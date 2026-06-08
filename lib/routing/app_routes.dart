@@ -5,6 +5,7 @@ import 'package:frontend_eco_2/screens/auth/register_screen.dart';
 import 'package:frontend_eco_2/screens/dashboard/dashboard_screen.dart';
 import 'package:frontend_eco_2/screens/notifications/notifications_screen.dart';
 import 'package:frontend_eco_2/screens/profile/edit_profile_screen.dart';
+import 'package:frontend_eco_2/screens/settings/settings_screen.dart';
 
 class AppRoutes {
   static const String welcome = '/';
@@ -59,7 +60,7 @@ class AppRoutes {
       case editProfile:
         return MaterialPageRoute(builder: (_) => const EditProfileScreen());
       case settings:
-        return MaterialPageRoute(builder: (_) => _placeholderScreen('Ajustes'));
+        return MaterialPageRoute(builder: (_) => const SettingsScreen());
       case greenFootprint:
         return MaterialPageRoute(builder: (_) => _placeholderScreen('Mi Huella Verde'));
       case missions:
