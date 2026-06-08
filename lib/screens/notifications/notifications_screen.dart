@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:frontend_eco_2/providers/providers.dart';
+import 'package:frontend_eco_2/theme/app_colors.dart';
+import 'package:frontend_eco_2/routing/app_routes.dart';
+import 'package:frontend_eco_2/widgets/common/custom_app_bar.dart';
+import 'package:frontend_eco_2/widgets/common/custom_status_bar.dart';
 
 class NotificationsScreen extends StatelessWidget {
   const NotificationsScreen({super.key});
@@ -18,78 +23,177 @@ class NotificationsScreen extends StatelessWidget {
         .toList();
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Notificaciones'),
-        actions: [
-          if (notifProvider.unreadCount > 0)
-            TextButton(
-              onPressed: () {
-                notifProvider.markAllAsRead();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Todas las notificaciones marcadas como leídas.'),
-                    duration: Duration(seconds: 1),
-                  ),
-                );
-              },
-              child: const Text('Marcar como leídas'),
-            ),
-        ],
-      ),
-      body: notifProvider.notifications.isEmpty
-          ? const Center(
+      backgroundColor: AppColors.background,
+      body: Column(
+        children: [
+          const CustomStatusBar(),
+          Expanded(
+            child: SafeArea(
+              top: false,
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(Icons.notifications_none, size: 64, color: Colors.grey),
-                  SizedBox(height: 16),
-                  Text('No tienes notificaciones por ahora.', style: TextStyle(color: Colors.grey)),
+                  // Header Row matching Perfil/Figma style
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
+                    child: Row(
+                      children: [
+                        Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            onTap: () => Navigator.of(context).pop(),
+                            customBorder: const CircleBorder(),
+                            child: Container(
+                              width: 40,
+                              height: 40,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: AppColors.primary.withValues(alpha: 0.1),
+                              ),
+                              alignment: Alignment.center,
+                              child: const Icon(
+                                Icons.chevron_left_rounded,
+                                color: AppColors.primary,
+                                size: 28,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        const Text(
+                          'Notificaciones',
+                          style: TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.primary,
+                            fontFamily: 'DM Sans',
+                          ),
+                        ),
+                        const Spacer(),
+                        IconButton(
+                          icon: const Icon(
+                            Icons.settings_outlined,
+                            color: AppColors.primary,
+                            size: 28,
+                          ),
+                          onPressed: () => Navigator.pushNamed(context, AppRoutes.settings),
+                        ),
+                        if (notifProvider.unreadCount > 0)
+                          Container(
+                            width: 24,
+                            height: 24,
+                            decoration: const BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: AppColors.accent,
+                            ),
+                            alignment: Alignment.center,
+                            child: Text(
+                              '${notifProvider.unreadCount}',
+                              style: const TextStyle(
+                                color: AppColors.primary,
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                  // Main content
+                  Expanded(
+                    child: notifProvider.notifications.isEmpty
+                        ? const Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.notifications_none, size: 64, color: Colors.grey),
+                                SizedBox(height: 16),
+                                Text('No tienes notificaciones por ahora.', style: TextStyle(color: Colors.grey)),
+                              ],
+                            ),
+                          )
+                        : Column(
+                            children: [
+                              if (notifProvider.unreadCount > 0)
+                                Align(
+                                  alignment: Alignment.centerRight,
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(right: 16.0, top: 0.0),
+                                    child: TextButton(
+                                      onPressed: () {
+                                        notifProvider.markAllAsRead();
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          const SnackBar(
+                                            content: Text('Todas las notificaciones marcadas como leídas.'),
+                                            duration: Duration(seconds: 1),
+                                          ),
+                                        );
+                                      },
+                                      child: const Text(
+                                        'Marcar todas como leídas',
+                                        style: TextStyle(
+                                          color: AppColors.primary,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 13,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              Expanded(
+                                child: ListView(
+                                  padding: const EdgeInsets.symmetric(vertical: 8),
+                                  children: [
+                                    if (todayNotifications.isNotEmpty) ...[
+                                      const Padding(
+                                        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                                        child: Text(
+                                          'HOY',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.grey,
+                                            letterSpacing: 1.2,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                      ),
+                                      ...todayNotifications.map((n) => _buildNotificationItem(context, n)),
+                                      const SizedBox(height: 16),
+                                    ],
+                                    if (weekNotifications.isNotEmpty) ...[
+                                      const Padding(
+                                        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                                        child: Text(
+                                          'ESTA SEMANA',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.grey,
+                                            letterSpacing: 1.2,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                      ),
+                                      ...weekNotifications.map((n) => _buildNotificationItem(context, n)),
+                                    ],
+                                    const SizedBox(height: 24),
+                                    const Center(
+                                      child: Text(
+                                        'Eso es todo por ahora',
+                                        style: TextStyle(color: Colors.grey, fontSize: 13),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                  ),
                 ],
               ),
-            )
-          : ListView(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              children: [
-                if (todayNotifications.isNotEmpty) ...[
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                    child: Text(
-                      'HOY',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.grey,
-                        letterSpacing: 1.2,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ),
-                  ...todayNotifications.map((n) => _buildNotificationItem(context, n)),
-                  const SizedBox(height: 16),
-                ],
-                if (weekNotifications.isNotEmpty) ...[
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                    child: Text(
-                      'ESTA SEMANA',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.grey,
-                        letterSpacing: 1.2,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ),
-                  ...weekNotifications.map((n) => _buildNotificationItem(context, n)),
-                ],
-                const SizedBox(height: 24),
-                const Center(
-                  child: Text(
-                    'Eso es todo por ahora',
-                    style: TextStyle(color: Colors.grey, fontSize: 13),
-                  ),
-                ),
-              ],
             ),
+          ),
+        ],
+      ),
     );
   }
 

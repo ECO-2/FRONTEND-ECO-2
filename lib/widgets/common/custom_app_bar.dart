@@ -17,21 +17,68 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.actions,
     this.automaticallyImplyLeading = true,
     this.leading,
-    this.backgroundColor = AppColors.primaryDark,
+    this.backgroundColor = AppColors.primary,
     this.foregroundColor = Colors.white,
     this.bottom,
   });
 
   @override
   Widget build(BuildContext context) {
+    Widget? leadingWidget = leading;
+    if (leadingWidget == null && automaticallyImplyLeading) {
+      final ModalRoute<dynamic>? parentRoute = ModalRoute.of(context);
+      final bool canPop = parentRoute?.canPop ?? false;
+      if (canPop) {
+        leadingWidget = Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () => Navigator.of(context).pop(),
+              customBorder: const CircleBorder(),
+              child: Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: foregroundColor == Colors.white
+                      ? Colors.white.withValues(alpha: 0.15)
+                      : AppColors.primary.withValues(alpha: 0.1),
+                ),
+                alignment: Alignment.center,
+                child: Icon(
+                  Icons.chevron_left_rounded,
+                  color: foregroundColor,
+                  size: 24,
+                ),
+              ),
+            ),
+          ),
+        );
+      }
+    }
+
+    List<Widget>? appBarActions = actions;
+    if (appBarActions == null && title != null) {
+      appBarActions = [
+        IconButton(
+          icon: Icon(
+            Icons.more_horiz_rounded,
+            color: foregroundColor,
+            size: 28,
+          ),
+          onPressed: () {},
+        ),
+      ];
+    }
+
     return AppBar(
+      toolbarHeight: 72.0,
       title: title != null
           ? Text(
               title!,
               style: TextStyle(
                 color: foregroundColor,
                 fontWeight: FontWeight.bold,
-                fontSize: 18,
+                fontSize: 20,
                 fontFamily: 'Inter',
               ),
             )
@@ -41,20 +88,20 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       foregroundColor: foregroundColor,
       elevation: 0,
       automaticallyImplyLeading: automaticallyImplyLeading,
-      leading: leading,
+      leading: leadingWidget,
       iconTheme: IconThemeData(color: foregroundColor),
-      actions: actions,
+      actions: appBarActions,
       bottom: bottom,
-      systemOverlayStyle: SystemUiOverlayStyle(
-        statusBarColor: backgroundColor,
-        statusBarIconBrightness: backgroundColor == Colors.white ? Brightness.dark : Brightness.light,
-        statusBarBrightness: backgroundColor == Colors.white ? Brightness.light : Brightness.dark,
+      systemOverlayStyle: const SystemUiOverlayStyle(
+        statusBarColor: AppColors.primaryDark,
+        statusBarIconBrightness: Brightness.light,
+        statusBarBrightness: Brightness.dark,
       ),
     );
   }
 
   @override
   Size get preferredSize => Size.fromHeight(
-        kToolbarHeight + (bottom?.preferredSize.height ?? 0.0),
+        72.0 + (bottom?.preferredSize.height ?? 0.0),
       );
 }
