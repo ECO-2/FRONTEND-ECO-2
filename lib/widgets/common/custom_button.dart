@@ -1,0 +1,82 @@
+import 'package:flutter/material.dart';
+
+class CustomButton extends StatelessWidget {
+  final String text;
+  final VoidCallback? onPressed;
+  final bool isLoading;
+  final bool isOutlined;
+  final IconData? icon;
+
+  const CustomButton({
+    super.key,
+    required this.text,
+    this.onPressed,
+    this.isLoading = false,
+    this.isOutlined = false,
+    this.icon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final borderRadius = BorderRadius.circular(20); // Figma standard border radius
+
+    if (isOutlined) {
+      return OutlinedButton(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: theme.colorScheme.primary,
+          side: BorderSide(color: theme.colorScheme.primary, width: 2),
+          shape: RoundedRectangleBorder(borderRadius: borderRadius),
+          padding: const EdgeInsets.symmetric(vertical: 16),
+        ),
+        onPressed: isLoading ? null : onPressed,
+        child: _buildChild(theme),
+      );
+    }
+
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: theme.colorScheme.primary,
+        foregroundColor: theme.colorScheme.onPrimary,
+        disabledBackgroundColor: theme.colorScheme.primary.withOpacity(0.5),
+        shape: RoundedRectangleBorder(borderRadius: borderRadius),
+        elevation: 0,
+        padding: const EdgeInsets.symmetric(vertical: 16),
+      ),
+      onPressed: isLoading ? null : onPressed,
+      child: _buildChild(theme),
+    );
+  }
+
+  Widget _buildChild(ThemeData theme) {
+    if (isLoading) {
+      return const SizedBox(
+        height: 20,
+        width: 20,
+        child: CircularProgressIndicator(
+          strokeWidth: 2.5,
+          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+        ),
+      );
+    }
+
+    if (icon != null) {
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, size: 20),
+          const SizedBox(width: 8),
+          Text(
+            text,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+        ],
+      );
+    }
+
+    return Text(
+      text,
+      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+    );
+  }
+}

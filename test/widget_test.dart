@@ -1,34 +1,36 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
 import 'package:frontend_eco_2/main.dart';
 
 void main() {
-  testWidgets('App smoke test - Login simulation', (WidgetTester tester) async {
+  testWidgets('App smoke test - Welcome flow to Login and Dashboard', (WidgetTester tester) async {
     // Build our app and trigger a frame.
     await tester.pumpWidget(const MyApp());
 
-    // Verify that our app starts in an unauthenticated state.
-    expect(find.text('No autenticado'), findsOneWidget);
-    expect(find.text('Cerrar sesión'), findsNothing);
+    // Verify that our app starts on the WelcomeScreen
+    expect(find.text('Cuidado de plantas con IA'), findsOneWidget);
+    expect(find.text('Iniciar Sesión'), findsOneWidget);
+    expect(find.text('Crear Cuenta'), findsOneWidget);
 
-    // Tap the 'Simular Login' button.
-    await tester.tap(find.text('Simular Login'));
+    // Tap the 'Iniciar Sesión' button on the WelcomeScreen to go to LoginScreen
+    await tester.tap(find.text('Iniciar Sesión'));
+    await tester.pumpAndSettle(); // Wait for navigation transition
+
+    // Verify that we are on the LoginScreen
+    expect(find.text('Te damos la bienvenida'), findsOneWidget);
     
-    // The login has a 1 second delay, pump the duration and pump again to process states.
+    // Tap the 'Iniciar Sesión' button on the LoginScreen (which has predefined test credentials)
+    // Find the button inside LoginScreen. We have a CustomButton.
+    final loginButton = find.widgetWithText(ElevatedButton, 'Iniciar Sesión');
+    expect(loginButton, findsOneWidget);
+    await tester.tap(loginButton);
+    
+    // The login has a 1 second mock network delay
     await tester.pump(const Duration(seconds: 1));
-    await tester.pump();
+    await tester.pumpAndSettle(); // Process redirect animation to Dashboard
 
-    // Verify that our app is now logged in.
-    expect(find.text('Bienvenido, usuario_prueba!'), findsOneWidget);
-    expect(find.text('Cerrar sesión'), findsOneWidget);
+    // Verify that we are now in the Dashboard screen
+    expect(find.text('ECO2 Dashboard'), findsOneWidget);
+    expect(find.text('¡Hola, usuario_prueba! 🌿'), findsOneWidget);
   });
 }
-
