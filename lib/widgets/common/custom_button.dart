@@ -6,6 +6,8 @@ class CustomButton extends StatelessWidget {
   final bool isLoading;
   final bool isOutlined;
   final IconData? icon;
+  final Color? backgroundColor;
+  final Color? foregroundColor;
 
   const CustomButton({
     super.key,
@@ -14,6 +16,8 @@ class CustomButton extends StatelessWidget {
     this.isLoading = false,
     this.isOutlined = false,
     this.icon,
+    this.backgroundColor,
+    this.foregroundColor,
   });
 
   @override
@@ -24,8 +28,8 @@ class CustomButton extends StatelessWidget {
     if (isOutlined) {
       return OutlinedButton(
         style: OutlinedButton.styleFrom(
-          foregroundColor: theme.colorScheme.primary,
-          side: BorderSide(color: theme.colorScheme.primary, width: 2),
+          foregroundColor: foregroundColor ?? theme.colorScheme.primary,
+          side: BorderSide(color: backgroundColor ?? theme.colorScheme.primary, width: 2),
           shape: RoundedRectangleBorder(borderRadius: borderRadius),
           padding: const EdgeInsets.symmetric(vertical: 16),
         ),
@@ -36,9 +40,9 @@ class CustomButton extends StatelessWidget {
 
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
-        backgroundColor: theme.colorScheme.primary,
-        foregroundColor: theme.colorScheme.onPrimary,
-        disabledBackgroundColor: theme.colorScheme.primary.withOpacity(0.5),
+        backgroundColor: backgroundColor ?? theme.colorScheme.primary,
+        foregroundColor: foregroundColor ?? theme.colorScheme.onPrimary,
+        disabledBackgroundColor: (backgroundColor ?? theme.colorScheme.primary).withOpacity(0.5),
         shape: RoundedRectangleBorder(borderRadius: borderRadius),
         elevation: 0,
         padding: const EdgeInsets.symmetric(vertical: 16),

@@ -17,12 +17,13 @@ void main() {
     await tester.pumpAndSettle(); // Wait for navigation transition
 
     // Verify that we are on the LoginScreen
-    expect(find.text('Te damos la bienvenida'), findsOneWidget);
+    expect(find.text('Bienvenido de vuelta'), findsOneWidget);
     
-    // Tap the 'Iniciar Sesión' button on the LoginScreen (which has predefined test credentials)
+    // Tap the 'Iniciar sesión' button on the LoginScreen (which has predefined test credentials)
     // Find the button inside LoginScreen. We have a CustomButton.
-    final loginButton = find.widgetWithText(ElevatedButton, 'Iniciar Sesión');
+    final loginButton = find.widgetWithText(ElevatedButton, 'Iniciar sesión');
     expect(loginButton, findsOneWidget);
+    await tester.ensureVisible(loginButton);
     await tester.tap(loginButton);
     
     // The login has a 1 second mock network delay
