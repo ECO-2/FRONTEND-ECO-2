@@ -69,20 +69,4 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  String _getTabTitle(int index) {
-    switch (index) {
-      case 0:
-        return 'Misiones y Logros';
-      case 1:
-        return 'Mi Jardín';
-      case 2:
-        return 'ECO2 Dashboard';
-      case 3:
-        return 'Escáner IA';
-      case 4:
-        return 'Mi Perfil';
-      default:
-        return 'ECO2';
-    }
-  }
 }
