@@ -11,20 +11,24 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:frontend_eco_2/main.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
+  testWidgets('App smoke test - Login simulation', (WidgetTester tester) async {
     // Build our app and trigger a frame.
     await tester.pumpWidget(const MyApp());
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    // Verify that our app starts in an unauthenticated state.
+    expect(find.text('No autenticado'), findsOneWidget);
+    expect(find.text('Cerrar sesión'), findsNothing);
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
+    // Tap the 'Simular Login' button.
+    await tester.tap(find.text('Simular Login'));
+    
+    // The login has a 1 second delay, pump the duration and pump again to process states.
+    await tester.pump(const Duration(seconds: 1));
     await tester.pump();
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    // Verify that our app is now logged in.
+    expect(find.text('Bienvenido, usuario_prueba!'), findsOneWidget);
+    expect(find.text('Cerrar sesión'), findsOneWidget);
   });
 }
+
