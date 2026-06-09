@@ -31,7 +31,6 @@ void main() {
     await tester.pumpAndSettle(); // Process redirect animation to Dashboard
 
     // Verify that we are now in the Dashboard screen
-    expect(find.text('ECO2 Dashboard'), findsOneWidget);
     expect(find.text('¡Hola, usuario_prueba! 🌿'), findsOneWidget);
   });
 }

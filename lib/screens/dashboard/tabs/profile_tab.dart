@@ -231,7 +231,7 @@ class ProfileTab extends StatelessWidget {
             icon: Icons.emoji_events_outlined,
             title: 'Mis Trofeos',
             subtitle: 'Trofeos y Nivel (12)',
-            onTap: () => Navigator.pushNamed(context, AppRoutes.missions), // or trophies route
+            onTap: () => Navigator.pushNamed(context, AppRoutes.trophies),
           ),
           const Divider(height: 1, color: Color(0xFFE2E7E4)),
           _buildOptionRow(

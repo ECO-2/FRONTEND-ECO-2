@@ -6,6 +6,10 @@ import 'package:frontend_eco_2/screens/dashboard/dashboard_screen.dart';
 import 'package:frontend_eco_2/screens/notifications/notifications_screen.dart';
 import 'package:frontend_eco_2/screens/profile/edit_profile_screen.dart';
 import 'package:frontend_eco_2/screens/settings/settings_screen.dart';
+import 'package:frontend_eco_2/screens/premium/premium_upgrade_screen.dart';
+import 'package:frontend_eco_2/screens/premium/checkout_screen.dart';
+import 'package:frontend_eco_2/screens/premium/success_screen.dart';
+import 'package:frontend_eco_2/screens/profile/trophies_screen.dart';
 
 class AppRoutes {
   static const String welcome = '/';
@@ -66,13 +70,13 @@ class AppRoutes {
       case missions:
         return MaterialPageRoute(builder: (_) => _placeholderScreen('Misiones'));
       case trophies:
-        return MaterialPageRoute(builder: (_) => _placeholderScreen('Trofeos'));
+        return MaterialPageRoute(builder: (_) => const TrophiesScreen());
       case premiumUpgrade:
-        return MaterialPageRoute(builder: (_) => _placeholderScreen('O2+ Upgrade'));
+        return MaterialPageRoute(builder: (_) => const PremiumUpgradeScreen());
       case checkout:
-        return MaterialPageRoute(builder: (_) => _placeholderScreen('O2+ Checkout'));
+        return MaterialPageRoute(builder: (_) => const CheckoutScreen());
       case success:
-        return MaterialPageRoute(builder: (_) => _placeholderScreen('O2+ Éxito'));
+        return MaterialPageRoute(builder: (_) => const SuccessScreen());
       
       default:
         return MaterialPageRoute(
