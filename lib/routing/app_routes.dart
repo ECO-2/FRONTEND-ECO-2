@@ -10,6 +10,8 @@ import 'package:frontend_eco_2/screens/premium/premium_upgrade_screen.dart';
 import 'package:frontend_eco_2/screens/premium/checkout_screen.dart';
 import 'package:frontend_eco_2/screens/premium/success_screen.dart';
 import 'package:frontend_eco_2/screens/profile/trophies_screen.dart';
+import 'package:frontend_eco_2/widgets/common/custom_app_bar.dart';
+import 'package:frontend_eco_2/screens/dashboard/tabs/missions_tab.dart';
 
 class AppRoutes {
   static const String welcome = '/';
@@ -68,7 +70,12 @@ class AppRoutes {
       case greenFootprint:
         return MaterialPageRoute(builder: (_) => _placeholderScreen('Mi Huella Verde'));
       case missions:
-        return MaterialPageRoute(builder: (_) => _placeholderScreen('Misiones'));
+        return MaterialPageRoute(
+          builder: (_) => const Scaffold(
+            appBar: CustomAppBar(title: 'Misiones'),
+            body: MissionsTab(),
+          ),
+        );
       case trophies:
         return MaterialPageRoute(builder: (_) => const TrophiesScreen());
       case premiumUpgrade:

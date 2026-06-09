@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:frontend_eco_2/providers/providers.dart';
 import 'package:frontend_eco_2/routing/app_routes.dart';
 import 'package:frontend_eco_2/theme/app_colors.dart';
+import 'package:frontend_eco_2/widgets/common/stat_card.dart';
 
 class HomeTab extends StatelessWidget {
   final VoidCallback onViewAll;
@@ -53,25 +54,22 @@ class HomeTab extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      _buildQuickStat(
-                        context,
-                        Icons.monetization_on,
-                        '${missionsProvider.userSeeds}',
-                        'Semillas',
+                      StatCard(
+                        icon: Icons.monetization_on,
+                        value: '${missionsProvider.userSeeds}',
+                        label: 'Semillas',
                         isDark: true,
                       ),
-                      _buildQuickStat(
-                        context,
-                        Icons.eco,
-                        '${plantsProvider.userPlants.length}',
-                        'Plantas',
+                      StatCard(
+                        icon: Icons.eco,
+                        value: '${plantsProvider.userPlants.length}',
+                        label: 'Plantas',
                         isDark: true,
                       ),
-                      _buildQuickStat(
-                        context,
-                        Icons.co2,
-                        '1.2 kg',
-                        'Reducido',
+                      StatCard(
+                        icon: Icons.co2,
+                        value: '1.2 kg',
+                        label: 'Reducido',
                         isDark: true,
                       ),
                     ],
@@ -207,29 +205,6 @@ class HomeTab extends StatelessWidget {
           const SizedBox(height: 100),
         ],
       ),
-    );
-  }
-
-  Widget _buildQuickStat(BuildContext context, IconData icon, String value, String label, {bool isDark = false}) {
-    final theme = Theme.of(context);
-    return Column(
-      children: [
-        Icon(icon, color: isDark ? AppColors.accent : AppColors.primary, size: 28),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: theme.textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: isDark ? Colors.white : AppColors.textPrimary,
-          ),
-        ),
-        Text(
-          label,
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: isDark ? Colors.white.withValues(alpha: 0.7) : AppColors.textSecondary,
-          ),
-        ),
-      ],
     );
   }
 }

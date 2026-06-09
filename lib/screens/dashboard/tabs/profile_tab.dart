@@ -4,6 +4,8 @@ import 'package:frontend_eco_2/providers/providers.dart';
 import 'package:frontend_eco_2/routing/app_routes.dart';
 import 'package:frontend_eco_2/widgets/common/custom_button.dart';
 import 'package:frontend_eco_2/theme/app_colors.dart';
+import 'package:frontend_eco_2/widgets/common/stat_card.dart';
+import 'package:frontend_eco_2/widgets/common/settings_option_tile.dart';
 
 class ProfileTab extends StatelessWidget {
   const ProfileTab({super.key});
@@ -118,26 +120,29 @@ class ProfileTab extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: _buildStatCard(
-                  '${plantsProvider.userPlants.length}',
-                  'Plantas',
-                  AppColors.primary,
+                child: StatCard(
+                  value: '${plantsProvider.userPlants.length}',
+                  label: 'Plantas',
+                  valueColor: AppColors.primary,
+                  showBorder: true,
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: _buildStatCard(
-                  '${missionsProvider.userSeeds}',
-                  'Semillas',
-                  AppColors.accentLight,
+                child: StatCard(
+                  value: '${missionsProvider.userSeeds}',
+                  label: 'Semillas',
+                  valueColor: AppColors.accentLight,
+                  showBorder: true,
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: _buildStatCard(
-                  '36g',
-                  'CO₂/día',
-                  AppColors.textSecondary,
+                child: StatCard(
+                  value: '36g',
+                  label: 'CO₂/día',
+                  valueColor: AppColors.textSecondary,
+                  showBorder: true,
                 ),
               ),
             ],
@@ -227,21 +232,28 @@ class ProfileTab extends StatelessWidget {
           const SizedBox(height: 24),
 
           // Option Items list with Dividers
-          _buildOptionRow(
+          SettingsOptionTile(
             icon: Icons.emoji_events_outlined,
             title: 'Mis Trofeos',
             subtitle: 'Trofeos y Nivel (12)',
             onTap: () => Navigator.pushNamed(context, AppRoutes.trophies),
           ),
           const Divider(height: 1, color: Color(0xFFE2E7E4)),
-          _buildOptionRow(
+          SettingsOptionTile(
+            icon: Icons.assignment_outlined,
+            title: 'Misiones Activas',
+            subtitle: 'Ver mis logros y misiones',
+            onTap: () => Navigator.pushNamed(context, AppRoutes.missions),
+          ),
+          const Divider(height: 1, color: Color(0xFFE2E7E4)),
+          SettingsOptionTile(
             icon: Icons.eco_outlined,
             title: 'Tienda de Semillas',
             subtitle: 'Canjear semillas (10)',
             onTap: () => Navigator.pushNamed(context, AppRoutes.greenFootprint), // or seed store route
           ),
           const Divider(height: 1, color: Color(0xFFE2E7E4)),
-          _buildOptionRow(
+          SettingsOptionTile(
             icon: Icons.bolt,
             title: 'Próximas funciones',
             subtitle: 'Coming soon IoT (14)',
@@ -273,73 +285,5 @@ class ProfileTab extends StatelessWidget {
     );
   }
 
-  Widget _buildStatCard(String value, String label, Color valueColor) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFE2E7E4), width: 1),
-      ),
-      child: Column(
-        children: [
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: valueColor,
-              fontFamily: 'Inter',
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: const TextStyle(
-              fontSize: 12,
-              color: AppColors.textSecondary,
-              fontFamily: 'Inter',
-            ),
-          ),
-        ],
-      ),
-    );
   }
 
-  Widget _buildOptionRow({
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required VoidCallback onTap,
-  }) {
-    return ListTile(
-      contentPadding: const EdgeInsets.symmetric(vertical: 4),
-      leading: Icon(icon, color: AppColors.primary, size: 24),
-      title: Text(
-        title,
-        style: const TextStyle(
-          fontWeight: FontWeight.bold,
-          color: AppColors.primary,
-          fontFamily: 'Inter',
-          fontSize: 16,
-        ),
-      ),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            subtitle,
-            style: const TextStyle(
-              color: AppColors.textSecondary,
-              fontSize: 12,
-              fontFamily: 'Inter',
-            ),
-          ),
-          const SizedBox(width: 8),
-          const Icon(Icons.arrow_forward, color: AppColors.textSecondary, size: 16),
-        ],
-      ),
-      onTap: onTap,
-    );
-  }
-}

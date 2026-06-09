@@ -3,6 +3,7 @@ import 'package:frontend_eco_2/theme/app_colors.dart';
 import 'package:frontend_eco_2/routing/app_routes.dart';
 import 'package:frontend_eco_2/widgets/common/custom_bottom_nav_bar.dart';
 import 'package:frontend_eco_2/widgets/common/custom_status_bar.dart';
+import 'package:frontend_eco_2/widgets/common/custom_button.dart';
 
 class PremiumUpgradeScreen extends StatelessWidget {
   final bool isTab;
@@ -201,30 +202,14 @@ class PremiumUpgradeScreen extends StatelessWidget {
                         const SizedBox(height: 28),
 
                         // Subscription Action Button
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.primary,
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              elevation: 0,
-                            ),
-                            onPressed: () {
-                              Navigator.pushNamed(context, AppRoutes.checkout);
-                            },
-                            child: const Text(
-                              'Suscribirse a O₂₊',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                fontFamily: 'Inter',
-                              ),
-                            ),
-                          ),
+                        CustomButton(
+                          text: 'Suscribirse a O₂₊',
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          onPressed: () {
+                            Navigator.pushNamed(context, AppRoutes.checkout);
+                          },
                         ),
                         const SizedBox(
                           height: 120,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend_eco_2/theme/app_colors.dart';
-import 'package:frontend_eco_2/widgets/common/custom_status_bar.dart';
+import 'package:frontend_eco_2/widgets/common/custom_app_bar.dart';
+import 'package:frontend_eco_2/widgets/common/stat_card.dart';
 
 class TrophiesScreen extends StatefulWidget {
   const TrophiesScreen({super.key});
@@ -55,101 +56,46 @@ class _TrophiesScreenState extends State<TrophiesScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: Column(
-        children: [
-          // 1. Dark Teal Header with AppBar
-          Container(
-            color: AppColors.primary,
-            child: Column(
-              children: [
-                const CustomStatusBar(backgroundColor: AppColors.primaryDark),
-                Container(
-                  height: 72,
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      // Back Button
-                      Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          onTap: () => Navigator.of(context).pop(),
-                          customBorder: const CircleBorder(),
-                          child: Container(
-                            width: 40,
-                            height: 40,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.white.withValues(alpha: 0.15),
-                            ),
-                            alignment: Alignment.center,
-                            child: const Icon(
-                              Icons.chevron_left_rounded,
-                              color: Colors.white,
-                              size: 28,
-                            ),
-                          ),
-                        ),
-                      ),
-                      // Title
-                      const Text(
-                        'Trofeos',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 20,
-                          fontFamily: 'Inter',
-                        ),
-                      ),
-                      // Dummy spacing to center the title
-                      const SizedBox(width: 40),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
+      appBar: const CustomAppBar(
+        title: 'Trofeos',
+        backgroundColor: AppColors.primary,
+        foregroundColor: Colors.white,
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Level Progress Card
+            _buildLevelCard(),
+            const SizedBox(height: 20),
 
-          // 2. Scrollable Body Content
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Level Progress Card
-                  _buildLevelCard(),
-                  const SizedBox(height: 20),
+            // Three Stat Cards Row
+            _buildStatsRow(),
+            const SizedBox(height: 28),
 
-                  // Three Stat Cards Row
-                  _buildStatsRow(),
-                  const SizedBox(height: 28),
+            // Tab Filter Selector
+            _buildTabSelector(),
+            const SizedBox(height: 20),
 
-                  // Tab Filter Selector
-                  _buildTabSelector(),
-                  const SizedBox(height: 20),
-
-                  // Trophies Grid
-                  GridView.builder(
-                    padding: EdgeInsets.zero,
-                    physics: const NeverScrollableScrollPhysics(),
-                    shrinkWrap: true,
-                    itemCount: filteredTrophies.length,
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 3,
-                      mainAxisSpacing: 14,
-                      crossAxisSpacing: 14,
-                      childAspectRatio: 0.66,
-                    ),
-                    itemBuilder: (context, index) {
-                      return _buildTrophyCard(filteredTrophies[index]);
-                    },
-                  ),
-                ],
+            // Trophies Grid
+            GridView.builder(
+              padding: EdgeInsets.zero,
+              physics: const NeverScrollableScrollPhysics(),
+              shrinkWrap: true,
+              itemCount: filteredTrophies.length,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+                mainAxisSpacing: 14,
+                crossAxisSpacing: 14,
+                childAspectRatio: 0.66,
               ),
+              itemBuilder: (context, index) {
+                return _buildTrophyCard(filteredTrophies[index]);
+              },
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -278,53 +224,39 @@ class _TrophiesScreenState extends State<TrophiesScreen> {
   Widget _buildStatsRow() {
     return Row(
       children: [
-        Expanded(child: _buildStatItem('12', 'Obtenidos')),
+        Expanded(
+          child: StatCard(
+            value: '12',
+            label: 'Obtenidos',
+            valueColor: AppColors.primaryDark,
+            fontFamily: 'DM Sans',
+            valueFontSize: 22,
+            showBorder: true,
+          ),
+        ),
         const SizedBox(width: 12),
-        Expanded(child: _buildStatItem('28', 'Disponibles')),
+        Expanded(
+          child: StatCard(
+            value: '28',
+            label: 'Disponibles',
+            valueColor: AppColors.primaryDark,
+            fontFamily: 'DM Sans',
+            valueFontSize: 22,
+            showBorder: true,
+          ),
+        ),
         const SizedBox(width: 12),
-        Expanded(child: _buildStatItem('43%', 'Completado')),
+        Expanded(
+          child: StatCard(
+            value: '43%',
+            label: 'Completado',
+            valueColor: AppColors.primaryDark,
+            fontFamily: 'DM Sans',
+            valueFontSize: 22,
+            showBorder: true,
+          ),
+        ),
       ],
-    );
-  }
-
-  Widget _buildStatItem(String number, String label) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE8ECE9), width: 1.5),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.01),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      padding: const EdgeInsets.symmetric(vertical: 16.0),
-      child: Column(
-        children: [
-          Text(
-            number,
-            style: const TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-              color: AppColors.primaryDark,
-              fontFamily: 'DM Sans',
-            ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            label,
-            style: const TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-              color: AppColors.textSecondary,
-              fontFamily: 'Inter',
-            ),
-          ),
-        ],
-      ),
     );
   }
 

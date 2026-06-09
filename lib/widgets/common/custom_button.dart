@@ -8,6 +8,10 @@ class CustomButton extends StatelessWidget {
   final IconData? icon;
   final Color? backgroundColor;
   final Color? foregroundColor;
+  final double? height;
+  final double? width;
+  final BorderSide? side;
+  final BorderRadiusGeometry? borderRadius;
 
   const CustomButton({
     super.key,
@@ -18,19 +22,39 @@ class CustomButton extends StatelessWidget {
     this.icon,
     this.backgroundColor,
     this.foregroundColor,
+    this.height,
+    this.width = double.infinity,
+    this.side,
+    this.borderRadius,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final borderRadius = BorderRadius.circular(20); // Figma standard border radius
+    final finalBorderRadius = borderRadius ?? BorderRadius.circular(20); // Figma standard border radius
+
+    Widget button;
 
     if (isOutlined) {
-      return OutlinedButton(
+      button = OutlinedButton(
         style: OutlinedButton.styleFrom(
           foregroundColor: foregroundColor ?? theme.colorScheme.primary,
-          side: BorderSide(color: backgroundColor ?? theme.colorScheme.primary, width: 2),
-          shape: RoundedRectangleBorder(borderRadius: borderRadius),
+          side: side ?? BorderSide(color: backgroundColor ?? theme.colorScheme.primary, width: 2),
+          shape: RoundedRectangleBorder(borderRadius: finalBorderRadius),
+          padding: const EdgeInsets.symmetric(vertical: 16),
+        ),
+        onPressed: isLoading ? null : onPressed,
+        child: _buildChild(theme),
+      );
+    } else {
+      button = ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: backgroundColor ?? theme.colorScheme.primary,
+          foregroundColor: foregroundColor ?? theme.colorScheme.onPrimary,
+          disabledBackgroundColor: (backgroundColor ?? theme.colorScheme.primary).withOpacity(0.5),
+          shape: RoundedRectangleBorder(borderRadius: finalBorderRadius),
+          side: side,
+          elevation: 0,
           padding: const EdgeInsets.symmetric(vertical: 16),
         ),
         onPressed: isLoading ? null : onPressed,
@@ -38,18 +62,14 @@ class CustomButton extends StatelessWidget {
       );
     }
 
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: backgroundColor ?? theme.colorScheme.primary,
-        foregroundColor: foregroundColor ?? theme.colorScheme.onPrimary,
-        disabledBackgroundColor: (backgroundColor ?? theme.colorScheme.primary).withOpacity(0.5),
-        shape: RoundedRectangleBorder(borderRadius: borderRadius),
-        elevation: 0,
-        padding: const EdgeInsets.symmetric(vertical: 16),
-      ),
-      onPressed: isLoading ? null : onPressed,
-      child: _buildChild(theme),
-    );
+    if (width != null || height != null) {
+      return SizedBox(
+        width: width,
+        height: height,
+        child: button,
+      );
+    }
+    return button;
   }
 
   Widget _buildChild(ThemeData theme) {

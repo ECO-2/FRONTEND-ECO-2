@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:frontend_eco_2/providers/providers.dart';
 import 'package:frontend_eco_2/theme/app_colors.dart';
 import 'package:frontend_eco_2/widgets/common/custom_text_field.dart';
-import 'package:frontend_eco_2/widgets/common/custom_status_bar.dart';
+import 'package:frontend_eco_2/widgets/common/custom_app_bar.dart';
 
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});
@@ -62,15 +62,62 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: Column(
-        children: [
-          const CustomStatusBar(),
-          _buildAppBar(context),
-          Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+      appBar: CustomAppBar(
+        title: 'Editar perfil',
+        actions: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.accent, // Lime green
+                foregroundColor: AppColors.primary, // Dark green text
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+              ),
+              onPressed: () {
+                // Simulate saving changes
+                final userProvider = Provider.of<UserProvider>(context, listen: false);
+                final currentUser = userProvider.currentUser;
+                if (currentUser != null) {
+                  // Update username and email in state
+                  String newUsername = _usernameController.text;
+                  if (newUsername.startsWith('@')) {
+                    newUsername = newUsername.substring(1);
+                  }
+                  final updatedUser = currentUser.copyWith(
+                    username: newUsername,
+                    email: _emailController.text,
+                  );
+                  userProvider.setUser(updatedUser);
+                }
+                
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('¡Perfil guardado con éxito! 💾'),
+                    backgroundColor: AppColors.primary,
+                  ),
+                );
+                Navigator.of(context).pop();
+              },
+              child: const Text(
+                'Guardar',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                  fontFamily: 'Inter',
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
                   // White Avatar Container
                   Container(
                     width: double.infinity,
@@ -234,9 +281,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 ],
               ),
             ),
-          ),
-        ],
-      ),
     );
   }
 
@@ -248,98 +292,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         fontWeight: FontWeight.w500,
         color: AppColors.textSecondary,
         fontFamily: 'Inter',
-      ),
-    );
-  }
-
-  Widget _buildAppBar(BuildContext context) {
-    return Container(
-      height: 72,
-      color: AppColors.primary,
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          // Back button
-          Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: () => Navigator.of(context).pop(),
-              customBorder: const CircleBorder(),
-              child: Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.white.withValues(alpha: 0.15),
-                ),
-                alignment: Alignment.center,
-                child: const Icon(
-                  Icons.chevron_left_rounded,
-                  color: Colors.white,
-                  size: 28,
-                ),
-              ),
-            ),
-          ),
-          
-          // Title
-          const Text(
-            'Editar perfil',
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 20,
-              fontFamily: 'Inter',
-            ),
-          ),
-          
-          // Guardar Button
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.accent, // Lime green
-              foregroundColor: AppColors.primary, // Dark green text
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-            ),
-            onPressed: () {
-              // Simulate saving changes
-              final userProvider = Provider.of<UserProvider>(context, listen: false);
-              final currentUser = userProvider.currentUser;
-              if (currentUser != null) {
-                // Update username and email in state
-                String newUsername = _usernameController.text;
-                if (newUsername.startsWith('@')) {
-                  newUsername = newUsername.substring(1);
-                }
-                final updatedUser = currentUser.copyWith(
-                  username: newUsername,
-                  email: _emailController.text,
-                );
-                userProvider.setUser(updatedUser);
-              }
-              
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('¡Perfil guardado con éxito! 💾'),
-                  backgroundColor: AppColors.primary,
-                ),
-              );
-              Navigator.of(context).pop();
-            },
-            child: const Text(
-              'Guardar',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 14,
-                fontFamily: 'Inter',
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }

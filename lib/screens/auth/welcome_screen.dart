@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend_eco_2/routing/app_routes.dart';
 import 'package:frontend_eco_2/theme/app_colors.dart';
+import 'package:frontend_eco_2/widgets/common/custom_button.dart';
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
@@ -55,62 +56,30 @@ class WelcomeScreen extends StatelessWidget {
                 Column(
                   children: [
                     // Crear Cuenta Button (Dark, top position)
-                    SizedBox(
-                      width: double.infinity,
+                    CustomButton(
+                      text: 'Crear Cuenta',
+                      backgroundColor: AppColors.primaryDark,
+                      foregroundColor: Colors.white,
                       height: 56,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primaryDark,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          elevation: 0,
-                          side: BorderSide(
-                            color: Colors.white.withValues(alpha: 0.15),
-                            width: 1,
-                          ),
-                        ),
-                        onPressed: () {
-                          Navigator.pushNamed(context, AppRoutes.register);
-                        },
-                        child: const Text(
-                          'Crear Cuenta',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: 'Inter',
-                          ),
-                        ),
+                      side: BorderSide(
+                        color: Colors.white.withValues(alpha: 0.15),
+                        width: 1,
                       ),
+                      onPressed: () {
+                        Navigator.pushNamed(context, AppRoutes.register);
+                      },
                     ),
                     const SizedBox(height: 16),
                     
                     // Iniciar Sesión Button (Accent/Lime, bottom position)
-                    SizedBox(
-                      width: double.infinity,
+                    CustomButton(
+                      text: 'Iniciar Sesión',
+                      backgroundColor: AppColors.accent,
+                      foregroundColor: Colors.black,
                       height: 56,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.accent,
-                          foregroundColor: Colors.black,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          elevation: 0,
-                        ),
-                        onPressed: () {
-                          Navigator.pushNamed(context, AppRoutes.login);
-                        },
-                        child: const Text(
-                          'Iniciar Sesión',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: 'Inter',
-                          ),
-                        ),
-                      ),
+                      onPressed: () {
+                        Navigator.pushNamed(context, AppRoutes.login);
+                      },
                     ),
                     const SizedBox(height: 24),
                   ],

@@ -3,7 +3,8 @@ import 'package:provider/provider.dart';
 import 'package:frontend_eco_2/providers/providers.dart';
 import 'package:frontend_eco_2/theme/app_colors.dart';
 import 'package:frontend_eco_2/routing/app_routes.dart';
-import 'package:frontend_eco_2/widgets/common/custom_status_bar.dart';
+import 'package:frontend_eco_2/widgets/common/custom_app_bar.dart';
+import 'package:frontend_eco_2/widgets/common/settings_option_tile.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -34,14 +35,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: Column(
+      appBar: const CustomAppBar(title: 'Ajustes'),
+      body: ListView(
+        padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
         children: [
-          const CustomStatusBar(),
-          _buildAppBar(context),
-          Expanded(
-            child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
-              children: [
                 // Profile summary card
                 Container(
                   margin: const EdgeInsets.only(bottom: 24),
@@ -102,17 +99,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                   child: Column(
                     children: [
-                      _buildSettingsItem(
+                      SettingsOptionTile(
                         icon: Icons.person_outline_rounded,
                         title: 'Editar perfil',
                         subtitle: 'Nombre, bio, foto',
+                        useIconContainer: true,
                         onTap: () => Navigator.pushNamed(context, AppRoutes.editProfile),
                       ),
                       const Divider(height: 1, indent: 68, endIndent: 16, color: Color(0xFFE2E7E4)),
-                      _buildSettingsItem(
+                      SettingsOptionTile(
                         icon: Icons.lock_outline_rounded,
                         title: 'Cambiar contraseña',
                         subtitle: 'Última: hace 3 meses',
+                        useIconContainer: true,
                         onTap: () {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(content: Text('Función para cambiar contraseña próximamente 🔒')),
@@ -120,9 +119,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         },
                       ),
                       const Divider(height: 1, indent: 68, endIndent: 16, color: Color(0xFFE2E7E4)),
-                      _buildSettingsItem(
+                      SettingsOptionTile(
                         icon: Icons.fingerprint_rounded,
                         title: 'Autenticación biométrica',
+                        useIconContainer: true,
+                        showArrow: false,
                         trailing: _buildSwitch(
                           value: _biometricAuth,
                           onChanged: (val) {
@@ -133,10 +134,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ),
                       ),
                       const Divider(height: 1, indent: 68, endIndent: 16, color: Color(0xFFE2E7E4)),
-                      _buildSettingsItem(
+                      SettingsOptionTile(
                         icon: Icons.star_outline_rounded,
                         title: 'Gestionar ECO2 Plus',
                         subtitle: 'Plan gratuito activo',
+                        useIconContainer: true,
+                        showArrow: false,
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: const [
@@ -169,9 +172,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                   child: Column(
                     children: [
-                      _buildSettingsItem(
+                      SettingsOptionTile(
                         icon: Icons.notifications_none_rounded,
                         title: 'Notificaciones push',
+                        useIconContainer: true,
+                        showArrow: false,
                         trailing: _buildSwitch(
                           value: _pushNotifications,
                           onChanged: (val) {
@@ -182,9 +187,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ),
                       ),
                       const Divider(height: 1, indent: 68, endIndent: 16, color: Color(0xFFE2E7E4)),
-                      _buildSettingsItem(
+                      SettingsOptionTile(
                         icon: Icons.chat_bubble_outline_rounded,
                         title: 'Recordatorios de riego',
+                        useIconContainer: true,
+                        showArrow: false,
                         trailing: _buildSwitch(
                           value: _wateringReminders,
                           onChanged: (val) {
@@ -195,9 +202,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ),
                       ),
                       const Divider(height: 1, indent: 68, endIndent: 16, color: Color(0xFFE2E7E4)),
-                      _buildSettingsItem(
+                      SettingsOptionTile(
                         icon: Icons.star_outline_rounded,
                         title: 'Logros y misiones',
+                        useIconContainer: true,
+                        showArrow: false,
                         trailing: _buildSwitch(
                           value: _achievementsMissions,
                           onChanged: (val) {
@@ -222,9 +231,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                   child: Column(
                     children: [
-                      _buildSettingsItem(
+                      SettingsOptionTile(
                         icon: Icons.language_rounded,
                         title: 'Idioma',
+                        useIconContainer: true,
+                        showArrow: false,
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: const [
@@ -247,9 +258,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         },
                       ),
                       const Divider(height: 1, indent: 68, endIndent: 16, color: Color(0xFFE2E7E4)),
-                      _buildSettingsItem(
+                      SettingsOptionTile(
                         icon: Icons.dark_mode_outlined,
                         title: 'Modo oscuro',
+                        useIconContainer: true,
+                        showArrow: false,
                         trailing: _buildSwitch(
                           value: _darkMode,
                           onChanged: (val) {
@@ -261,9 +274,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ),
                       ),
                       const Divider(height: 1, indent: 68, endIndent: 16, color: Color(0xFFE2E7E4)),
-                      _buildSettingsItem(
+                      SettingsOptionTile(
                         icon: Icons.color_lens_outlined,
                         title: 'Tema y colores',
+                        useIconContainer: true,
+                        showArrow: false,
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: const [
@@ -291,9 +306,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 const SizedBox(height: 40),
               ],
             ),
-          ),
-        ],
-      ),
     );
   }
 
@@ -313,48 +325,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildSettingsItem({
-    required IconData icon,
-    required String title,
-    String? subtitle,
-    Widget? trailing,
-    VoidCallback? onTap,
-  }) {
-    return ListTile(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      leading: Container(
-        width: 40,
-        height: 40,
-        decoration: BoxDecoration(
-          color: const Color(0xFFF1F4F3), // Light greyish green background
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Icon(icon, color: AppColors.primary, size: 20),
-      ),
-      title: Text(
-        title,
-        style: const TextStyle(
-          fontWeight: FontWeight.bold,
-          fontSize: 15,
-          color: AppColors.textPrimary,
-          fontFamily: 'Inter',
-        ),
-      ),
-      subtitle: subtitle != null
-          ? Text(
-              subtitle,
-              style: const TextStyle(
-                fontSize: 12,
-                color: AppColors.textSecondary,
-                fontFamily: 'Inter',
-              ),
-            )
-          : null,
-      trailing: trailing ?? const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondary),
-      onTap: onTap,
-    );
-  }
-
   Widget _buildSwitch({required bool value, required ValueChanged<bool> onChanged}) {
     return Switch(
       value: value,
@@ -364,55 +334,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
       inactiveThumbColor: Colors.white,
       inactiveTrackColor: const Color(0xFFE2E7E4),
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-    );
-  }
-
-  Widget _buildAppBar(BuildContext context) {
-    return Container(
-      height: 72,
-      color: AppColors.primary,
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          // Back button
-          Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: () => Navigator.of(context).pop(),
-              customBorder: const CircleBorder(),
-              child: Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.white.withValues(alpha: 0.15),
-                ),
-                alignment: Alignment.center,
-                child: const Icon(
-                  Icons.chevron_left_rounded,
-                  color: Colors.white,
-                  size: 28,
-                ),
-              ),
-            ),
-          ),
-          
-          // Title
-          const Text(
-            'Ajustes',
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 20,
-              fontFamily: 'Inter',
-            ),
-          ),
-          
-          // Empty placeholder to balance the back button alignment
-          const SizedBox(width: 40),
-        ],
-      ),
     );
   }
 }

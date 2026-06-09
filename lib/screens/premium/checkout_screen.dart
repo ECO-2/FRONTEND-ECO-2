@@ -3,7 +3,8 @@ import 'package:provider/provider.dart';
 import 'package:frontend_eco_2/providers/providers.dart';
 import 'package:frontend_eco_2/theme/app_colors.dart';
 import 'package:frontend_eco_2/routing/app_routes.dart';
-import 'package:frontend_eco_2/widgets/common/custom_status_bar.dart';
+import 'package:frontend_eco_2/widgets/common/custom_app_bar.dart';
+import 'package:frontend_eco_2/widgets/common/custom_button.dart';
 
 class CheckoutScreen extends StatefulWidget {
   const CheckoutScreen({super.key});
@@ -20,10 +21,13 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
+      appBar: const CustomAppBar(
+        title: 'Confirmar pago',
+        backgroundColor: AppColors.primaryDark,
+        foregroundColor: Colors.white,
+      ),
       body: Column(
         children: [
-          const CustomStatusBar(),
-          _buildAppBar(context),
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
@@ -365,37 +369,12 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             const SizedBox(height: 16),
             
             // Pay button
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.accent, // Lime green
-                  foregroundColor: AppColors.primary, // Dark green
-                  elevation: 0,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                ),
-                onPressed: _isProcessing ? null : _processPayment,
-                child: _isProcessing
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2.5,
-                          valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
-                        ),
-                      )
-                    : const Text(
-                        'Pagar \$39.99',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'Inter',
-                        ),
-                      ),
-              ),
+            CustomButton(
+              text: 'Pagar \$39.99',
+              backgroundColor: AppColors.accent,
+              foregroundColor: AppColors.primary,
+              isLoading: _isProcessing,
+              onPressed: _processPayment,
             ),
           ],
         ),
@@ -425,49 +404,5 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       
       Navigator.pushReplacementNamed(context, AppRoutes.success);
     }
-  }
-
-  Widget _buildAppBar(BuildContext context) {
-    return Container(
-      height: 72,
-      color: AppColors.primaryDark,
-      padding: const EdgeInsets.symmetric(horizontal: 24.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: () => Navigator.of(context).pop(),
-              customBorder: const CircleBorder(),
-              child: Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.white.withValues(alpha: 0.15),
-                ),
-                alignment: Alignment.center,
-                child: const Icon(
-                  Icons.chevron_left_rounded,
-                  color: Colors.white,
-                  size: 28,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          const Text(
-            'Confirmar pago',
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 20,
-              fontFamily: 'Inter',
-            ),
-          ),
-        ],
-      ),
-    );
   }
 }

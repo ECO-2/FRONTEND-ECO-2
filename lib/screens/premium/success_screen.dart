@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend_eco_2/theme/app_colors.dart';
 import 'package:frontend_eco_2/routing/app_routes.dart';
 import 'package:frontend_eco_2/widgets/common/custom_status_bar.dart';
+import 'package:frontend_eco_2/widgets/common/custom_button.dart';
 
 class SuccessScreen extends StatelessWidget {
   const SuccessScreen({super.key});
@@ -298,16 +299,11 @@ class SuccessScreen extends StatelessWidget {
               top: false,
               child: SizedBox(
                 width: double.infinity,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primaryDark, // Dark green background
-                    foregroundColor: AppColors.accent, // Lime green text!
-                    elevation: 0,
-                    padding: const EdgeInsets.symmetric(vertical: 18),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(24),
-                    ),
-                  ),
+                child: CustomButton(
+                  text: 'Empezar a usar Plus',
+                  backgroundColor: AppColors.primaryDark,
+                  foregroundColor: AppColors.accent,
+                  borderRadius: BorderRadius.circular(24),
                   onPressed: () {
                     // Navigate back and remove history to get fresh start in dashboard
                     Navigator.of(context).pushNamedAndRemoveUntil(
@@ -315,14 +311,6 @@ class SuccessScreen extends StatelessWidget {
                       (route) => false,
                     );
                   },
-                  child: const Text(
-                    'Empezar a usar Plus',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'Inter',
-                    ),
-                  ),
                 ),
               ),
             ),

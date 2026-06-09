@@ -9,6 +9,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final Widget? leading;
   final Color backgroundColor;
   final Color foregroundColor;
+  final Color? statusBarColor;
   final PreferredSizeWidget? bottom;
 
   const CustomAppBar({
@@ -19,6 +20,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.leading,
     this.backgroundColor = AppColors.primary,
     this.foregroundColor = Colors.white,
+    this.statusBarColor,
     this.bottom,
   });
 
@@ -70,7 +72,16 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       ];
     }
 
+    final actualStatusBarColor = statusBarColor ??
+        (backgroundColor == AppColors.primary
+            ? AppColors.primaryDark
+            : backgroundColor);
+
+    final bool isDarkBackground = ThemeData.estimateBrightnessForColor(actualStatusBarColor) == Brightness.dark;
+    final double statusBarHeight = MediaQuery.of(context).padding.top;
+
     return AppBar(
+      primary: true,
       toolbarHeight: 72.0,
       title: title != null
           ? Text(
@@ -84,7 +95,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
             )
           : null,
       centerTitle: false,
-      backgroundColor: backgroundColor,
+      backgroundColor: Colors.transparent,
       foregroundColor: foregroundColor,
       elevation: 0,
       automaticallyImplyLeading: automaticallyImplyLeading,
@@ -92,10 +103,23 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       iconTheme: IconThemeData(color: foregroundColor),
       actions: appBarActions,
       bottom: bottom,
-      systemOverlayStyle: const SystemUiOverlayStyle(
-        statusBarColor: AppColors.primaryDark,
-        statusBarIconBrightness: Brightness.light,
-        statusBarBrightness: Brightness.dark,
+      flexibleSpace: Column(
+        children: [
+          Container(
+            height: statusBarHeight,
+            color: actualStatusBarColor,
+          ),
+          Expanded(
+            child: Container(
+              color: backgroundColor,
+            ),
+          ),
+        ],
+      ),
+      systemOverlayStyle: SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: isDarkBackground ? Brightness.light : Brightness.dark,
+        statusBarBrightness: isDarkBackground ? Brightness.dark : Brightness.light,
       ),
     );
   }

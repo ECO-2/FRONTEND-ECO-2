@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:frontend_eco_2/providers/providers.dart';
 import 'package:frontend_eco_2/theme/app_colors.dart';
 import 'package:frontend_eco_2/routing/app_routes.dart';
-import 'package:frontend_eco_2/widgets/common/custom_status_bar.dart';
+import 'package:frontend_eco_2/widgets/common/custom_app_bar.dart';
 
 class NotificationsScreen extends StatelessWidget {
   const NotificationsScreen({super.key});
@@ -22,83 +22,50 @@ class NotificationsScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: Column(
-        children: [
-          const CustomStatusBar(),
-          Expanded(
-            child: SafeArea(
-              top: false,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Header Row matching Perfil/Figma style
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
-                    child: Row(
-                      children: [
-                        Material(
-                          color: Colors.transparent,
-                          child: InkWell(
-                            onTap: () => Navigator.of(context).pop(),
-                            customBorder: const CircleBorder(),
-                            child: Container(
-                              width: 40,
-                              height: 40,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: AppColors.primary.withValues(alpha: 0.1),
-                              ),
-                              alignment: Alignment.center,
-                              child: const Icon(
-                                Icons.chevron_left_rounded,
-                                color: AppColors.primary,
-                                size: 28,
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        const Text(
-                          'Notificaciones',
-                          style: TextStyle(
-                            fontSize: 28,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.primary,
-                            fontFamily: 'DM Sans',
-                          ),
-                        ),
-                        const Spacer(),
-                        IconButton(
-                          icon: const Icon(
-                            Icons.settings_outlined,
-                            color: AppColors.primary,
-                            size: 28,
-                          ),
-                          onPressed: () => Navigator.pushNamed(context, AppRoutes.settings),
-                        ),
-                        if (notifProvider.unreadCount > 0)
-                          Container(
-                            width: 24,
-                            height: 24,
-                            decoration: const BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: AppColors.accent,
-                            ),
-                            alignment: Alignment.center,
-                            child: Text(
-                              '${notifProvider.unreadCount}',
-                              style: const TextStyle(
-                                color: AppColors.primary,
-                                fontSize: 11,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                      ],
+      appBar: CustomAppBar(
+        title: 'Notificaciones',
+        backgroundColor: AppColors.background,
+        foregroundColor: AppColors.primary,
+        actions: [
+          IconButton(
+            icon: const Icon(
+              Icons.settings_outlined,
+              color: AppColors.primary,
+              size: 28,
+            ),
+            onPressed: () => Navigator.pushNamed(context, AppRoutes.settings),
+          ),
+          if (notifProvider.unreadCount > 0)
+            Padding(
+              padding: const EdgeInsets.only(right: 16.0),
+              child: Center(
+                child: Container(
+                  width: 24,
+                  height: 24,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: AppColors.accent,
+                  ),
+                  alignment: Alignment.center,
+                  child: Text(
+                    '${notifProvider.unreadCount}',
+                    style: const TextStyle(
+                      color: AppColors.primary,
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                  // Main content
-                  Expanded(
+                ),
+              ),
+            ),
+        ],
+      ),
+      body: SafeArea(
+        top: false,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
                     child: notifProvider.notifications.isEmpty
                         ? const Center(
                             child: Column(
@@ -185,12 +152,9 @@ class NotificationsScreen extends StatelessWidget {
                               ),
                             ],
                           ),
-                  ),
-                ],
-              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend_eco_2/theme/app_colors.dart';
+import 'package:frontend_eco_2/widgets/common/custom_button.dart';
 
 class ScannerTab extends StatelessWidget {
   const ScannerTab({super.key});
@@ -166,16 +167,12 @@ class ScannerTab extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    elevation: 0,
-                  ),
+                child: CustomButton(
+                  text: 'Hacer Foto',
+                  icon: Icons.camera_alt,
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
                   onPressed: () {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
@@ -184,24 +181,18 @@ class ScannerTab extends StatelessWidget {
                       ),
                     );
                   },
-                  icon: const Icon(Icons.camera_alt),
-                  label: const Text(
-                    'Hacer Foto',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: OutlinedButton.icon(
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.primary,
-                    side: const BorderSide(color: AppColors.primary, width: 1.5),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                  ),
+                child: CustomButton(
+                  text: 'Subir de Galería',
+                  icon: Icons.photo_library,
+                  isOutlined: true,
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: AppColors.primary,
+                  side: const BorderSide(color: AppColors.primary, width: 1.5),
+                  borderRadius: BorderRadius.circular(16),
                   onPressed: () {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
@@ -210,11 +201,6 @@ class ScannerTab extends StatelessWidget {
                       ),
                     );
                   },
-                  icon: const Icon(Icons.photo_library),
-                  label: const Text(
-                    'Subir de Galería',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
                 ),
               ),
             ],
