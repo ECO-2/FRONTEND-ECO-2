@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import 'package:frontend_eco_2/theme/app_colors.dart';
+import 'package:frontend_eco_2/providers/providers.dart';
+import 'package:frontend_eco_2/routing/app_routes.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String? title;
@@ -60,14 +63,40 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 
     List<Widget>? appBarActions = actions;
     if (appBarActions == null && title != null) {
+      final notificationsProvider = Provider.of<NotificationsProvider>(context);
+      final unreadCount = notificationsProvider.unreadCount;
+
       appBarActions = [
-        IconButton(
-          icon: Icon(
-            Icons.more_horiz_rounded,
-            color: foregroundColor,
-            size: 28,
+        SizedBox(
+          width: 48,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              IconButton(
+                icon: Icon(
+                  Icons.notifications_none_rounded,
+                  color: foregroundColor,
+                  size: 28,
+                ),
+                onPressed: () {
+                  Navigator.of(context).pushNamed(AppRoutes.notifications);
+                },
+              ),
+              if (unreadCount > 0)
+                Positioned(
+                  top: 12,
+                  right: 12,
+                  child: Container(
+                    width: 8,
+                    height: 8,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: AppColors.error, // Red dot
+                    ),
+                  ),
+                ),
+            ],
           ),
-          onPressed: () {},
         ),
       ];
     }

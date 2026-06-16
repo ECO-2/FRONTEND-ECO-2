@@ -10,8 +10,10 @@ import 'package:frontend_eco_2/screens/premium/premium_upgrade_screen.dart';
 import 'package:frontend_eco_2/screens/premium/checkout_screen.dart';
 import 'package:frontend_eco_2/screens/premium/success_screen.dart';
 import 'package:frontend_eco_2/screens/profile/trophies_screen.dart';
+import 'package:frontend_eco_2/screens/profile/green_footprint_screen.dart';
 import 'package:frontend_eco_2/widgets/common/custom_app_bar.dart';
 import 'package:frontend_eco_2/screens/dashboard/tabs/missions_tab.dart';
+import 'package:frontend_eco_2/screens/garden/plant_detail_screen.dart';
 
 class AppRoutes {
   static const String welcome = '/';
@@ -52,9 +54,11 @@ class AppRoutes {
       case myGarden:
         return MaterialPageRoute(builder: (_) => _placeholderScreen('Mi Jardín'));
       case plantDetail:
-        return MaterialPageRoute(builder: (_) => _placeholderScreen('Detalle de Planta'));
+        return MaterialPageRoute(builder: (_) => const PlantDetailScreen());
       case addPlant:
-        return MaterialPageRoute(builder: (_) => _placeholderScreen('Añadir Planta'));
+        // addPlant is shown as a bottom sheet from GardenTab;
+        // if navigated directly (e.g. from HomeTab empty state) just go to dashboard.
+        return MaterialPageRoute(builder: (_) => const DashboardScreen());
       case careHistory:
         return MaterialPageRoute(builder: (_) => _placeholderScreen('Historial de Cuidados'));
       case scan:
@@ -68,7 +72,7 @@ class AppRoutes {
       case settings:
         return MaterialPageRoute(builder: (_) => const SettingsScreen());
       case greenFootprint:
-        return MaterialPageRoute(builder: (_) => _placeholderScreen('Mi Huella Verde'));
+        return MaterialPageRoute(builder: (_) => const GreenFootprintScreen());
       case missions:
         return MaterialPageRoute(
           builder: (_) => const Scaffold(

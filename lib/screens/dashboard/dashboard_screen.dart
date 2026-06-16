@@ -10,6 +10,8 @@ import 'package:frontend_eco_2/screens/dashboard/tabs/garden_tab.dart';
 import 'package:frontend_eco_2/screens/dashboard/tabs/scanner_tab.dart';
 import 'package:frontend_eco_2/screens/dashboard/tabs/profile_tab.dart';
 import 'package:frontend_eco_2/screens/premium/premium_upgrade_screen.dart';
+import 'package:frontend_eco_2/widgets/common/custom_app_bar.dart';
+import 'package:frontend_eco_2/widgets/dashboard/dashboard_header.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -47,12 +49,25 @@ class _DashboardScreenState extends State<DashboardScreen> {
       const ProfileTab(),  // Perfil -> Index 4
     ];
 
+    PreferredSizeWidget? appBar;
+    if (_currentIndex == 2) {
+      appBar = const DashboardHeader();
+    } else if (_currentIndex == 1) {
+      appBar = const CustomAppBar(
+        title: 'Mi Jardín',
+        automaticallyImplyLeading: false,
+      );
+    }
+
+    final showStatusBarInBody = appBar == null;
+
     return Scaffold(
       extendBody: true,
       backgroundColor: AppColors.background,
+      appBar: appBar,
       body: Column(
         children: [
-          const CustomStatusBar(),
+          if (showStatusBarInBody) const CustomStatusBar(),
           Expanded(
             child: tabs[_currentIndex],
           ),

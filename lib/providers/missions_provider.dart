@@ -45,6 +45,15 @@ class MissionsProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  bool spendSeeds(int count) {
+    if (_userSeeds >= count) {
+      _userSeeds -= count;
+      notifyListeners();
+      return true;
+    }
+    return false;
+  }
+
   void completeAchievement(String id) {
     if (!_completedAchievementIds.contains(id)) {
       _completedAchievementIds.add(id);

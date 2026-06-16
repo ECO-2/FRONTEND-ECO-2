@@ -56,12 +56,12 @@ class CustomTextField extends StatelessWidget {
           decoration: InputDecoration(
             hintText: hintText,
             hintStyle: TextStyle(
-              color: AppColors.textSecondary.withOpacity(0.5),
+              color: AppColors.textSecondary.withValues(alpha: 0.5),
               fontSize: 15,
             ),
             suffixText: suffixText,
             suffixStyle: TextStyle(
-              color: AppColors.textSecondary.withOpacity(0.5),
+              color: AppColors.textSecondary.withValues(alpha: 0.5),
               fontSize: 13,
             ),
             prefixIcon: prefixIcon != null ? Icon(prefixIcon, color: AppColors.primary) : null,

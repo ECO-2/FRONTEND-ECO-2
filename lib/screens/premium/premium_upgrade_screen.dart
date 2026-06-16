@@ -4,6 +4,7 @@ import 'package:frontend_eco_2/routing/app_routes.dart';
 import 'package:frontend_eco_2/widgets/common/custom_bottom_nav_bar.dart';
 import 'package:frontend_eco_2/widgets/common/custom_status_bar.dart';
 import 'package:frontend_eco_2/widgets/common/custom_button.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
 class PremiumUpgradeScreen extends StatelessWidget {
   final bool isTab;
@@ -83,7 +84,7 @@ class PremiumUpgradeScreen extends StatelessWidget {
                             ),
                           ],
                         ),
-                      ),
+                      ).animate().fadeIn(duration: 500.ms).shimmer(delay: 500.ms, duration: 1800.ms, color: Colors.white.withValues(alpha: 0.4)),
                       const SizedBox(height: 20),
 
                       // Main Title
@@ -97,7 +98,7 @@ class PremiumUpgradeScreen extends StatelessWidget {
                           letterSpacing: -0.5,
                         ),
                         textAlign: TextAlign.center,
-                      ),
+                      ).animate().fadeIn(delay: 150.ms, duration: 600.ms).slideY(begin: -0.15, end: 0),
                       const SizedBox(height: 12),
 
                       // Subtitle
@@ -110,7 +111,7 @@ class PremiumUpgradeScreen extends StatelessWidget {
                           fontFamily: 'Inter',
                         ),
                         textAlign: TextAlign.center,
-                      ),
+                      ).animate().fadeIn(delay: 250.ms, duration: 600.ms),
                     ],
                   ),
                 ),
@@ -153,7 +154,7 @@ class PremiumUpgradeScreen extends StatelessWidget {
                           title: 'Macetas ilimitadas',
                           subtitle:
                               'Añade todas las plantas que quieras sin límites.',
-                        ),
+                        ).animate().fadeIn(delay: 350.ms, duration: 400.ms).slideX(begin: 0.1, end: 0),
                         const Divider(height: 1, color: Color(0xFFF1F4F3)),
 
                         // Item 2: Búsqueda mejorada
@@ -164,7 +165,7 @@ class PremiumUpgradeScreen extends StatelessWidget {
                           title: 'Búsqueda mejorada por descripción',
                           subtitle:
                               'Encuentra plantas describiendo su aspecto con IA.',
-                        ),
+                        ).animate().fadeIn(delay: 450.ms, duration: 400.ms).slideX(begin: 0.1, end: 0),
                         const Divider(height: 1, color: Color(0xFFF1F4F3)),
 
                         // Item 3: Escaneos ilimitados
@@ -175,7 +176,7 @@ class PremiumUpgradeScreen extends StatelessWidget {
                           title: 'Escaneos ilimitados',
                           subtitle:
                               'Identifica cualquier planta, cuando quieras.',
-                        ),
+                        ).animate().fadeIn(delay: 550.ms, duration: 400.ms).slideX(begin: 0.1, end: 0),
                         const Divider(height: 1, color: Color(0xFFF1F4F3)),
 
                         // Item 4: AI assisted How to treat
@@ -186,7 +187,7 @@ class PremiumUpgradeScreen extends StatelessWidget {
                           title: 'How to treat asistido con IA',
                           subtitle:
                               'Diagnóstico personalizado de plagas y cuidados.',
-                        ),
+                        ).animate().fadeIn(delay: 650.ms, duration: 400.ms).slideX(begin: 0.1, end: 0),
                         const Divider(height: 1, color: Color(0xFFF1F4F3)),
 
                         // Item 5: Partner discounts
@@ -197,7 +198,8 @@ class PremiumUpgradeScreen extends StatelessWidget {
                           title: 'Descuentos en viveros aliados',
                           subtitle:
                               'Hasta 20% off en especies de aliados selectos.',
-                        ),
+                        ).animate().fadeIn(delay: 750.ms, duration: 400.ms).slideX(begin: 0.1, end: 0),
+                        const Divider(height: 1, color: Color(0xFFF1F4F3)),
 
                         const SizedBox(height: 28),
 
@@ -210,7 +212,7 @@ class PremiumUpgradeScreen extends StatelessWidget {
                           onPressed: () {
                             Navigator.pushNamed(context, AppRoutes.checkout);
                           },
-                        ),
+                        ).animate().fadeIn(delay: 850.ms, duration: 500.ms).scaleXY(begin: 0.95, end: 1, curve: Curves.easeOutBack),
                         const SizedBox(
                           height: 120,
                         ), // Spacing for bottom navbar

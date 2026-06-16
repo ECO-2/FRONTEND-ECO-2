@@ -1,169 +1,224 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:frontend_eco_2/providers/providers.dart';
+import 'package:frontend_eco_2/routing/app_routes.dart';
 import 'package:frontend_eco_2/theme/app_colors.dart';
 import 'package:frontend_eco_2/widgets/common/custom_button.dart';
 
-class ScannerTab extends StatelessWidget {
+// ── Mock identification result ────────────────────────────────────────────
+class _ScanResult {
+  final String commonName;
+  final String scientificName;
+  final int confidencePct;
+  final List<String> tags;
+  final String speciesId;
+
+  const _ScanResult({
+    required this.commonName,
+    required this.scientificName,
+    required this.confidencePct,
+    required this.tags,
+    required this.speciesId,
+  });
+}
+
+const _mockResult = _ScanResult(
+  commonName: 'Monstera',
+  scientificName: 'Monstera deliciosa',
+  confidencePct: 98,
+  tags: ['Tropical', 'Luz indirecta', 'Riego semanal'],
+  speciesId: 's1',
+);
+
+// ── ScannerTab ────────────────────────────────────────────────────────────
+class ScannerTab extends StatefulWidget {
   const ScannerTab({super.key});
 
   @override
+  State<ScannerTab> createState() => _ScannerTabState();
+}
+
+class _ScannerTabState extends State<ScannerTab> {
+  bool _showResult = false;
+  bool _scanning = false;
+
+  void _triggerScan() async {
+    setState(() => _scanning = true);
+    await Future.delayed(const Duration(seconds: 2));
+    if (mounted) setState(() {_scanning = false; _showResult = true;});
+  }
+
+  void _resetScan() => setState(() => _showResult = false);
+
+  @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 400),
+      switchInCurve: Curves.easeOut,
+      switchOutCurve: Curves.easeIn,
+      child: _showResult
+          ? _ResultView(
+              result: _mockResult,
+              onReset: _resetScan,
+            )
+          : _ViewfinderView(
+              scanning: _scanning,
+              onScan: _triggerScan,
+            ),
+    );
+  }
+}
+
+// ── Viewfinder View ────────────────────────────────────────────────────────
+class _ViewfinderView extends StatelessWidget {
+  final bool scanning;
+  final VoidCallback onScan;
+
+  const _ViewfinderView({required this.scanning, required this.onScan});
+
+  @override
+  Widget build(BuildContext context) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          const Text(
             'Identificación de Plantas',
-            style: theme.textTheme.titleMedium?.copyWith(
+            style: TextStyle(
               fontWeight: FontWeight.bold,
+              fontSize: 16,
               color: AppColors.textPrimary,
+              fontFamily: 'Inter',
             ),
           ),
           const SizedBox(height: 4),
           const Text(
-            'Apunta con la cámara a la planta o sube una foto de tu galería para diagnosticarla.',
-            style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+            'Apunta con la cámara a la planta o sube una foto de tu galería.',
+            style: TextStyle(
+              color: AppColors.textSecondary,
+              fontSize: 13,
+              fontFamily: 'Inter',
+            ),
           ),
           const SizedBox(height: 20),
 
           // Viewfinder Card
-          Card(
-            elevation: 0,
-            clipBehavior: Clip.antiAlias,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(24),
-              side: BorderSide(
-                color: AppColors.primary.withValues(alpha: 0.15),
-                width: 1.5,
+          GestureDetector(
+            onTap: onScan,
+            child: Card(
+              elevation: 0,
+              clipBehavior: Clip.antiAlias,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(24),
+                side: BorderSide(
+                  color: AppColors.primary.withValues(alpha: 0.15),
+                  width: 1.5,
+                ),
               ),
-            ),
-            child: AspectRatio(
-              aspectRatio: 1.2,
-              child: Stack(
-                children: [
-                  // Scan preview image
-                  Positioned.fill(
-                    child: Image.asset(
-                      'assets/images/ai_scan_preview.png',
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                  // Corner framing brackets (Overlay)
-                  Positioned.fill(
-                    child: Padding(
-                      padding: const EdgeInsets.all(24.0),
-                      child: Stack(
-                        children: [
-                          // Top-Left corner
-                          Align(
-                            alignment: Alignment.topLeft,
-                            child: Container(
-                              width: 24,
-                              height: 24,
-                              decoration: const BoxDecoration(
-                                border: Border(
-                                  top: BorderSide(color: AppColors.accent, width: 3),
-                                  left: BorderSide(color: AppColors.accent, width: 3),
-                                ),
-                              ),
-                            ),
-                          ),
-                          // Top-Right corner
-                          Align(
-                            alignment: Alignment.topRight,
-                            child: Container(
-                              width: 24,
-                              height: 24,
-                              decoration: const BoxDecoration(
-                                border: Border(
-                                  top: BorderSide(color: AppColors.accent, width: 3),
-                                  right: BorderSide(color: AppColors.accent, width: 3),
-                                ),
-                              ),
-                            ),
-                          ),
-                          // Bottom-Left corner
-                          Align(
-                            alignment: Alignment.bottomLeft,
-                            child: Container(
-                              width: 24,
-                              height: 24,
-                              decoration: const BoxDecoration(
-                                border: Border(
-                                  bottom: BorderSide(color: AppColors.accent, width: 3),
-                                  left: BorderSide(color: AppColors.accent, width: 3),
-                                ),
-                              ),
-                            ),
-                          ),
-                          // Bottom-Right corner
-                          Align(
-                            alignment: Alignment.bottomRight,
-                            child: Container(
-                              width: 24,
-                              height: 24,
-                              decoration: const BoxDecoration(
-                                border: Border(
-                                  bottom: BorderSide(color: AppColors.accent, width: 3),
-                                  right: BorderSide(color: AppColors.accent, width: 3),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
+              child: AspectRatio(
+                aspectRatio: 1.2,
+                child: Stack(
+                  children: [
+                    // Background colour
+                    Container(color: AppColors.primaryDark),
+                    // Subtle plant illustration
+                    Center(
+                      child: Icon(
+                        Icons.local_florist_rounded,
+                        size: 90,
+                        color: Colors.white.withValues(alpha: 0.07),
                       ),
                     ),
-                  ),
-                  // Scanning Laser Line Animation
-                  const Positioned.fill(
-                    child: _ScanningLaserLine(),
-                  ),
-                  // Center Scanner Tag
-                  Positioned(
-                    bottom: 16,
-                    left: 0,
-                    right: 0,
-                    child: Center(
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        decoration: BoxDecoration(
-                          color: Colors.black.withValues(alpha: 0.65),
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
+                    // Corner brackets
+                    Positioned.fill(
+                      child: Padding(
+                        padding: const EdgeInsets.all(24.0),
+                        child: Stack(
                           children: [
-                            Container(
-                              width: 8,
-                              height: 8,
-                              decoration: const BoxDecoration(
-                                color: AppColors.accent,
-                                shape: BoxShape.circle,
-                              ),
+                            Align(
+                              alignment: Alignment.topLeft,
+                              child: _corner(top: true, left: true),
                             ),
-                            const SizedBox(width: 8),
-                            const Text(
-                              'Listo para Escanear',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                              ),
+                            Align(
+                              alignment: Alignment.topRight,
+                              child: _corner(top: true, left: false),
+                            ),
+                            Align(
+                              alignment: Alignment.bottomLeft,
+                              child: _corner(top: false, left: true),
+                            ),
+                            Align(
+                              alignment: Alignment.bottomRight,
+                              child: _corner(top: false, left: false),
                             ),
                           ],
                         ),
                       ),
                     ),
-                  ),
-                ],
+                    // Laser line animation
+                    const Positioned.fill(child: _ScanningLaserLine()),
+                    // Status tag at bottom
+                    Positioned(
+                      bottom: 16,
+                      left: 0,
+                      right: 0,
+                      child: Center(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withValues(alpha: 0.65),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.15)),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                width: 8,
+                                height: 8,
+                                decoration: const BoxDecoration(
+                                  color: AppColors.accent,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                scanning
+                                    ? 'Analizando…'
+                                    : 'Toca para Escanear',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: 'Inter',
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    // Loading overlay
+                    if (scanning)
+                      Container(
+                        color: Colors.black.withValues(alpha: 0.35),
+                        alignment: Alignment.center,
+                        child: const CircularProgressIndicator(
+                          color: AppColors.accent,
+                          strokeWidth: 3,
+                        ),
+                      ),
+                  ],
+                ),
               ),
             ),
           ),
           const SizedBox(height: 20),
 
-          // Scanning action buttons
+          // Action buttons
           Row(
             children: [
               Expanded(
@@ -173,14 +228,7 @@ class ScannerTab extends StatelessWidget {
                   backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
                   borderRadius: BorderRadius.circular(16),
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Abriendo cámara para diagnóstico... 📸'),
-                        duration: Duration(seconds: 2),
-                      ),
-                    );
-                  },
+                  onPressed: onScan,
                 ),
               ),
               const SizedBox(width: 12),
@@ -193,14 +241,7 @@ class ScannerTab extends StatelessWidget {
                   foregroundColor: AppColors.primary,
                   side: const BorderSide(color: AppColors.primary, width: 1.5),
                   borderRadius: BorderRadius.circular(16),
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Abriendo galería... 🖼️'),
-                        duration: Duration(seconds: 2),
-                      ),
-                    );
-                  },
+                  onPressed: onScan,
                 ),
               ),
             ],
@@ -208,56 +249,66 @@ class ScannerTab extends StatelessWidget {
           const SizedBox(height: 32),
 
           // Recent analyses
-          Text(
+          const Text(
             'Análisis Recientes',
-            style: theme.textTheme.titleMedium?.copyWith(
+            style: TextStyle(
               fontWeight: FontWeight.bold,
+              fontSize: 16,
               color: AppColors.textPrimary,
+              fontFamily: 'Inter',
             ),
           ),
           const SizedBox(height: 12),
-
-          _buildRecentAnalysisItem(
-            context,
-            'Monstera Deliciosa',
-            '98% de coincidencia • Muy saludable',
-            'Hace 2 horas',
-            Icons.eco,
-          ),
+          _buildRecentItem('Monstera Deliciosa', '98% · Muy saludable',
+              'Hace 2 horas', Icons.eco),
           const SizedBox(height: 10),
-          _buildRecentAnalysisItem(
-            context,
-            'Poto (Epipremnum aureum)',
-            '94% de coincidencia • Requiere riego',
-            'Ayer',
-            Icons.local_florist,
-          ),
-
-          const SizedBox(height: 100), // Padding for bottom navbar
+          _buildRecentItem('Poto (Epipremnum aureum)', '94% · Requiere riego',
+              'Ayer', Icons.local_florist),
+          const SizedBox(height: 100),
         ],
       ),
     );
   }
 
-  Widget _buildRecentAnalysisItem(
-    BuildContext context,
-    String title,
-    String subtitle,
-    String time,
-    IconData icon,
-  ) {
+  Widget _corner({required bool top, required bool left}) {
+    return SizedBox(
+      width: 24,
+      height: 24,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          border: Border(
+            top: top
+                ? const BorderSide(color: AppColors.accent, width: 3)
+                : BorderSide.none,
+            bottom: !top
+                ? const BorderSide(color: AppColors.accent, width: 3)
+                : BorderSide.none,
+            left: left
+                ? const BorderSide(color: AppColors.accent, width: 3)
+                : BorderSide.none,
+            right: !left
+                ? const BorderSide(color: AppColors.accent, width: 3)
+                : BorderSide.none,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRecentItem(
+      String title, String subtitle, String time, IconData icon) {
     return Card(
       elevation: 0,
-      color: AppColors.cardBackground,
+      color: Colors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
         side: BorderSide(
           color: AppColors.textMuted.withValues(alpha: 0.15),
-          width: 1,
         ),
       ),
       child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         leading: Container(
           width: 44,
           height: 44,
@@ -265,38 +316,247 @@ class ScannerTab extends StatelessWidget {
             color: AppColors.primary.withValues(alpha: 0.06),
             borderRadius: BorderRadius.circular(12),
           ),
-          child: Icon(
-            icon,
-            color: AppColors.primary,
-          ),
+          child: Icon(icon, color: AppColors.primary),
         ),
-        title: Text(
-          title,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            color: AppColors.textPrimary,
-          ),
-        ),
-        subtitle: Text(
-          subtitle,
-          style: const TextStyle(
-            color: AppColors.textSecondary,
-            fontSize: 12,
-          ),
-        ),
-        trailing: Text(
-          time,
-          style: const TextStyle(
-            color: AppColors.textMuted,
-            fontSize: 11,
-          ),
-        ),
-        onTap: () {},
+        title: Text(title,
+            style: const TextStyle(
+                fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+        subtitle: Text(subtitle,
+            style: const TextStyle(
+                color: AppColors.textSecondary, fontSize: 12)),
+        trailing: Text(time,
+            style: const TextStyle(
+                color: AppColors.textMuted, fontSize: 11)),
       ),
     );
   }
 }
 
+// ── Result View ──────────────────────────────────────────────────────────
+class _ResultView extends StatelessWidget {
+  final _ScanResult result;
+  final VoidCallback onReset;
+
+  const _ResultView({required this.result, required this.onReset});
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.only(
+          left: 16, right: 16, top: 16, bottom: 100),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Back / header row
+          Row(
+            children: [
+              GestureDetector(
+                onTap: onReset,
+                child: const Row(
+                  children: [
+                    Icon(Icons.arrow_back_ios_rounded,
+                        size: 16, color: AppColors.primary),
+                    SizedBox(width: 4),
+                    Text(
+                      'Nuevo escaneo',
+                      style: TextStyle(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.w600,
+                        fontFamily: 'Inter',
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+
+          // Result card
+          Container(
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: AppColors.primary.withValues(alpha: 0.2),
+              ),
+            ),
+            child: Column(
+              children: [
+                // Plant image area (green header)
+                Container(
+                  width: double.infinity,
+                  height: 200,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFDCEDDC),
+                    borderRadius:
+                        BorderRadius.vertical(top: Radius.circular(20)),
+                  ),
+                  alignment: Alignment.center,
+                  child: Icon(
+                    Icons.local_florist_rounded,
+                    size: 80,
+                    color: AppColors.primary.withValues(alpha: 0.6),
+                  ),
+                ),
+
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Confidence badge
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: AppColors.primary,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              '${result.confidencePct}% coincidencia',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'Inter',
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+
+                      // Names
+                      Text(
+                        result.commonName,
+                        style: const TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.primaryDark,
+                          fontFamily: 'DM Sans',
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        result.scientificName,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: AppColors.textSecondary,
+                          fontStyle: FontStyle.italic,
+                          fontFamily: 'Inter',
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+
+                      // Tags
+                      Wrap(
+                        spacing: 6,
+                        runSpacing: 4,
+                        children: result.tags
+                            .map((t) => _buildTag(t))
+                            .toList(),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+
+          // Action buttons (Figma: "Ver ficha" and "+ A mi jardín")
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.primary,
+                    side: const BorderSide(color: AppColors.primary, width: 1.5),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 13),
+                  ),
+                  icon: const Icon(Icons.info_outline_rounded, size: 18),
+                  label: const Text(
+                    'Ver ficha',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Inter',
+                    ),
+                  ),
+                  onPressed: () =>
+                      Navigator.pushNamed(context, AppRoutes.plantDetail),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 13),
+                  ),
+                  icon: const Icon(Icons.add_circle_outline_rounded, size: 18),
+                  label: const Text(
+                    'A mi jardín',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Inter',
+                    ),
+                  ),
+                  onPressed: () {
+                    Provider.of<PlantsProvider>(context, listen: false)
+                        .addPlant(result.commonName, result.speciesId, result.commonName);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                            '${result.commonName} añadida a tu jardín 🌿'),
+                        backgroundColor: AppColors.primary,
+                        duration: const Duration(seconds: 2),
+                      ),
+                    );
+                    onReset();
+                  },
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTag(String text) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Text(
+        text,
+        style: const TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
+          color: AppColors.primary,
+          fontFamily: 'Inter',
+        ),
+      ),
+    );
+  }
+}
+
+// ── Laser line animation ──────────────────────────────────────────────────
 class _ScanningLaserLine extends StatefulWidget {
   const _ScanningLaserLine();
 
@@ -328,34 +588,29 @@ class _ScanningLaserLineState extends State<_ScanningLaserLine>
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, child) {
-        return Stack(
-          children: [
-            Align(
-              alignment: Alignment(0, (_controller.value * 2) - 1),
-              child: Container(
-                height: 4,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.accent.withValues(alpha: 0.8),
-                      blurRadius: 10,
-                      spreadRadius: 2,
-                    ),
-                  ],
-                  gradient: LinearGradient(
-                    colors: [
-                      AppColors.accent.withValues(alpha: 0.0),
-                      AppColors.accent,
-                      AppColors.accent,
-                      AppColors.accent.withValues(alpha: 0.0),
-                    ],
-                    stops: const [0.0, 0.4, 0.6, 1.0],
-                  ),
-                ),
+        return Align(
+          alignment: Alignment(0, (_controller.value * 2) - 1),
+          child: Container(
+            height: 4,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  AppColors.accent.withValues(alpha: 0.0),
+                  AppColors.accent,
+                  AppColors.accent,
+                  AppColors.accent.withValues(alpha: 0.0),
+                ],
+                stops: const [0.0, 0.4, 0.6, 1.0],
               ),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.accent.withValues(alpha: 0.8),
+                  blurRadius: 10,
+                  spreadRadius: 2,
+                ),
+              ],
             ),
-          ],
+          ),
         );
       },
     );

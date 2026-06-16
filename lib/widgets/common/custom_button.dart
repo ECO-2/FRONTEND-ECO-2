@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bounceable/flutter_bounceable.dart';
 
 class CustomButton extends StatelessWidget {
   final String text;
@@ -15,8 +16,8 @@ class CustomButton extends StatelessWidget {
 
   const CustomButton({
     super.key,
-    required this.text,
     this.onPressed,
+    required this.text,
     this.isLoading = false,
     this.isOutlined = false,
     this.icon,
@@ -32,6 +33,7 @@ class CustomButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final finalBorderRadius = borderRadius ?? BorderRadius.circular(20); // Figma standard border radius
+    final bool isEnabled = onPressed != null && !isLoading;
 
     Widget button;
 
@@ -43,7 +45,7 @@ class CustomButton extends StatelessWidget {
           shape: RoundedRectangleBorder(borderRadius: finalBorderRadius),
           padding: const EdgeInsets.symmetric(vertical: 16),
         ),
-        onPressed: isLoading ? null : onPressed,
+        onPressed: isEnabled ? onPressed : null,
         child: _buildChild(theme),
       );
     } else {
@@ -51,25 +53,30 @@ class CustomButton extends StatelessWidget {
         style: ElevatedButton.styleFrom(
           backgroundColor: backgroundColor ?? theme.colorScheme.primary,
           foregroundColor: foregroundColor ?? theme.colorScheme.onPrimary,
-          disabledBackgroundColor: (backgroundColor ?? theme.colorScheme.primary).withOpacity(0.5),
+          disabledBackgroundColor: (backgroundColor ?? theme.colorScheme.primary).withValues(alpha: 0.5),
           shape: RoundedRectangleBorder(borderRadius: finalBorderRadius),
           side: side,
           elevation: 0,
           padding: const EdgeInsets.symmetric(vertical: 16),
         ),
-        onPressed: isLoading ? null : onPressed,
+        onPressed: isEnabled ? onPressed : null,
         child: _buildChild(theme),
       );
     }
 
+    Widget result = button;
     if (width != null || height != null) {
-      return SizedBox(
+      result = SizedBox(
         width: width,
         height: height,
         child: button,
       );
     }
-    return button;
+
+    return Bounceable(
+      onTap: isEnabled ? () {} : null,
+      child: result,
+    );
   }
 
   Widget _buildChild(ThemeData theme) {

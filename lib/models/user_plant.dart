@@ -3,6 +3,7 @@ class UserPlant {
   final String userId;
   final String speciesId;
   final String nickname;
+  final String name;
   final String? healthStatus;
   final DateTime? acquiredAt;
   final DateTime? lastWateredAt;
@@ -11,6 +12,7 @@ class UserPlant {
   final DateTime? deletedAt;
 
   UserPlant({
+    required this.name,
     required this.id,
     required this.userId,
     required this.speciesId,
@@ -30,11 +32,20 @@ class UserPlant {
       speciesId: json['species_id'] as String,
       nickname: json['nickname'] as String,
       healthStatus: json['health_status'] as String?,
-      acquiredAt: json['acquired_at'] != null ? DateTime.parse(json['acquired_at'] as String) : null,
-      lastWateredAt: json['last_watered_at'] != null ? DateTime.parse(json['last_watered_at'] as String) : null,
+      acquiredAt: json['acquired_at'] != null
+          ? DateTime.parse(json['acquired_at'] as String)
+          : null,
+      lastWateredAt: json['last_watered_at'] != null
+          ? DateTime.parse(json['last_watered_at'] as String)
+          : null,
       createdAt: DateTime.parse(json['created_at'] as String),
-      updatedAt: json['updated_at'] != null ? DateTime.parse(json['updated_at'] as String) : null,
-      deletedAt: json['deleted_at'] != null ? DateTime.parse(json['deleted_at'] as String) : null,
+      updatedAt: json['updated_at'] != null
+          ? DateTime.parse(json['updated_at'] as String)
+          : null,
+      deletedAt: json['deleted_at'] != null
+          ? DateTime.parse(json['deleted_at'] as String)
+          : null,
+      name: json['name'] as String,
     );
   }
 
@@ -66,6 +77,7 @@ class UserPlant {
     DateTime? deletedAt,
   }) {
     return UserPlant(
+      name: name ?? this.name,
       id: id ?? this.id,
       userId: userId ?? this.userId,
       speciesId: speciesId ?? this.speciesId,

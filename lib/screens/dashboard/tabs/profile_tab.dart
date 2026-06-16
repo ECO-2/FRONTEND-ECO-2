@@ -129,20 +129,26 @@ class ProfileTab extends StatelessWidget {
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: StatCard(
-                  value: '${missionsProvider.userSeeds}',
-                  label: 'Semillas',
-                  valueColor: AppColors.accentLight,
-                  showBorder: true,
+                child: GestureDetector(
+                  onTap: () => Navigator.pushNamed(context, AppRoutes.greenFootprint),
+                  child: StatCard(
+                    value: '${missionsProvider.userSeeds}',
+                    label: 'Semillas',
+                    valueColor: AppColors.accentLight,
+                    showBorder: true,
+                  ),
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: StatCard(
-                  value: '36g',
-                  label: 'CO₂/día',
-                  valueColor: AppColors.textSecondary,
-                  showBorder: true,
+                child: GestureDetector(
+                  onTap: () => Navigator.pushNamed(context, AppRoutes.greenFootprint),
+                  child: StatCard(
+                    value: '36.5 kg',
+                    label: 'CO₂ total',
+                    valueColor: AppColors.textSecondary,
+                    showBorder: true,
+                  ),
                 ),
               ),
             ],

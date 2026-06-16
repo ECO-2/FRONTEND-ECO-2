@@ -27,8 +27,6 @@ class StatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    
     Widget content = Column(
       mainAxisSize: MainAxisSize.min,
       children: [

@@ -9,6 +9,7 @@ class PlantsProvider with ChangeNotifier {
       speciesId: 's1',
       nickname: 'Mi Monstera',
       healthStatus: 'Excelente',
+      name: 'Monstera Deliciosa',
       acquiredAt: DateTime.now().subtract(const Duration(days: 30)),
       lastWateredAt: DateTime.now().subtract(const Duration(days: 8)), // Needs watering in Figma description (Lleva 8 días sin riego)
       createdAt: DateTime.now().subtract(const Duration(days: 30)),
@@ -19,6 +20,7 @@ class PlantsProvider with ChangeNotifier {
       speciesId: 's2',
       nickname: 'Mi Potus',
       healthStatus: 'Bueno',
+      name: 'Potus',
       acquiredAt: DateTime.now().subtract(const Duration(days: 15)),
       lastWateredAt: DateTime.now().subtract(const Duration(days: 2)),
       createdAt: DateTime.now().subtract(const Duration(days: 15)),
@@ -30,13 +32,14 @@ class PlantsProvider with ChangeNotifier {
   List<UserPlant> get userPlants => _userPlants;
   bool get isLoading => _isLoading;
 
-  void addPlant(String nickname, String speciesId) {
+  void addPlant(String nickname, String speciesId, String name) {
     final newPlant = UserPlant(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       userId: 'mock-id-123',
       speciesId: speciesId,
       nickname: nickname,
       healthStatus: 'Bueno',
+      name: name,
       acquiredAt: DateTime.now(),
       lastWateredAt: DateTime.now(),
       createdAt: DateTime.now(),

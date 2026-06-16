@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:frontend_eco_2/routing/app_routes.dart';
 import 'package:frontend_eco_2/theme/app_colors.dart';
 import 'package:frontend_eco_2/widgets/common/custom_button.dart';
@@ -33,7 +34,7 @@ class WelcomeScreen extends StatelessWidget {
                   'assets/images/Variante Tipografica 2.png',
                   height: size.height * 0.25, // Ajusta el tamaño del logo según el tamaño de la pantalla
                   fit: BoxFit.contain,
-                ),
+                ).animate().fadeIn(duration: 800.ms).slideY(begin: -0.15, end: 0, curve: Curves.easeOutQuad),
                 
                 // Desplazamiento del texto hacia arriba
                 Transform.translate(
@@ -48,7 +49,7 @@ class WelcomeScreen extends StatelessWidget {
                       letterSpacing: 0.5,
                     ),
                   ),
-                ),
+                ).animate().fadeIn(delay: 200.ms, duration: 600.ms),
                 
                 const Spacer(),
                 
@@ -83,7 +84,7 @@ class WelcomeScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 24),
                   ],
-                ),
+                ).animate().fadeIn(delay: 450.ms, duration: 700.ms).slideY(begin: 0.2, end: 0, curve: Curves.easeOutBack),
               ],
             ),
           ),
