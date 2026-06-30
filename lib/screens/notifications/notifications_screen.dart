@@ -38,8 +38,11 @@ class NotificationsScreen extends StatelessWidget {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.notifications_none,
-                            size: 64, color: Colors.grey),
+                        Icon(
+                          Icons.notifications_none,
+                          size: 64,
+                          color: Colors.grey,
+                        ),
                         SizedBox(height: 16),
                         Text(
                           'No tienes notificaciones por ahora.',
@@ -66,7 +69,8 @@ class NotificationsScreen extends StatelessWidget {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
                                     content: Text(
-                                        'Todas las notificaciones marcadas como leídas.'),
+                                      'Todas las notificaciones marcadas como leídas.',
+                                    ),
                                     duration: Duration(seconds: 1),
                                   ),
                                 );
@@ -87,16 +91,18 @@ class NotificationsScreen extends StatelessWidget {
                       // HOY
                       if (todayNotifications.isNotEmpty) ...[
                         _sectionLabel('HOY'),
-                        ...todayNotifications
-                            .map((n) => _buildNotifItem(context, n)),
+                        ...todayNotifications.map(
+                          (n) => _buildNotifItem(context, n),
+                        ),
                         const SizedBox(height: 8),
                       ],
 
                       // ESTA SEMANA
                       if (weekNotifications.isNotEmpty) ...[
                         _sectionLabel('ESTA SEMANA'),
-                        ...weekNotifications
-                            .map((n) => _buildNotifItem(context, n)),
+                        ...weekNotifications.map(
+                          (n) => _buildNotifItem(context, n),
+                        ),
                       ],
 
                       // Footer
@@ -122,29 +128,29 @@ class NotificationsScreen extends StatelessWidget {
   }
 
   Widget _sectionLabel(String label) {
-    return Column(
-      children: [
-        Container(
-          height: 1,
-          color: const Color(0xFFE2E8E4),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-          child: Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              label,
-              style: const TextStyle(
-                fontFamily: 'DM Sans',
-                fontWeight: FontWeight.w700,
-                fontSize: 12,
-                color: _kTextMuted,
-                letterSpacing: 1.2,
+    return Container(
+      color: Colors.grey[200],
+      child: Column(
+        children: [
+          const Divider(height: 1, color: Color(0xFFE2E8E4)),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                label,
+                style: const TextStyle(
+                  fontFamily: 'DM Sans',
+                  fontWeight: FontWeight.w700,
+                  fontSize: 12,
+                  color: _kTextMuted,
+                  letterSpacing: 1.2,
+                ),
               ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -189,15 +195,14 @@ class NotificationsScreen extends StatelessWidget {
 
     return InkWell(
       onTap: () {
-        Provider.of<NotificationsProvider>(context, listen: false)
-            .markAsRead(notification.id);
+        Provider.of<NotificationsProvider>(
+          context,
+          listen: false,
+        ).markAsRead(notification.id);
       },
       child: Container(
-        color: isUnread
-            ? _kDark.withValues(alpha: 0.04)
-            : Colors.transparent,
-        padding:
-            const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        color: isUnread ? _kDark.withValues(alpha: 0.04) : Colors.transparent,
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -205,10 +210,7 @@ class NotificationsScreen extends StatelessWidget {
             Container(
               width: 42,
               height: 42,
-              decoration: BoxDecoration(
-                color: iconBg,
-                shape: BoxShape.circle,
-              ),
+              decoration: BoxDecoration(color: iconBg, shape: BoxShape.circle),
               alignment: Alignment.center,
               child: Icon(icon, color: iconColor, size: 20),
             ),
@@ -334,10 +336,12 @@ class _NotifHeader extends StatelessWidget {
           ),
           // Settings icon
           IconButton(
-            icon: const Icon(Icons.settings_outlined,
-                color: Colors.white, size: 24),
-            onPressed: () =>
-                Navigator.pushNamed(context, AppRoutes.settings),
+            icon: const Icon(
+              Icons.settings_outlined,
+              color: Colors.white,
+              size: 24,
+            ),
+            onPressed: () => Navigator.pushNamed(context, AppRoutes.settings),
           ),
           // Unread badge
           if (unreadCount > 0)

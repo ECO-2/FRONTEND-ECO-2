@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:frontend_eco_2/providers/providers.dart';
 import 'package:frontend_eco_2/theme/app_colors.dart';
+import 'package:frontend_eco_2/widgets/common/custom_app_bar.dart';
+
 
 // ── Color tokens extracted from Figma ────────────────────────────────────
 const _kDark = Color(0xFF10454F);
@@ -30,10 +32,12 @@ class GreenFootprintScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: _kBg,
+      appBar: const CustomAppBar(
+        title: 'Mi Huella Verde',
+        automaticallyImplyLeading: true,
+      ),
       body: Column(
         children: [
-          // ── Header verde oscuro (Figma: #10454F) ───────────────
-          _FigmaHeader(title: 'Mi Huella Verde'),
           // ── Scrollable content ──────────────────────────────────
           Expanded(
             child: SingleChildScrollView(
@@ -217,7 +221,7 @@ class GreenFootprintScreen extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Container(
-            height: chartHeight + 28,
+            height: chartHeight + 40,
             padding: const EdgeInsets.fromLTRB(8, 10, 8, 0),
             decoration: BoxDecoration(
               color: const Color(0xFFF0F0F0).withValues(alpha: 0.6),
@@ -286,58 +290,6 @@ class GreenFootprintScreen extends StatelessWidget {
           ),
           onPressed: () {},
         ),
-      ),
-    );
-  }
-}
-
-// ── Shared green header (Figma: back btn circle + white title) ─────────────
-class _FigmaHeader extends StatelessWidget {
-  final String title;
-
-  const _FigmaHeader({required this.title});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: _kDark,
-      padding: EdgeInsets.only(
-        top: MediaQuery.of(context).padding.top + 10,
-        bottom: 10,
-        left: 16,
-        right: 16,
-      ),
-      child: Row(
-        children: [
-          // Back button: circle with 15% white bg
-          GestureDetector(
-            onTap: () => Navigator.maybePop(context),
-            child: Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(18),
-              ),
-              alignment: Alignment.center,
-              child: const Icon(
-                Icons.arrow_back_ios_new_rounded,
-                color: Colors.white,
-                size: 16,
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Text(
-            title,
-            style: const TextStyle(
-              fontFamily: 'DM Sans',
-              fontWeight: FontWeight.w600,
-              fontSize: 20,
-              color: Colors.white,
-            ),
-          ),
-        ],
       ),
     );
   }

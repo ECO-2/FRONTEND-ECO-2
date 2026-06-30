@@ -37,16 +37,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
     final tabs = [
       const PremiumUpgradeScreen(isTab: true), // O2+ -> Index 0
-      const GardenTab(),   // Jardin -> Index 1
+      const GardenTab(), // Jardin -> Index 1
       HomeTab(
         onViewAll: () {
           setState(() {
             _currentIndex = 1; // Switch to Garden tab
           });
         },
-      ),                   // Dashboard -> Index 2
-      const ScannerTab(),  // Escaner -> Index 3
-      const ProfileTab(),  // Perfil -> Index 4
+      ), // Dashboard -> Index 2
+      const ScannerTab(), // Escaner -> Index 3
+      const ProfileTab(), // Perfil -> Index 4
     ];
 
     PreferredSizeWidget? appBar;
@@ -68,9 +68,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       body: Column(
         children: [
           if (showStatusBarInBody) const CustomStatusBar(),
-          Expanded(
-            child: tabs[_currentIndex],
-          ),
+          Expanded(child: tabs[_currentIndex]),
         ],
       ),
       bottomNavigationBar: CustomBottomNavBar(
@@ -83,5 +81,4 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ),
     );
   }
-
 }

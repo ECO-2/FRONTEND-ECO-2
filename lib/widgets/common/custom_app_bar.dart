@@ -7,6 +7,7 @@ import 'package:frontend_eco_2/routing/app_routes.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String? title;
+  final Widget? titleWidget;
   final List<Widget>? actions;
   final bool automaticallyImplyLeading;
   final Widget? leading;
@@ -14,10 +15,12 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final Color foregroundColor;
   final Color? statusBarColor;
   final PreferredSizeWidget? bottom;
+  final double toolbarHeight;
 
   const CustomAppBar({
     super.key,
     this.title,
+    this.titleWidget,
     this.actions,
     this.automaticallyImplyLeading = true,
     this.leading,
@@ -25,6 +28,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.foregroundColor = Colors.white,
     this.statusBarColor,
     this.bottom,
+    this.toolbarHeight = 72.0,
   });
 
   @override
@@ -101,28 +105,33 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       ];
     }
 
-    final actualStatusBarColor = statusBarColor ??
+    final actualStatusBarColor =
+        statusBarColor ??
         (backgroundColor == AppColors.primary
             ? AppColors.primaryDark
             : backgroundColor);
 
-    final bool isDarkBackground = ThemeData.estimateBrightnessForColor(actualStatusBarColor) == Brightness.dark;
+    final bool isDarkBackground =
+        ThemeData.estimateBrightnessForColor(actualStatusBarColor) ==
+        Brightness.dark;
     final double statusBarHeight = MediaQuery.of(context).padding.top;
 
     return AppBar(
       primary: true,
-      toolbarHeight: 72.0,
-      title: title != null
-          ? Text(
-              title!,
-              style: TextStyle(
-                color: foregroundColor,
-                fontWeight: FontWeight.bold,
-                fontSize: 20,
-                fontFamily: 'Inter',
-              ),
-            )
-          : null,
+      toolbarHeight: toolbarHeight,
+      title:
+          titleWidget ??
+          (title != null
+              ? Text(
+                  title!,
+                  style: TextStyle(
+                    color: foregroundColor,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                    fontFamily: 'Inter',
+                  ),
+                )
+              : null),
       centerTitle: false,
       backgroundColor: Colors.transparent,
       foregroundColor: foregroundColor,
@@ -134,27 +143,23 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       bottom: bottom,
       flexibleSpace: Column(
         children: [
-          Container(
-            height: statusBarHeight,
-            color: actualStatusBarColor,
-          ),
-          Expanded(
-            child: Container(
-              color: backgroundColor,
-            ),
-          ),
+          Container(height: statusBarHeight, color: actualStatusBarColor),
+          Expanded(child: Container(color: backgroundColor)),
         ],
       ),
       systemOverlayStyle: SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
-        statusBarIconBrightness: isDarkBackground ? Brightness.light : Brightness.dark,
-        statusBarBrightness: isDarkBackground ? Brightness.dark : Brightness.light,
+        statusBarIconBrightness: isDarkBackground
+            ? Brightness.light
+            : Brightness.dark,
+        statusBarBrightness: isDarkBackground
+            ? Brightness.dark
+            : Brightness.light,
       ),
     );
   }
 
   @override
-  Size get preferredSize => Size.fromHeight(
-        72.0 + (bottom?.preferredSize.height ?? 0.0),
-      );
+  Size get preferredSize =>
+      Size.fromHeight(toolbarHeight + (bottom?.preferredSize.height ?? 0.0));
 }

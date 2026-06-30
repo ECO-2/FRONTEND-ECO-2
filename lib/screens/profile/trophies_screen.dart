@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend_eco_2/theme/app_colors.dart';
+import 'package:frontend_eco_2/widgets/common/custom_app_bar.dart';
 
 // ── Figma color tokens ────────────────────────────────────────────────────
 const _kDark = Color(0xFF10454F);
@@ -21,50 +22,59 @@ class _TrophiesScreenState extends State<TrophiesScreen> {
 
   final List<_TrophyItem> _trophies = const [
     _TrophyItem(
-        title: 'Primera Planta',
-        category: 'Bronce',
-        isUnlocked: true,
-        desc: 'Añade tu primera planta'),
+      title: 'Primera Planta',
+      category: 'Bronce',
+      isUnlocked: true,
+      desc: 'Añade tu primera planta',
+    ),
     _TrophyItem(
-        title: 'Coleccionista',
-        category: 'Plata',
-        isUnlocked: true,
-        desc: 'Añade 5 plantas distintas'),
+      title: 'Coleccionista',
+      category: 'Plata',
+      isUnlocked: true,
+      desc: 'Añade 5 plantas distintas',
+    ),
     _TrophyItem(
-        title: 'Cuidadora Fiel',
-        category: 'Oro',
-        isUnlocked: true,
-        desc: 'Completa 30 riegos'),
+      title: 'Cuidadora Fiel',
+      category: 'Oro',
+      isUnlocked: true,
+      desc: 'Completa 30 riegos',
+    ),
     _TrophyItem(
-        title: 'Explorer x10',
-        category: 'Plata',
-        isUnlocked: true,
-        desc: 'Escanea 10 plantas'),
+      title: 'Explorer x10',
+      category: 'Plata',
+      isUnlocked: true,
+      desc: 'Escanea 10 plantas',
+    ),
     _TrophyItem(
-        title: 'Riego Master',
-        category: 'Bronce',
-        isUnlocked: false,
-        desc: 'Completa 100 riegos'),
+      title: 'Riego Master',
+      category: 'Bronce',
+      isUnlocked: false,
+      desc: 'Completa 100 riegos',
+    ),
     _TrophyItem(
-        title: 'Verde Total',
-        category: 'Oro',
-        isUnlocked: false,
-        desc: 'Alcanza nivel 10'),
+      title: 'Verde Total',
+      category: 'Oro',
+      isUnlocked: false,
+      desc: 'Alcanza nivel 10',
+    ),
     _TrophyItem(
-        title: 'Jardín Pro',
-        category: 'Oro',
-        isUnlocked: false,
-        desc: 'Añade 20 plantas'),
+      title: 'Jardín Pro',
+      category: 'Oro',
+      isUnlocked: false,
+      desc: 'Añade 20 plantas',
+    ),
     _TrophyItem(
-        title: 'Escáner',
-        category: 'Plata',
-        isUnlocked: false,
-        desc: 'Escanea 25 plantas'),
+      title: 'Escáner',
+      category: 'Plata',
+      isUnlocked: false,
+      desc: 'Escanea 25 plantas',
+    ),
     _TrophyItem(
-        title: 'Sembradora',
-        category: 'Bronce',
-        isUnlocked: false,
-        desc: 'Acumula 500 semillas'),
+      title: 'Sembradora',
+      category: 'Bronce',
+      isUnlocked: false,
+      desc: 'Acumula 500 semillas',
+    ),
   ];
 
   @override
@@ -73,10 +83,12 @@ class _TrophiesScreenState extends State<TrophiesScreen> {
 
     return Scaffold(
       backgroundColor: _kBg,
+      appBar: const CustomAppBar(
+        title: 'Trofeos',
+        automaticallyImplyLeading: true,
+      ),
       body: Column(
         children: [
-          // ── Dark header ────────────────────────────────────────
-          _buildHeader(context),
           // ── Scrollable body ────────────────────────────────────
           Expanded(
             child: SingleChildScrollView(
@@ -108,61 +120,17 @@ class _TrophiesScreenState extends State<TrophiesScreen> {
                       itemCount: filtered.length,
                       gridDelegate:
                           const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 3,
-                        mainAxisSpacing: 12,
-                        crossAxisSpacing: 12,
-                        childAspectRatio: 0.68,
-                      ),
+                            crossAxisCount: 3,
+                            mainAxisSpacing: 12,
+                            crossAxisSpacing: 12,
+                            childAspectRatio: 0.68,
+                          ),
                       itemBuilder: (context, i) =>
                           _buildTrophyCard(filtered[i]),
                     ),
                   ),
                 ],
               ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ── Header ──────────────────────────────────────────────────────────
-  Widget _buildHeader(BuildContext context) {
-    return Container(
-      color: _kDark,
-      padding: EdgeInsets.only(
-        top: MediaQuery.of(context).padding.top + 10,
-        bottom: 10,
-        left: 16,
-        right: 16,
-      ),
-      child: Row(
-        children: [
-          GestureDetector(
-            onTap: () => Navigator.maybePop(context),
-            child: Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(18),
-              ),
-              alignment: Alignment.center,
-              child: const Icon(
-                Icons.arrow_back_ios_new_rounded,
-                color: Colors.white,
-                size: 16,
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          const Text(
-            'Trofeos',
-            style: TextStyle(
-              fontFamily: 'DM Sans',
-              fontWeight: FontWeight.w600,
-              fontSize: 20,
-              color: Colors.white,
             ),
           ),
         ],
@@ -358,8 +326,9 @@ class _TrophiesScreenState extends State<TrophiesScreen> {
                       tabs[i],
                       style: TextStyle(
                         fontFamily: 'DM Sans',
-                        fontWeight:
-                            selected ? FontWeight.w700 : FontWeight.w400,
+                        fontWeight: selected
+                            ? FontWeight.w700
+                            : FontWeight.w400,
                         fontSize: 14,
                         color: selected ? _kTextDark : _kTextMuted,
                       ),
@@ -435,10 +404,7 @@ class _TrophiesScreenState extends State<TrophiesScreen> {
           Container(
             width: 54,
             height: 54,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: circleBg,
-            ),
+            decoration: BoxDecoration(shape: BoxShape.circle, color: circleBg),
             alignment: Alignment.center,
             child: Icon(iconData, color: iconColor, size: 26),
           ),

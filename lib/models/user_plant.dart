@@ -45,7 +45,7 @@ class UserPlant {
       deletedAt: json['deleted_at'] != null
           ? DateTime.parse(json['deleted_at'] as String)
           : null,
-      name: json['name'] as String,
+      name: (json['name'] ?? json['nickname'] ?? '') as String,
     );
   }
 

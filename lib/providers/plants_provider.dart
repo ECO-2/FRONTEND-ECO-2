@@ -11,7 +11,9 @@ class PlantsProvider with ChangeNotifier {
       healthStatus: 'Excelente',
       name: 'Monstera Deliciosa',
       acquiredAt: DateTime.now().subtract(const Duration(days: 30)),
-      lastWateredAt: DateTime.now().subtract(const Duration(days: 8)), // Needs watering in Figma description (Lleva 8 días sin riego)
+      lastWateredAt: DateTime.now().subtract(
+        const Duration(days: 8),
+      ), // Needs watering in Figma description (Lleva 8 días sin riego)
       createdAt: DateTime.now().subtract(const Duration(days: 30)),
     ),
     UserPlant(
@@ -48,11 +50,11 @@ class PlantsProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void waterPlant(String id) {
+  void waterPlant(String id, {DateTime? date}) {
     final index = _userPlants.indexWhere((p) => p.id == id);
     if (index != -1) {
       _userPlants[index] = _userPlants[index].copyWith(
-        lastWateredAt: DateTime.now(),
+        lastWateredAt: date ?? DateTime.now(),
         updatedAt: DateTime.now(),
       );
       notifyListeners();

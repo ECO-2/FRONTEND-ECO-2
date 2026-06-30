@@ -2,60 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:frontend_eco_2/models/models.dart';
 import 'package:frontend_eco_2/providers/providers.dart';
-import 'package:frontend_eco_2/theme/app_colors.dart';
+import 'package:frontend_eco_2/routing/app_routes.dart';
+import 'package:frontend_eco_2/widgets/common/custom_status_bar.dart';
+import 'package:frontend_eco_2/widgets/common/custom_bottom_nav_bar.dart';
 
-// ── Mock care history records ─────────────────────────────────────────────
-class _CareRecord {
-  final String type;  // 'water' | 'fertilize' | 'prune'
-  final String label;
-  final DateTime date;
-
-  const _CareRecord({
-    required this.type,
-    required this.label,
-    required this.date,
-  });
-}
-
-final _mockCareHistory = [
-  _CareRecord(
-    type: 'water',
-    label: 'Riego',
-    date: DateTime.now().subtract(const Duration(days: 2)),
-  ),
-  _CareRecord(
-    type: 'fertilize',
-    label: 'Abonado',
-    date: DateTime.now().subtract(const Duration(days: 10)),
-  ),
-  _CareRecord(
-    type: 'prune',
-    label: 'Poda',
-    date: DateTime.now().subtract(const Duration(days: 20)),
-  ),
-];
-
-// ── Species info (reused from plant_card.dart logic) ─────────────────────
-const _speciesData = {
-  's1': (
-    scientific: 'Monstera deliciosa',
-    bg: Color(0xFFDCEDDC),
-    health: 0.9,
-    tags: ['Tropical', 'Luz indirecta', 'Riego semanal'],
-  ),
-  's2': (
-    scientific: 'Epipremnum aureum',
-    bg: Color(0xFFDCEDDC),
-    health: 0.75,
-    tags: ['Tropical', 'Luz indirecta', 'Fácil'],
-  ),
-  's3': (
-    scientific: 'Sansevieria trifasciata',
-    bg: Color(0xFFF0F4EC),
-    health: 0.85,
-    tags: ['Desértica', 'Luz adaptable', 'Riego 2-3 sem.'],
-  ),
-};
+// Import components from widgets/
+import 'widgets/species_data.dart';
+import 'widgets/care_sheet_content.dart';
+import 'widgets/care_status_card.dart';
+import 'widgets/species_care_grid.dart';
+import 'widgets/care_history_list.dart';
 
 class PlantDetailScreen extends StatelessWidget {
   const PlantDetailScreen({super.key});
@@ -64,433 +20,484 @@ class PlantDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final plant = ModalRoute.of(context)?.settings.arguments as UserPlant?;
     if (plant == null) {
-      return const Scaffold(
-        body: Center(child: Text('Planta no encontrada')),
-      );
+      return const Scaffold(body: Center(child: Text('Planta no encontrada')));
     }
 
-    final species = _speciesData[plant.speciesId];
-    final scientificName = species?.scientific ?? 'Especie desconocida';
-    final bgColor = species?.bg ?? const Color(0xFFEAF3EC);
-    final healthLevel = species?.health ?? 0.5;
-    final tags = species?.tags ?? ['Planta'];
-    final daysSince = plant.lastWateredAt != null
-        ? DateTime.now().difference(plant.lastWateredAt!).inDays
-        : 0;
-    final needsWater = daysSince >= 7;
+    final sp = speciesDataMap[plant.speciesId] ?? defaultSpecies;
+
+    // Calculate dynamic dates for mock care history and status card
+    final lastWatered =
+        plant.lastWateredAt ?? DateTime.now().subtract(const Duration(days: 8));
+    final daysSinceWater = DateTime.now().difference(lastWatered).inDays;
+
+    final statusBarHeight = MediaQuery.of(context).padding.top;
+    const appBarHeight = 64.0;
+    const imageHeight = 200.0;
+    const imageWidth = double.infinity;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
-      body: CustomScrollView(
-        slivers: [
-          // ── App Bar (green gradient) ──────────────────
-          SliverAppBar(
-            expandedHeight: 260,
-            pinned: true,
-            backgroundColor: AppColors.primaryDark,
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back_ios_rounded, color: Colors.white),
-              onPressed: () => Navigator.pop(context),
-            ),
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.more_horiz_rounded, color: Colors.white),
-                onPressed: () {},
-              ),
-            ],
-            flexibleSpace: FlexibleSpaceBar(
-              collapseMode: CollapseMode.parallax,
-              background: Container(
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [AppColors.primaryDark, AppColors.primary],
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                  ),
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const SizedBox(height: 40),
-                    // Plant image circle
-                    Container(
-                      width: 120,
-                      height: 120,
-                      decoration: BoxDecoration(
-                        color: bgColor,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.12),
-                            blurRadius: 20,
-                            offset: const Offset(0, 8),
-                          ),
-                        ],
-                      ),
-                      alignment: Alignment.center,
-                      child: Icon(
+      backgroundColor: Colors.white,
+      extendBody: true,
+      body: Stack(
+        children: [
+          // ── CAPA 1: Imagen fija en el fondo ──
+          Positioned(
+            top: statusBarHeight + appBarHeight + 16,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: Container(
+                width: imageWidth,
+                height: imageHeight,
+                color: sp.bg,
+                child: sp.assetImage != null
+                    ? Image.asset(sp.assetImage!, fit: BoxFit.contain)
+                    : const Icon(
                         Icons.local_florist_rounded,
-                        size: 60,
-                        color: AppColors.primary.withValues(alpha: 0.7),
+                        size: 80,
+                        color: Color(0xFFB0B0B0),
                       ),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      plant.nickname,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'DM Sans',
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      scientificName,
-                      style: const TextStyle(
-                        color: Colors.white70,
-                        fontSize: 13,
-                        fontStyle: FontStyle.italic,
-                        fontFamily: 'Inter',
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                  ],
-                ),
               ),
             ),
           ),
 
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
+          // ── CAPA 2: Contenido desplazable (sobre la imagen) ──
+          Positioned.fill(
+            child: SingleChildScrollView(
+              physics: const _TopClampingScrollPhysics(),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // ── Tags ────────────────────────────────
-                  Wrap(
-                    spacing: 6,
-                    children: tags
-                        .map((t) => _buildTag(t))
-                        .toList(),
+                  // Espacio transparente para mostrar la imagen fija del fondo al principio
+                  SizedBox(
+                    height: statusBarHeight + appBarHeight + imageHeight + 24,
                   ),
-                  const SizedBox(height: 24),
 
-                  // ── Health indicators ────────────────────
-                  const Text(
-                    'Estado de la Planta',
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
-                      fontFamily: 'Inter',
+                  // Caja contenedora sólida del detalle
+                  Container(
+                    width: double.infinity,
+                    decoration: const BoxDecoration(color: Colors.white),
+                    padding: const EdgeInsets.fromLTRB(
+                      24,
+                      24,
+                      24,
+                      120,
+                    ), // Padding inferior amplio para el BottomNavBar
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // ── Plant Title & Acquisition Info ──
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    plant.nickname,
+                                    style: const TextStyle(
+                                      fontFamily: 'DM Sans',
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 26,
+                                      color: Color(0xFF0D2B31),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    sp.scientific,
+                                    style: const TextStyle(
+                                      fontFamily: 'DM Sans',
+                                      fontSize: 14,
+                                      color: Color(0xFF807F7F),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                const Text(
+                                  'En mi colección desde',
+                                  style: TextStyle(
+                                    fontFamily: 'DM Sans',
+                                    fontSize: 11,
+                                    color: Color(0xFF807F7F),
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  _formatAcquisitionDate(plant.acquiredAt),
+                                  style: const TextStyle(
+                                    fontFamily: 'DM Sans',
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 13,
+                                    color: Color(0xFF0D2B31),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+
+                        // ── Tags ──
+                        Row(
+                          children: sp.tags
+                              .map(
+                                (tag) => Container(
+                                  margin: const EdgeInsets.only(right: 8),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 6,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFDFE2D6),
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: Text(
+                                    tag,
+                                    style: const TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                      color: Color(0xFF1A3B35),
+                                    ),
+                                  ),
+                                ),
+                              )
+                              .toList(),
+                        ),
+                        const SizedBox(height: 16),
+                        const Divider(
+                          color: Color(0xFFE2E7E4),
+                          height: 1,
+                          thickness: 1,
+                        ),
+                        const SizedBox(height: 20),
+
+                        // ── Care Status Card ──
+                        CareStatusCard(plant: plant, sp: sp),
+                        const SizedBox(height: 24),
+
+                        // ── Action Buttons ──
+                        Row(
+                          children: [
+                            Expanded(
+                              child: ElevatedButton.icon(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFF0D2B31),
+                                  foregroundColor: Colors.white,
+                                  elevation: 0,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 16,
+                                  ),
+                                ),
+                                onPressed: () => _showCareSheet(context, plant),
+                                icon: const Icon(
+                                  Icons.water_drop_rounded,
+                                  size: 18,
+                                  color: Color.fromARGB(255, 236, 233, 21),
+                                ),
+                                label: const Text(
+                                  'Registrar cuidado',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                    fontFamily: 'Inter',
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: OutlinedButton(
+                                style: OutlinedButton.styleFrom(
+                                  foregroundColor: const Color(0xFF0D2B31),
+                                  side: const BorderSide(
+                                    color: Color(0xFF0D2B31),
+                                    width: 1.5,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 16,
+                                  ),
+                                ),
+                                onPressed: () {
+                                  Navigator.pushNamed(
+                                    context,
+                                    AppRoutes.careHistory,
+                                    arguments: plant,
+                                  );
+                                },
+                                child: const Text(
+                                  'Ver historial',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                    fontFamily: 'Inter',
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 24),
+
+                        // ── Section: Últimos cuidados ──
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              'Últimos cuidados',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                                color: Color(0xFF0D2B31),
+                                fontFamily: 'Inter',
+                              ),
+                            ),
+                            GestureDetector(
+                              onTap: () {},
+                              child: const Row(
+                                children: [
+                                  Text(
+                                    'ver todas',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Color(0xFF807F7F),
+                                      fontFamily: 'Inter',
+                                    ),
+                                  ),
+                                  SizedBox(width: 4),
+                                  Icon(
+                                    Icons.arrow_forward_rounded,
+                                    size: 14,
+                                    color: Color(0xFF807F7F),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+
+                        CareHistoryList(
+                          lastWatered: lastWatered,
+                          daysSinceWater: daysSinceWater,
+                        ),
+                        const SizedBox(height: 24),
+
+                        // ── Section: Cuidados de la especie ──
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              'Cuidados de la especie',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                                color: Color(0xFF0D2B31),
+                                fontFamily: 'Inter',
+                              ),
+                            ),
+                            GestureDetector(
+                              onTap: () {},
+                              child: const Row(
+                                children: [
+                                  Text(
+                                    'ver ficha completa',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Color(0xFF807F7F),
+                                      fontFamily: 'Inter',
+                                    ),
+                                  ),
+                                  SizedBox(width: 4),
+                                  Icon(
+                                    Icons.arrow_forward_rounded,
+                                    size: 14,
+                                    color: Color(0xFF807F7F),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+
+                        SpeciesCareGrid(sp: sp),
+                        const SizedBox(height: 24),
+
+                        // ── Section: Mi nota personal ──
+                        const Text(
+                          'Mi nota personal',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                            color: Color(0xFF0D2B31),
+                            fontFamily: 'Inter',
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 16,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFEFF5E4),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: const Color(0xFF8C9682),
+                              width: 1.0,
+                            ),
+                          ),
+                          child: Text(
+                            sp.personalNote,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: Color(0xFF0D2B31),
+                              fontFamily: 'Inter',
+                              height: 1.4,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _buildIndicator(
-                          icon: Icons.water_drop_outlined,
-                          label: 'Riego',
-                          value: needsWater ? 0.2 : 0.8,
-                          color: needsWater ? AppColors.orange : AppColors.primary,
-                          sublabel: needsWater
-                              ? 'Hace $daysSince días'
-                              : 'Hace $daysSince días',
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: _buildIndicator(
-                          icon: Icons.wb_sunny_outlined,
-                          label: 'Luz',
-                          value: 0.85,
-                          color: const Color(0xFFFFBF00),
-                          sublabel: 'Indirecta',
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: _buildIndicator(
-                          icon: Icons.local_florist_outlined,
-                          label: 'Salud',
-                          value: healthLevel,
-                          color: AppColors.primary,
-                          sublabel:
-                              '${(healthLevel * 100).round()}%',
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
+                ],
+              ),
+            ),
+          ),
 
-                  // ── Care history ──────────────────────────
-                  const Text(
-                    'Historial de Cuidados',
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
-                      fontFamily: 'Inter',
+          // ── CAPA 3: Custom Status Bar (al frente) ──
+          const Positioned(top: 0, left: 0, right: 0, child: CustomStatusBar()),
+
+          // ── CAPA 4: Custom AppBar (al frente y fija) ──
+          Positioned(
+            top: statusBarHeight,
+            left: 0,
+            right: 0,
+            child: Container(
+              color: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Row(
+                children: [
+                  GestureDetector(
+                    onTap: () => Navigator.pop(context),
+                    child: Container(
+                      width: 40,
+                      height: 40,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFF3F5F4),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.arrow_back_ios_new_rounded,
+                        size: 16,
+                        color: Color(0xFF0D2B31),
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 12),
-                  ..._mockCareHistory.map((c) => _buildCareRow(c)),
-                  const SizedBox(height: 80),
+                  const SizedBox(width: 12),
+                  const Expanded(
+                    child: Text(
+                      'Mi Jardín',
+                      style: TextStyle(
+                        fontFamily: 'DM Sans',
+                        fontWeight: FontWeight.bold,
+                        fontSize: 24,
+                        color: Color(0xFF0D2B31),
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(
+                      Icons.more_horiz_rounded,
+                      color: Color(0xFF0D2B31),
+                      size: 26,
+                    ),
+                    onPressed: () {},
+                  ),
                 ],
               ),
             ),
           ),
         ],
       ),
-
-      // ── Floating "Registrar Cuidado" button ───────────
-      floatingActionButton: SizedBox(
-        width: double.infinity,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: FloatingActionButton.extended(
-            backgroundColor: AppColors.primary,
-            foregroundColor: Colors.white,
-            elevation: 4,
-            onPressed: () => _showCareSheet(context, plant),
-            icon: const Icon(Icons.add_circle_outline_rounded),
-            label: const Text(
-              'Registrar Cuidado',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 15,
-                fontFamily: 'Inter',
-              ),
-            ),
-          ),
-        ),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-    );
-  }
-
-  Widget _buildTag(String text) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Text(
-        text,
-        style: const TextStyle(
-          fontSize: 11,
-          fontWeight: FontWeight.w600,
-          color: AppColors.primary,
-          fontFamily: 'Inter',
-        ),
-      ),
-    );
-  }
-
-  Widget _buildIndicator({
-    required IconData icon,
-    required String label,
-    required double value,
-    required Color color,
-    required String sublabel,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE2E8E4)),
-      ),
-      child: Column(
-        children: [
-          Icon(icon, color: color, size: 22),
-          const SizedBox(height: 6),
-          Text(
-            label,
-            style: const TextStyle(
-              fontSize: 11,
-              color: AppColors.textSecondary,
-              fontFamily: 'Inter',
-            ),
-          ),
-          const SizedBox(height: 6),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(3),
-            child: LinearProgressIndicator(
-              value: value,
-              minHeight: 4,
-              backgroundColor: const Color(0xFFE8ECE9),
-              valueColor: AlwaysStoppedAnimation<Color>(color),
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            sublabel,
-            style: const TextStyle(
-              fontSize: 9,
-              color: AppColors.textMuted,
-              fontFamily: 'Inter',
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCareRow(_CareRecord record) {
-    final daysAgo = DateTime.now().difference(record.date).inDays;
-    final iconData = switch (record.type) {
-      'water' => Icons.water_drop_outlined,
-      'fertilize' => Icons.eco_outlined,
-      'prune' => Icons.content_cut_outlined,
-      _ => Icons.check_circle_outline,
-    };
-    final color = switch (record.type) {
-      'water' => const Color(0xFF4A90D9),
-      'fertilize' => AppColors.primary,
-      'prune' => const Color(0xFF8B6C2E),
-      _ => AppColors.primary,
-    };
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        children: [
-          Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            alignment: Alignment.center,
-            child: Icon(iconData, size: 18, color: color),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              record.label,
-              style: const TextStyle(
-                fontWeight: FontWeight.w500,
-                fontSize: 13,
-                color: AppColors.textPrimary,
-                fontFamily: 'Inter',
-              ),
-            ),
-          ),
-          Text(
-            daysAgo == 0
-                ? 'Hoy'
-                : daysAgo == 1
-                    ? 'Ayer'
-                    : 'Hace $daysAgo días',
-            style: const TextStyle(
-              fontSize: 11,
-              color: AppColors.textSecondary,
-              fontFamily: 'Inter',
-            ),
-          ),
-        ],
+      bottomNavigationBar: CustomBottomNavBar(
+        selectedIndex: 1, // Jardín
+        onTap: (index) {
+          if (index == 1) {
+            Navigator.pop(context);
+          } else {
+            Navigator.pushNamedAndRemoveUntil(
+              context,
+              AppRoutes.dashboard,
+              (route) => false,
+              arguments: index,
+            );
+          }
+        },
       ),
     );
   }
 
   void _showCareSheet(BuildContext context, UserPlant plant) {
-    final plantsProvider =
-        Provider.of<PlantsProvider>(context, listen: false);
+    final sp = speciesDataMap[plant.speciesId] ?? defaultSpecies;
     showModalBottomSheet(
       context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
       builder: (ctx) {
-        return Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Container(
-                  width: 36,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFDDDDDD),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                'Registrar Cuidado',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: 'DM Sans',
-                ),
-              ),
-              const SizedBox(height: 16),
-              _careOption(
-                context: ctx,
-                icon: Icons.water_drop_rounded,
-                label: 'Regar planta',
-                color: const Color(0xFF4A90D9),
-                onTap: () {
-                  plantsProvider.waterPlant(plant.id);
-                  Navigator.pop(ctx);
-                },
-              ),
-              _careOption(
-                context: ctx,
-                icon: Icons.eco_rounded,
-                label: 'Abonar planta',
-                color: AppColors.primary,
-                onTap: () => Navigator.pop(ctx),
-              ),
-              _careOption(
-                context: ctx,
-                icon: Icons.content_cut_rounded,
-                label: 'Podar planta',
-                color: const Color(0xFF8B6C2E),
-                onTap: () => Navigator.pop(ctx),
-              ),
-            ],
-          ),
-        );
+        return CareSheetContent(plant: plant, sp: sp);
       },
     );
   }
 
-  Widget _careOption({
-    required BuildContext context,
-    required IconData icon,
-    required String label,
-    required Color color,
-    required VoidCallback onTap,
-  }) {
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      leading: Container(
-        width: 40,
-        height: 40,
-        decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(10),
-        ),
-        alignment: Alignment.center,
-        child: Icon(icon, color: color, size: 20),
-      ),
-      title: Text(
-        label,
-        style: const TextStyle(
-          fontWeight: FontWeight.w500,
-          fontFamily: 'Inter',
-        ),
-      ),
-      onTap: onTap,
-    );
+  String _formatAcquisitionDate(DateTime? dt) {
+    if (dt == null) return '15 Feb 2026';
+    final months = [
+      'Ene',
+      'Feb',
+      'Mar',
+      'Abr',
+      'May',
+      'Jun',
+      'Jul',
+      'Ago',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dic',
+    ];
+    return '${dt.day} ${months[dt.month - 1]} ${dt.year}';
+  }
+}
+
+class _TopClampingScrollPhysics extends ScrollPhysics {
+  const _TopClampingScrollPhysics({super.parent});
+
+  @override
+  _TopClampingScrollPhysics applyTo(ScrollPhysics? ancestor) {
+    return _TopClampingScrollPhysics(parent: buildParent(ancestor));
+  }
+
+  @override
+  double applyBoundaryConditions(ScrollMetrics position, double value) {
+    if (value < position.pixels && position.pixels <= 0.0) {
+      return value -
+          position.pixels; // Block scroll below 0.0 (dragging down at top)
+    }
+    if (value < 0.0 && 0.0 < position.pixels) {
+      return value; // Clamp exactly at 0.0
+    }
+    return super.applyBoundaryConditions(position, value);
   }
 }
