@@ -38,27 +38,33 @@ class StatCard extends StatelessWidget {
           ),
           const SizedBox(height: 4),
         ],
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: valueFontSize ?? (icon != null ? 18 : 24),
-            fontWeight: FontWeight.bold,
-            color: isDark
-                ? Colors.white
-                : (valueColor ?? AppColors.textPrimary),
-            fontFamily: fontFamily ?? 'Inter',
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            value,
+            style: TextStyle(
+              fontSize: valueFontSize ?? (icon != null ? 18 : 24),
+              fontWeight: FontWeight.bold,
+              color: isDark
+                  ? Colors.white
+                  : (valueColor ?? AppColors.textPrimary),
+              fontFamily: fontFamily ?? 'Inter',
+            ),
           ),
         ),
         const SizedBox(height: 2),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: labelFontSize ?? 11,
-            fontWeight: FontWeight.w600,
-            color: isDark
-                ? Colors.white.withValues(alpha: 0.7)
-                : AppColors.textSecondary,
-            fontFamily: 'Inter',
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: labelFontSize ?? 11,
+              fontWeight: FontWeight.w600,
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.7)
+                  : AppColors.textSecondary,
+              fontFamily: 'Inter',
+            ),
           ),
         ),
       ],

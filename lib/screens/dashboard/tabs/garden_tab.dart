@@ -458,7 +458,7 @@ class _PlantListCard extends StatelessWidget {
                               child: Image.asset(
                                 sp.assetImage!,
                                 fit: BoxFit.contain,
-                                errorBuilder: (_, __, ___) => Icon(
+                                errorBuilder: (_, _, _) => Icon(
                                   Icons.local_florist_rounded,
                                   size: 56,
                                   color: AppColors.primary.withValues(alpha: 0.5),

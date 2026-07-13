@@ -91,13 +91,16 @@ class SpeciesCareGrid extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 2),
-                Text(
-                  value,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                    color: Color(0xFF0D2B31),
-                    fontFamily: 'Inter',
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    value,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                      color: Color(0xFF0D2B31),
+                      fontFamily: 'Inter',
+                    ),
                   ),
                 ),
               ],

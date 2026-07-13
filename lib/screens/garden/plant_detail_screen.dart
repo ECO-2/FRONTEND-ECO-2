@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:frontend_eco_2/models/models.dart';
-import 'package:frontend_eco_2/providers/providers.dart';
 import 'package:frontend_eco_2/routing/app_routes.dart';
 import 'package:frontend_eco_2/widgets/common/custom_status_bar.dart';
 import 'package:frontend_eco_2/widgets/common/custom_bottom_nav_bar.dart';
@@ -142,11 +140,12 @@ class PlantDetailScreen extends StatelessWidget {
                         const SizedBox(height: 12),
 
                         // ── Tags ──
-                        Row(
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
                           children: sp.tags
                               .map(
                                 (tag) => Container(
-                                  margin: const EdgeInsets.only(right: 8),
                                   padding: const EdgeInsets.symmetric(
                                     horizontal: 12,
                                     vertical: 6,

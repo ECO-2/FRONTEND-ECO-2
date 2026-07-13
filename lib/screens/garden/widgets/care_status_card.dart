@@ -35,14 +35,19 @@ class CareStatusCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'Estado de cuidado',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 15,
-                  color: Color(0xFF0D2B31),
+              const Expanded(
+                child: Text(
+                  'Estado de cuidado',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                    color: Color(0xFF0D2B31),
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
+              const SizedBox(width: 8),
               if (isOverdue)
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),

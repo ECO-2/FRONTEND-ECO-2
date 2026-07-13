@@ -450,18 +450,24 @@ class _CareHistoryScreenState extends State<CareHistoryScreen> {
           child: Icon(icon, color: iconColor, size: 16),
         ),
         const SizedBox(height: 8),
-        Text(
-          value,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 20,
-            color: Color(0xFF0D2B31),
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            value,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 20,
+              color: Color(0xFF0D2B31),
+            ),
           ),
         ),
         const SizedBox(height: 2),
-        Text(
-          label,
-          style: const TextStyle(fontSize: 11, color: Color(0xFF807F7F)),
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            label,
+            style: const TextStyle(fontSize: 11, color: Color(0xFF807F7F)),
+          ),
         ),
       ],
     );

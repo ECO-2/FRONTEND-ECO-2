@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:frontend_eco_2/providers/providers.dart';
-import 'package:frontend_eco_2/theme/app_colors.dart';
 import 'package:frontend_eco_2/routing/app_routes.dart';
-import 'package:frontend_eco_2/screens/profile/green_footprint_screen.dart'
-    show _FigmaHeader;
 
 const _kDark = Color(0xFF10454F);
 const _kBg = Color(0xFFF8FAF9);

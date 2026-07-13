@@ -24,7 +24,7 @@ class MyApp extends StatelessWidget {
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, _) {
           return MaterialApp(
-            title: 'Material App',
+            title: 'ECO2',
             themeMode: themeProvider.themeMode,
             debugShowCheckedModeBanner: false,
             theme: ThemeData(

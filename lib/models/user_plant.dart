@@ -77,7 +77,7 @@ class UserPlant {
     DateTime? deletedAt,
   }) {
     return UserPlant(
-      name: name ?? this.name,
+      name: name ?? name,
       id: id ?? this.id,
       userId: userId ?? this.userId,
       speciesId: speciesId ?? this.speciesId,

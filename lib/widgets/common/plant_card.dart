@@ -120,7 +120,7 @@ class PlantCard extends StatelessWidget {
                           ? Image.asset(
                               info.assetImage!,
                               fit: BoxFit.contain,
-                              errorBuilder: (_, __, ___) => Icon(
+                              errorBuilder: (_, _, _) => Icon(
                                 Icons.local_florist_rounded,
                                 size: 48,
                                 color: AppColors.primary.withValues(alpha: 0.55),
@@ -194,7 +194,7 @@ class PlantCard extends StatelessWidget {
                     spacing: 4,
                     runSpacing: 4,
                     children: info.tags
-                        .take(3)
+                        .take(MediaQuery.of(context).size.width < 360 ? 1 : 2)
                         .map((tag) => _buildTag(tag))
                         .toList(),
                   ),

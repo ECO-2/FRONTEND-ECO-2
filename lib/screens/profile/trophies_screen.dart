@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:frontend_eco_2/theme/app_colors.dart';
 import 'package:frontend_eco_2/widgets/common/custom_app_bar.dart';
 
 // ── Figma color tokens ────────────────────────────────────────────────────
@@ -80,6 +79,8 @@ class _TrophiesScreenState extends State<TrophiesScreen> {
   @override
   Widget build(BuildContext context) {
     final filtered = _trophies;
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final double childAspectRatio = screenWidth < 360 ? 0.58 : 0.68;
 
     return Scaffold(
       backgroundColor: _kBg,
@@ -119,11 +120,11 @@ class _TrophiesScreenState extends State<TrophiesScreen> {
                       shrinkWrap: true,
                       itemCount: filtered.length,
                       gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
+                          SliverGridDelegateWithFixedCrossAxisCount(
                             crossAxisCount: 3,
                             mainAxisSpacing: 12,
                             crossAxisSpacing: 12,
-                            childAspectRatio: 0.68,
+                            childAspectRatio: childAspectRatio,
                           ),
                       itemBuilder: (context, i) =>
                           _buildTrophyCard(filtered[i]),

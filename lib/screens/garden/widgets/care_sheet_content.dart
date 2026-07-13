@@ -217,12 +217,12 @@ class _CareSheetContentState extends State<CareSheetContent> {
               const SizedBox(height: 12),
               
               // Date options row
-              Row(
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
                 children: [
                   _buildDateButton('Hoy'),
-                  const SizedBox(width: 8),
                   _buildDateButton('Ayer'),
-                  const SizedBox(width: 8),
                   _buildDateButton('Otra fecha'),
                 ],
               ),

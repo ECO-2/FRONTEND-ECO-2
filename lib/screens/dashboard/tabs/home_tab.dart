@@ -18,6 +18,8 @@ class HomeTab extends StatelessWidget {
     final missionsProvider = Provider.of<MissionsProvider>(context);
     final plants = plantsProvider.userPlants;
 
+    final screenWidth = MediaQuery.of(context).size.width;
+    final childAspectRatio = screenWidth < 360 ? 0.70 : 0.78;
     final bottomPadding = MediaQuery.of(context).padding.bottom + 80;
 
     return SingleChildScrollView(
@@ -50,11 +52,11 @@ class HomeTab extends StatelessWidget {
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               itemCount: plants.length >= 4 ? 4 : plants.length + 1,
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
                 crossAxisSpacing: 12,
                 mainAxisSpacing: 12,
-                childAspectRatio: 0.78,
+                childAspectRatio: childAspectRatio,
               ),
               itemBuilder: (context, index) {
                 if (index < plants.length) {
@@ -364,7 +366,7 @@ class HomeTab extends StatelessWidget {
                       Text(
                         'hoy',
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.85),
+                          color: Colors.white.withValues(alpha: 0.85),
                           fontSize: 16,
                           fontWeight: FontWeight.w400,
                           fontFamily: 'Inter',
@@ -388,7 +390,7 @@ class HomeTab extends StatelessWidget {
                         TextSpan(
                           text: 'g/dia',
                           style: TextStyle(
-                            color: Colors.white.withOpacity(0.9),
+                            color: Colors.white.withValues(alpha: 0.9),
                             fontSize: 18,
                             fontWeight: FontWeight.w400,
                             fontFamily: 'Inter',
@@ -406,7 +408,7 @@ class HomeTab extends StatelessWidget {
               width: 68,
               height: 68,
               decoration: BoxDecoration(
-                color: const Color(0xFF10454F).withOpacity(0.2),
+                color: const Color(0xFF10454F).withValues(alpha: 0.2),
                 shape: BoxShape.circle,
               ),
               alignment: Alignment.center,
