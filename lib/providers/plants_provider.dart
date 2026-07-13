@@ -29,10 +29,129 @@ class PlantsProvider with ChangeNotifier {
     ),
   ];
 
+  final List<PlantSpecies> _speciesCatalog = [
+    PlantSpecies(
+      id: 's1',
+      scientificName: 'Monstera deliciosa',
+      commonName: 'Monstera deliciosa',
+      category: 'Tropical',
+      lightRequirement: 'Luz indirecta',
+      waterFrequencyDays: 7,
+      humidityPreference: 'Alta',
+      airPurificationScore: 80,
+      minTemperature: 15,
+      maxTemperature: 30,
+      createdAt: DateTime.now().subtract(const Duration(days: 100)),
+    ),
+    PlantSpecies(
+      id: 's2',
+      scientificName: 'Epipremnum aureum',
+      commonName: 'Pothos dorado',
+      category: 'Tropical',
+      lightRequirement: 'Luz indirecta',
+      waterFrequencyDays: 7,
+      humidityPreference: 'Media',
+      airPurificationScore: 85,
+      minTemperature: 15,
+      maxTemperature: 30,
+      createdAt: DateTime.now().subtract(const Duration(days: 100)),
+    ),
+    PlantSpecies(
+      id: 's3',
+      scientificName: 'Sansevieria trifasciata',
+      commonName: 'Sansevieria',
+      category: 'Suculentas',
+      lightRequirement: 'Luz adaptable',
+      waterFrequencyDays: 20,
+      humidityPreference: 'Baja',
+      airPurificationScore: 75,
+      minTemperature: 10,
+      maxTemperature: 35,
+      createdAt: DateTime.now().subtract(const Duration(days: 100)),
+    ),
+    PlantSpecies(
+      id: 's4',
+      scientificName: 'Ficus lyrata',
+      commonName: 'Ficus Lira',
+      category: 'Tropical',
+      lightRequirement: 'Luz brillante',
+      waterFrequencyDays: 7,
+      humidityPreference: 'Alta',
+      airPurificationScore: 78,
+      minTemperature: 15,
+      maxTemperature: 28,
+      createdAt: DateTime.now().subtract(const Duration(days: 100)),
+    ),
+    PlantSpecies(
+      id: 's5',
+      scientificName: 'Cactaceae',
+      commonName: 'Cactus Saguaro',
+      category: 'Cactus',
+      lightRequirement: 'Pleno sol',
+      waterFrequencyDays: 30,
+      humidityPreference: 'Baja',
+      airPurificationScore: 30,
+      minTemperature: 5,
+      maxTemperature: 45,
+      createdAt: DateTime.now().subtract(const Duration(days: 100)),
+    ),
+    PlantSpecies(
+      id: 's6',
+      scientificName: 'Spathiphyllum wallisii',
+      commonName: 'Espatifilo',
+      category: 'Tropical',
+      lightRequirement: 'Luz indirecta',
+      waterFrequencyDays: 5,
+      humidityPreference: 'Alta',
+      airPurificationScore: 90,
+      minTemperature: 16,
+      maxTemperature: 25,
+      createdAt: DateTime.now().subtract(const Duration(days: 100)),
+    ),
+    PlantSpecies(
+      id: 's7',
+      scientificName: 'Aloe vera',
+      commonName: 'Áloe Vera',
+      category: 'Suculentas',
+      lightRequirement: 'Pleno sol',
+      waterFrequencyDays: 14,
+      humidityPreference: 'Baja',
+      airPurificationScore: 70,
+      minTemperature: 10,
+      maxTemperature: 40,
+      createdAt: DateTime.now().subtract(const Duration(days: 100)),
+    ),
+    PlantSpecies(
+      id: 's8',
+      scientificName: 'Chlorophytum comosum',
+      commonName: 'Cinta',
+      category: 'Tropical',
+      lightRequirement: 'Luz indirecta',
+      waterFrequencyDays: 6,
+      humidityPreference: 'Media',
+      airPurificationScore: 82,
+      minTemperature: 12,
+      maxTemperature: 28,
+      createdAt: DateTime.now().subtract(const Duration(days: 100)),
+    ),
+  ];
+
   bool _isLoading = false;
+  bool _showCatalogTab = true;
 
   List<UserPlant> get userPlants => _userPlants;
+  List<PlantSpecies> get speciesCatalog => _speciesCatalog;
   bool get isLoading => _isLoading;
+  bool get showCatalogTab => _showCatalogTab;
+
+  void setShowCatalogTab(bool value) {
+    _showCatalogTab = value;
+    notifyListeners();
+  }
+
+  void addPlantFromSpecies(PlantSpecies species, {String? nickname}) {
+    addPlant(nickname ?? species.commonName, species.id, species.commonName);
+  }
 
   void addPlant(String nickname, String speciesId, String name) {
     final newPlant = UserPlant(

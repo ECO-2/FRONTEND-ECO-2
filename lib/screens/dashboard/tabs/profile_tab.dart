@@ -8,7 +8,9 @@ import 'package:frontend_eco_2/widgets/common/stat_card.dart';
 import 'package:frontend_eco_2/widgets/common/settings_option_tile.dart';
 
 class ProfileTab extends StatelessWidget {
-  const ProfileTab({super.key});
+  final VoidCallback? onNavigateToGarden;
+
+  const ProfileTab({super.key, this.onNavigateToGarden});
 
   @override
   Widget build(BuildContext context) {
@@ -250,6 +252,16 @@ class ProfileTab extends StatelessWidget {
             title: 'Misiones Activas',
             subtitle: 'Ver mis logros y misiones',
             onTap: () => Navigator.pushNamed(context, AppRoutes.missions),
+          ),
+          const Divider(height: 1, color: Color(0xFFE2E7E4)),
+          SettingsOptionTile(
+            icon: Icons.menu_book_rounded,
+            title: 'Catálogo de Plantas',
+            subtitle: 'Explorar especies botánicas',
+            onTap: () {
+              plantsProvider.setShowCatalogTab(true);
+              onNavigateToGarden?.call();
+            },
           ),
           const Divider(height: 1, color: Color(0xFFE2E7E4)),
           SettingsOptionTile(

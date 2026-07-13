@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:frontend_eco_2/models/models.dart';
 import 'package:frontend_eco_2/providers/providers.dart';
 import 'package:frontend_eco_2/routing/app_routes.dart';
 import 'package:frontend_eco_2/theme/app_colors.dart';
@@ -490,8 +491,24 @@ class _ResultView extends StatelessWidget {
                       fontFamily: 'Inter',
                     ),
                   ),
-                  onPressed: () =>
-                      Navigator.pushNamed(context, AppRoutes.plantDetail),
+                  onPressed: () {
+                    final plantsProvider = Provider.of<PlantsProvider>(context, listen: false);
+                    final species = plantsProvider.speciesCatalog.firstWhere(
+                      (s) => s.id == result.speciesId,
+                      orElse: () => PlantSpecies(
+                        id: result.speciesId,
+                        scientificName: result.scientificName,
+                        commonName: result.commonName,
+                        waterFrequencyDays: 7,
+                        createdAt: DateTime.now(),
+                      ),
+                    );
+                    Navigator.pushNamed(
+                      context,
+                      AppRoutes.speciesDetail,
+                      arguments: species,
+                    );
+                  },
                 ),
               ),
               const SizedBox(width: 12),

@@ -1,28 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:frontend_eco_2/models/models.dart';
 import 'package:frontend_eco_2/providers/providers.dart';
 import 'package:frontend_eco_2/theme/app_colors.dart';
-
-// Mockup species list (replace with API data later)
-const _availableSpecies = [
-  _Species(id: 's1', name: 'Monstera', scientificName: 'Monstera deliciosa'),
-  _Species(id: 's2', name: 'Potus', scientificName: 'Epipremnum aureum'),
-  _Species(id: 's3', name: 'Sansevieria', scientificName: 'Sansevieria trifasciata'),
-  _Species(id: 's4', name: 'Ficus Lira', scientificName: 'Ficus lyrata'),
-  _Species(id: 's5', name: 'Cactus', scientificName: 'Cactaceae'),
-];
-
-class _Species {
-  final String id;
-  final String name;
-  final String scientificName;
-
-  const _Species({
-    required this.id,
-    required this.name,
-    required this.scientificName,
-  });
-}
 
 class AddPlantModal extends StatefulWidget {
   const AddPlantModal({super.key});
@@ -33,7 +13,7 @@ class AddPlantModal extends StatefulWidget {
 
 class _AddPlantModalState extends State<AddPlantModal> {
   final _nameController = TextEditingController();
-  _Species? _selectedSpecies;
+  PlantSpecies? _selectedSpecies;
 
   @override
   void dispose() {
@@ -46,13 +26,15 @@ class _AddPlantModalState extends State<AddPlantModal> {
     if (nickname.isEmpty || _selectedSpecies == null) return;
 
     Provider.of<PlantsProvider>(context, listen: false)
-        .addPlant(nickname, _selectedSpecies!.id, _selectedSpecies!.name);
+        .addPlant(nickname, _selectedSpecies!.id, _selectedSpecies!.commonName);
     Navigator.of(context).pop();
   }
 
   @override
   Widget build(BuildContext context) {
     final bottomPadding = MediaQuery.of(context).viewInsets.bottom;
+    final plantsProvider = Provider.of<PlantsProvider>(context);
+    final availableSpecies = plantsProvider.speciesCatalog;
 
     return Container(
       decoration: const BoxDecoration(
@@ -141,7 +123,7 @@ class _AddPlantModalState extends State<AddPlantModal> {
             Wrap(
               spacing: 8,
               runSpacing: 8,
-              children: _availableSpecies.map((sp) {
+              children: availableSpecies.map((sp) {
                 final selected = _selectedSpecies?.id == sp.id;
                 return GestureDetector(
                   onTap: () => setState(() => _selectedSpecies = sp),
@@ -164,7 +146,7 @@ class _AddPlantModalState extends State<AddPlantModal> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          sp.name,
+                          sp.commonName,
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 13,

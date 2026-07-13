@@ -15,6 +15,7 @@ import 'package:frontend_eco_2/widgets/common/custom_app_bar.dart';
 import 'package:frontend_eco_2/screens/dashboard/tabs/missions_tab.dart';
 import 'package:frontend_eco_2/screens/garden/plant_detail_screen.dart';
 import 'package:frontend_eco_2/screens/garden/care_history_screen.dart';
+import 'package:frontend_eco_2/screens/garden/species_detail_screen.dart';
 
 class AppRoutes {
   static const String welcome = '/';
@@ -23,6 +24,7 @@ class AppRoutes {
   static const String dashboard = '/dashboard';
   static const String myGarden = '/my-garden';
   static const String plantDetail = '/plant-detail';
+  static const String speciesDetail = '/species-detail';
   static const String addPlant = '/add-plant';
   static const String careHistory = '/care-history';
   static const String scan = '/scan';
@@ -60,6 +62,11 @@ class AppRoutes {
       case plantDetail:
         return MaterialPageRoute(
           builder: (_) => const PlantDetailScreen(),
+          settings: routeSettings,
+        );
+      case speciesDetail:
+        return MaterialPageRoute(
+          builder: (_) => const SpeciesDetailScreen(),
           settings: routeSettings,
         );
       case addPlant:

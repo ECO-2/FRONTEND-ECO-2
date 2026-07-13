@@ -78,6 +78,10 @@ class HomeTab extends StatelessWidget {
           _buildO2Banner(context),
           const SizedBox(height: 8),
 
+          // ── Catalog Banner ────────────────────────────
+          _buildCatalogBanner(context),
+          const SizedBox(height: 8),
+
           // ── Mi Huella Verde header ────────────────────
           Row(
             children: [
@@ -625,6 +629,94 @@ class HomeTab extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildCatalogBanner(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xFFEAF5EA),
+            Color(0xFFF2F7F2),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(15),
+        border: Border.all(color: const Color(0xFFD3DFD3), width: 1),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      child: Row(
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: AppColors.primary.withValues(alpha: 0.08),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.menu_book_rounded, color: AppColors.primary, size: 22),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: const [
+                Text(
+                  'Catálogo de Plantas',
+                  style: TextStyle(
+                    color: AppColors.primaryDark,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                    fontFamily: 'Inter',
+                  ),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  'Explora fichas botánicas y consejos',
+                  style: TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 12,
+                    fontFamily: 'Inter',
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          GestureDetector(
+            onTap: () {
+              Provider.of<PlantsProvider>(context, listen: false).setShowCatalogTab(true);
+              onViewAll(); // Switches to tab 1 (Jardín/Mi Jardín)
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+              decoration: BoxDecoration(
+                color: AppColors.primary,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: const Row(
+                children: [
+                  Text(
+                    'Explorar',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                      fontFamily: 'Inter',
+                    ),
+                  ),
+                  SizedBox(width: 4),
+                  Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 12),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

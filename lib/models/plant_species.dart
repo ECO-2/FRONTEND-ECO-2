@@ -84,4 +84,18 @@ class PlantSpecies {
       createdAt: createdAt ?? this.createdAt,
     );
   }
+
+  String get difficulty {
+    if (waterFrequencyDays >= 20) return 'Muy fácil';
+    if (waterFrequencyDays >= 7) return 'Fácil';
+    return 'Media';
+  }
+
+  List<String> get tags {
+    final list = <String>[];
+    if (category != null) list.add(category!);
+    if (lightRequirement != null) list.add(lightRequirement!);
+    list.add('Riego c/${waterFrequencyDays}d');
+    return list;
+  }
 }
