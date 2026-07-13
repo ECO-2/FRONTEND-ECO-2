@@ -4,30 +4,39 @@ import 'package:frontend_eco_2/models/models.dart';
 import 'package:frontend_eco_2/providers/plants_provider.dart';
 import 'package:frontend_eco_2/theme/app_colors.dart';
 
-class SpeciesDetailScreen extends StatelessWidget {
+class SpeciesDetailScreen extends StatefulWidget {
   const SpeciesDetailScreen({super.key});
+
+  @override
+  State<SpeciesDetailScreen> createState() => _SpeciesDetailScreenState();
+}
+
+class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
+  bool _isFavorited = false;
 
   Color _getBackgroundColor(String id) {
     switch (id) {
       case 's1':
-        return const Color(0xFFF2F7F2);
+        return const Color(0xFFF7F9F6);
       case 's2':
-        return const Color(0xFFEAF5EA);
+        return const Color(0xFFF2F7F2);
       case 's3':
-        return const Color(0xFFF0F4EC);
+        return const Color(0xFFF5F8F4);
       case 's4':
-        return const Color(0xFFEAF0E8);
+        return const Color(0xFFF0F5F2);
       case 's5':
-        return const Color(0xFFF5F2E8);
+        return const Color(0xFFFAF7F0);
       default:
-        return const Color(0xFFF0F4F2);
+        return const Color(0xFFF5F7F6);
     }
   }
 
   String? _getAssetImage(String id) {
-    if (id == 's1') {
-      return 'assets/images/monstera.png';
-    }
+    if (id == 's1') return 'assets/images/monstera.png';
+    if (id == 's2') return 'assets/images/potus.png';
+    if (id == 's3') return 'assets/images/sansevieria.png';
+    if (id == 's4') return 'assets/images/ficus_lira.png';
+    if (id == 's5') return 'assets/images/cactus.png';
     return null;
   }
 
@@ -35,92 +44,120 @@ class SpeciesDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final species = ModalRoute.of(context)?.settings.arguments as PlantSpecies?;
     if (species == null) {
-      return const Scaffold(
-        body: Center(child: Text('Especie no encontrada')),
-      );
+      return const Scaffold(body: Center(child: Text('Especie no encontrada')));
     }
 
     final bgColor = _getBackgroundColor(species.id);
     final assetImage = _getAssetImage(species.id);
-    final screenHeight = MediaQuery.of(context).size.height;
+    final bottomNavPadding = MediaQuery.of(context).padding.bottom;
 
     return Scaffold(
-      backgroundColor: Colors.white,
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: Container(
-            padding: const EdgeInsets.all(8),
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              Icons.arrow_back_ios_new_rounded,
-              size: 16,
-              color: AppColors.primary,
-            ),
-          ),
-          onPressed: () => Navigator.pop(context),
-        ),
-        actions: [
-          IconButton(
-            icon: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.favorite_border_rounded,
-                size: 18,
-                color: AppColors.primary,
-              ),
-            ),
-            onPressed: () {},
-          ),
-          const SizedBox(width: 8),
-        ],
-      ),
-      body: Stack(
+      backgroundColor: bgColor,
+      body: Column(
         children: [
-          // ── Background Image Header ──
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            height: screenHeight * 0.4,
-            child: Container(
-              color: bgColor,
-              child: SafeArea(
-                bottom: false,
-                child: Center(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(24, 24, 24, 40),
-                    child: assetImage != null
-                        ? Image.asset(
-                            assetImage,
-                            fit: BoxFit.contain,
-                          )
-                        : Icon(
-                            Icons.local_florist_rounded,
-                            size: 120,
-                            color: AppColors.primary.withValues(alpha: 0.25),
-                          ),
+          Container(
+            height: MediaQuery.of(context).padding.top,
+            color: const Color(0xFF10454F),
+          ),
+          Container(
+            color: Colors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                IconButton(
+                  icon: const Icon(
+                    Icons.arrow_back_ios_new_rounded,
+                    size: 20,
+                    color: Color(0xFF10454F),
                   ),
+                  onPressed: () => Navigator.pop(context),
                 ),
-              ),
+                Row(
+                  children: [
+                    IconButton(
+                      icon: Icon(
+                        _isFavorited
+                            ? Icons.favorite_rounded
+                            : Icons.favorite_border_rounded,
+                        size: 22,
+                        color: const Color(0xFFE64A19),
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _isFavorited = !_isFavorited;
+                        });
+                      },
+                    ),
+                    IconButton(
+                      icon: const Icon(
+                        Icons.share_outlined,
+                        size: 22,
+                        color: Color(0xFF10454F),
+                      ),
+                      onPressed: () {},
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
-
-          // ── Scrollable detail content ──
-          Positioned.fill(
+          Expanded(
             child: SingleChildScrollView(
               child: Column(
                 children: [
-                  SizedBox(height: screenHeight * 0.35),
+                  Container(
+                    width: double.infinity,
+                    color: Colors.white,
+                    padding: const EdgeInsets.only(bottom: 24),
+                    child: Stack(
+                      alignment: Alignment.bottomCenter,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 40,
+                            vertical: 10,
+                          ),
+                          child: SizedBox(
+                            height: 240,
+                            child: assetImage != null
+                                ? Image.asset(assetImage, fit: BoxFit.contain)
+                                : Icon(
+                                    Icons.local_florist_rounded,
+                                    size: 140,
+                                    color: AppColors.primary.withValues(
+                                      alpha: 0.25,
+                                    ),
+                                  ),
+                          ),
+                        ),
+                        Positioned(
+                          bottom: 0,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(
+                                0xFF263238,
+                              ).withValues(alpha: 0.75),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: const Text(
+                              '1 / 5',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'Inter',
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                   Container(
                     width: double.infinity,
                     decoration: const BoxDecoration(
@@ -129,78 +166,497 @@ class SpeciesDetailScreen extends StatelessWidget {
                         top: Radius.circular(32),
                       ),
                     ),
-                    padding: const EdgeInsets.fromLTRB(24, 32, 24, 120),
+                    padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Common Name & Scientific Name
-                        Text(
-                          species.commonName,
-                          style: const TextStyle(
-                            fontFamily: 'DM Sans',
-                            fontWeight: FontWeight.bold,
-                            fontSize: 28,
-                            color: AppColors.primaryDark,
+                        Center(
+                          child: Container(
+                            width: 38,
+                            height: 5,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFE2E7E4),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
                           ),
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          species.scientificName,
-                          style: const TextStyle(
+                        const SizedBox(height: 20),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    species.scientificName,
+                                    style: const TextStyle(
+                                      fontFamily: 'DM Sans',
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 28,
+                                      color: Color(0xFF0D2B31),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    species.commonName,
+                                    style: const TextStyle(
+                                      fontFamily: 'Inter',
+                                      fontSize: 15,
+                                      color: Color(0xFF807F7F),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFF1F8E9),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Icon(
+                                        Icons.star_rounded,
+                                        color: Color(0xFFFFD54F),
+                                        size: 16,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        species.rating.toStringAsFixed(1),
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 13,
+                                          color: Color(0xFF10454F),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  species.popularity,
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    color: Color(0xFF807F7F),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 6,
+                          children: species.detailTags.map((tag) {
+                            final isAir =
+                                tag == 'Aire purificador' ||
+                                tag == 'Filtro de toxinas';
+                            return Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                color: isAir
+                                    ? const Color(0xFFEFF5EA)
+                                    : const Color(0xFFEFF2EF),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Text(
+                                tag,
+                                style: TextStyle(
+                                  color: isAir
+                                      ? const Color(0xFF689F38)
+                                      : const Color(0xFF4F5B5B),
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  fontFamily: 'Inter',
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                        const SizedBox(height: 24),
+                        const Text(
+                          'Sobre esta planta',
+                          style: TextStyle(
                             fontFamily: 'DM Sans',
-                            fontStyle: FontStyle.italic,
-                            fontSize: 15,
-                            color: AppColors.textSecondary,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
+                            color: Color(0xFF0D2B31),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          species.description,
+                          style: const TextStyle(
+                            fontFamily: 'Inter',
+                            fontSize: 14,
+                            height: 1.4,
+                            color: Color(0xFF616161),
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              'Dificultad',
+                              style: TextStyle(
+                                fontFamily: 'DM Sans',
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18,
+                                color: Color(0xFF0D2B31),
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFEFF2EF),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                species.difficulty,
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF10454F),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 10),
+                        Row(
+                          children: List.generate(6, (index) {
+                            final filled = index < species.difficultySegments;
+                            return Expanded(
+                              child: Container(
+                                height: 8,
+                                margin: EdgeInsets.only(
+                                  left: index == 0 ? 0 : 3,
+                                  right: index == 5 ? 0 : 3,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: filled
+                                      ? const Color(0xFF10454F)
+                                      : const Color(0xFFE0E5E2),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                              ),
+                            );
+                          }),
+                        ),
+                        const SizedBox(height: 4),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: const [
+                            Text(
+                              'Principiante',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: Color(0xFF807F7F),
+                              ),
+                            ),
+                            Text(
+                              'Experto',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: Color(0xFF807F7F),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 32),
+                        const Text(
+                          'Cuidados',
+                          style: TextStyle(
+                            fontFamily: 'DM Sans',
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
+                            color: Color(0xFF0D2B31),
+                          ),
+                        ),
+                        const Text(
+                          'Requisitos ideales para esta especie',
+                          style: TextStyle(
+                            fontFamily: 'Inter',
+                            fontSize: 13,
+                            color: Color(0xFF807F7F),
                           ),
                         ),
                         const SizedBox(height: 16),
-
-                        // Badges Row
                         Row(
                           children: [
-                            _buildBadge(species.category ?? 'Planta', AppColors.primary.withValues(alpha: 0.08), AppColors.primary),
-                            const SizedBox(width: 8),
-                            _buildBadge(
-                              species.difficulty,
-                              species.difficulty == 'Muy fácil'
-                                  ? const Color(0xFFF2F4EB)
-                                  : const Color(0xFFFFF4EC),
-                              species.difficulty == 'Muy fácil'
-                                  ? const Color(0xFF10454F)
-                                  : const Color(0xFFB94E13),
+                            Expanded(
+                              child: _buildCareCard(
+                                icon: Icons.water_drop_rounded,
+                                iconColor: const Color(0xFF1565C0),
+                                iconBg: const Color(0xFFE3F2FD),
+                                label: 'Riego',
+                                value: 'c/${species.waterFrequencyDays} días',
+                                subText: 'Cuando tierra seca',
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: _buildCareCard(
+                                icon: Icons.wb_sunny_rounded,
+                                iconColor: const Color(0xFFFBC02D),
+                                iconBg: const Color(0xFFFFFDE7),
+                                label: 'Luz',
+                                value: species.lightRequirement ?? 'Indirecta',
+                                subText: 'Brillante',
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _buildCareCard(
+                                icon: Icons.thermostat_rounded,
+                                iconColor: const Color(0xFFE64A19),
+                                iconBg: const Color(0xFFFBE9E7),
+                                label: 'Temperatura',
+                                value:
+                                    '${species.minTemperature ?? 15}-${species.maxTemperature ?? 28}°C',
+                                subText: species.category == 'Tropical'
+                                    ? 'Tropical'
+                                    : 'Templado',
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: _buildCareCard(
+                                icon: Icons.opacity_rounded,
+                                iconColor: const Color(0xFF00796B),
+                                iconBg: const Color(0xFFE0F2F1),
+                                label: 'Humedad',
+                                value: species.humidityRange,
+                                subText: species.humidityLevel,
+                              ),
                             ),
                           ],
                         ),
                         const SizedBox(height: 24),
-                        const Divider(color: Color(0xFFE2E7E4)),
-                        const SizedBox(height: 24),
-
-                        // Care parameters grid
-                        const Text(
-                          'Cuidados requeridos',
-                          style: TextStyle(
-                            fontFamily: 'DM Sans',
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
-                            color: AppColors.primaryDark,
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 16,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF10454F),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 44,
+                                height: 44,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFBDE038),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: const Center(
+                                  child: Icon(
+                                    Icons.eco_rounded,
+                                    color: Color(0xFF10454F),
+                                    size: 24,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 14),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Absorbe ~${(1.5 + (species.airPurificationScore ?? 50) / 100 * 2).toStringAsFixed(1)}g de CO₂/día',
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 14,
+                                        fontFamily: 'Inter',
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      'Equivalente a un auto recorriendo ${(20 + (species.airPurificationScore ?? 50) * 0.15).toInt()}m',
+                                      style: const TextStyle(
+                                        color: Color(0xFFBDE038),
+                                        fontSize: 12,
+                                        fontFamily: 'Inter',
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                         const SizedBox(height: 16),
-                        _buildCareGrid(species),
+                        if (species.isToxic)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 14,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFFF3E0),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: const Color(0xFFFFB74D),
+                                width: 1,
+                              ),
+                            ),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: const [
+                                Icon(
+                                  Icons.warning_amber_rounded,
+                                  color: Color(0xFFF57C00),
+                                  size: 22,
+                                ),
+                                SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Tóxica para mascotas',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 14,
+                                          color: Color(0xFFE65100),
+                                          fontFamily: 'Inter',
+                                        ),
+                                      ),
+                                      SizedBox(height: 2),
+                                      Text(
+                                        'Mantener fuera del alcance de gatos y perros',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: Color(0xFFE65100),
+                                          fontFamily: 'Inter',
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         const SizedBox(height: 32),
-
-                        // Step by step care guide
-                        const Text(
-                          'Guía de Cuidado Paso a Paso',
-                          style: TextStyle(
-                            fontFamily: 'DM Sans',
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
-                            color: AppColors.primaryDark,
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: [
+                                const Text(
+                                  'Experiencias',
+                                  style: TextStyle(
+                                    fontFamily: 'DM Sans',
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 18,
+                                    color: Color(0xFF0D2B31),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFEFF2EF),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: const Text(
+                                    '128',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.bold,
+                                      color: Color(0xFF10454F),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            TextButton(
+                              onPressed: () {},
+                              child: const Text(
+                                'Ver todas',
+                                style: TextStyle(
+                                  color: Color(0xFF10454F),
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF8FAF9),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: const Color(0xFFEFF2EF),
+                              width: 1,
+                            ),
+                          ),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                width: 36,
+                                height: 36,
+                                decoration: const BoxDecoration(
+                                  color: Color(0xFFE0E6E3),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Center(
+                                  child: Icon(
+                                    Icons.person_rounded,
+                                    color: Color(0xFF10454F),
+                                    size: 20,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              const Expanded(
+                                child: Text(
+                                  'Crece súper rápido en mi sala. Fácil de cuidar, solo necesita luz indirecta y agua cada semana. ¡La recomiendo!',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    height: 1.4,
+                                    color: Color(0xFF616161),
+                                    fontFamily: 'Inter',
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                        const SizedBox(height: 16),
-                        _buildCareGuideSection(species),
+                        const SizedBox(height: 24),
                       ],
                     ),
                   ),
@@ -208,190 +664,92 @@ class SpeciesDetailScreen extends StatelessWidget {
               ),
             ),
           ),
-
-          // ── Bottom Action Button Bar ──
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: Container(
-              padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, -4),
-                  ),
-                ],
-              ),
-              child: SafeArea(
-                top: false,
-                child: ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                  ),
-                  onPressed: () {
-                    Provider.of<PlantsProvider>(context, listen: false)
-                        .addPlantFromSpecies(species);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          '¡${species.commonName} añadida a tu jardín! 🌿',
-                          style: const TextStyle(fontWeight: FontWeight.w600),
-                        ),
-                        backgroundColor: AppColors.primary,
-                        behavior: SnackBarBehavior.floating,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                    );
-                    Navigator.pop(context);
-                  },
-                  icon: const Icon(Icons.add_circle_outline_rounded, size: 20),
-                  label: const Text(
-                    'Añadir a mi jardín',
-                    style: TextStyle(
-                      fontFamily: 'Inter',
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
+          Container(
+            padding: EdgeInsets.fromLTRB(20, 12, 20, bottomNavPadding + 12),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 10,
+                  offset: const Offset(0, -4),
                 ),
-              ),
+              ],
             ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildBadge(String label, Color bg, Color text) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          color: text,
-          fontSize: 12,
-          fontWeight: FontWeight.bold,
-          fontFamily: 'Inter',
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCareGrid(PlantSpecies species) {
-    final co2Text = species.id == 's1'
-        ? '3.2 g/día'
-        : species.id == 's2'
-            ? '2.5 g/día'
-            : species.id == 's3'
-                ? '1.8 g/día'
-                : '${(1.5 + (species.airPurificationScore ?? 50) / 100 * 2).toStringAsFixed(1)} g/día';
-
-    return Column(
-      children: [
-        Row(
-          children: [
-            Expanded(
-              child: _buildCareItem(
-                Icons.water_drop_outlined,
-                const Color(0xFF4A90D9),
-                'Riego',
-                'Cada ${species.waterFrequencyDays} días',
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildCareItem(
-                Icons.wb_sunny_outlined,
-                const Color(0xFFFABF2E),
-                'Luz solar',
-                species.lightRequirement ?? 'Adaptable',
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: _buildCareItem(
-                Icons.thermostat_outlined,
-                const Color(0xFFF56B1C),
-                'Temperatura',
-                '${species.minTemperature ?? 15}-${species.maxTemperature ?? 30}°C',
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildCareItem(
-                Icons.eco_outlined,
-                AppColors.primary,
-                'Absorción CO₂',
-                co2Text,
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildCareItem(
-    IconData icon,
-    Color iconColor,
-    String label,
-    String value,
-  ) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF8FAF9),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE2E7E4), width: 1.0),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, color: iconColor, size: 24),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Row(
               children: [
-                Text(
-                  label,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: AppColors.textSecondary,
-                    fontFamily: 'Inter',
+                Expanded(
+                  child: ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFBDE038),
+                      foregroundColor: const Color(0xFF10454F),
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(32),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                    ),
+                    onPressed: () {
+                      Provider.of<PlantsProvider>(
+                        context,
+                        listen: false,
+                      ).addPlantFromSpecies(species);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            '¡${species.commonName} añadida a tu jardín! 🌿',
+                            style: const TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                          backgroundColor: const Color(0xFF10454F),
+                          behavior: SnackBarBehavior.floating,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      );
+                      Navigator.pop(context);
+                    },
+                    icon: const Icon(
+                      Icons.add,
+                      size: 22,
+                      color: Color(0xFF10454F),
+                    ),
+                    label: const Text(
+                      'Añadir a mi jardín',
+                      style: TextStyle(
+                        fontFamily: 'Inter',
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        color: Color(0xFF10454F),
+                      ),
+                    ),
                   ),
                 ),
-                const SizedBox(height: 2),
-                FittedBox(
-                  fit: BoxFit.scaleDown,
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    value,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                      color: AppColors.primaryDark,
-                      fontFamily: 'Inter',
+                const SizedBox(width: 16),
+                Container(
+                  width: 52,
+                  height: 52,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: const Color(0xFF10454F),
+                      width: 1.5,
                     ),
+                  ),
+                  child: IconButton(
+                    icon: Icon(
+                      _isFavorited
+                          ? Icons.favorite_rounded
+                          : Icons.favorite_border_rounded,
+                      color: const Color(0xFF10454F),
+                      size: 24,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _isFavorited = !_isFavorited;
+                      });
+                    },
                   ),
                 ),
               ],
@@ -402,60 +760,62 @@ class SpeciesDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildCareGuideSection(PlantSpecies species) {
-    final lightAdvice = species.lightRequirement == 'Pleno sol'
-        ? 'Requiere luz solar directa durante al menos 6 horas al día. Ideal para terrazas, balcones o ventanas muy soleadas.'
-        : species.lightRequirement == 'Luz adaptable'
-            ? 'Tolera tanto lugares con poca iluminación como espacios con luz brillante indirecta. Evitar el sol directo del mediodía.'
-            : 'Prefiere luz indirecta y brillante. Colócala cerca de una ventana con cortina translúcida. Evita el sol directo directo para no quemar las hojas.';
-
-    final waterAdvice = species.waterFrequencyDays >= 20
-        ? 'Riego muy espaciado. Deja secar el sustrato por completo antes de volver a regar. En invierno, reduce el riego a una vez al mes.'
-        : species.waterFrequencyDays >= 10
-            ? 'Riego moderado. Riega solo cuando los primeros 3-5 cm de tierra estén completamente secos. Soporta periodos cortos de sequía.'
-            : 'Riego regular. Mantén el sustrato ligeramente húmedo, pero nunca encharcado. Riega cuando la superficie del sustrato comience a secarse.';
-
-    return Column(
-      children: [
-        _buildGuideStep('1. Ubicación y Luz', lightAdvice),
-        const SizedBox(height: 12),
-        _buildGuideStep('2. Rutina de Riego', waterAdvice),
-        const SizedBox(height: 12),
-        _buildGuideStep('3. Sustrato y Drenaje', 'Utiliza una mezcla ligera y bien aireada. Se recomienda una base de turba mezclada con perlita y fibra de coco para asegurar un excelente drenaje y evitar la pudrición de raíces.'),
-        const SizedBox(height: 12),
-        _buildGuideStep('4. Fertilización', 'Abona con un fertilizante líquido equilibrado una vez al mes durante el periodo de crecimiento activo (primavera y verano). En otoño e invierno, suspende la fertilización.'),
-      ],
-    );
-  }
-
-  Widget _buildGuideStep(String title, String content) {
+  Widget _buildCareCard({
+    required IconData icon,
+    required Color iconColor,
+    required Color iconBg,
+    required String label,
+    required String value,
+    required String subText,
+  }) {
     return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: const Color(0xFFF8FAF9),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE2E7E4), width: 1.0),
+        border: Border.all(color: const Color(0xFFEFF2EF), width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Row(
+            children: [
+              Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: iconBg,
+                  shape: BoxShape.circle,
+                ),
+                child: Center(child: Icon(icon, color: iconColor, size: 18)),
+              ),
+              const SizedBox(width: 10),
+              Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: Color(0xFF807F7F),
+                  fontFamily: 'Inter',
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
           Text(
-            title,
+            value,
             style: const TextStyle(
               fontWeight: FontWeight.bold,
-              fontSize: 14,
-              color: AppColors.primary,
+              fontSize: 18,
+              color: Color(0xFF10454F),
               fontFamily: 'Inter',
             ),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 2),
           Text(
-            content,
+            subText,
             style: const TextStyle(
-              fontSize: 13,
-              height: 1.4,
-              color: AppColors.textPrimary,
+              fontSize: 11,
+              color: Color(0xFF807F7F),
               fontFamily: 'Inter',
             ),
           ),
