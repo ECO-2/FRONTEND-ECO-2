@@ -9,6 +9,9 @@ class SettingsOptionTile extends StatelessWidget {
   final VoidCallback? onTap;
   final bool useIconContainer;
   final bool showArrow;
+  final Color? iconColor;
+  final Color? iconBgColor;
+  final Color? titleColor;
 
   const SettingsOptionTile({
     super.key,
@@ -19,23 +22,29 @@ class SettingsOptionTile extends StatelessWidget {
     this.onTap,
     this.useIconContainer = false,
     this.showArrow = true,
+    this.iconColor,
+    this.iconBgColor,
+    this.titleColor,
   });
 
   @override
   Widget build(BuildContext context) {
     Widget leadingWidget;
+    final primaryColor = iconColor ?? AppColors.primary;
+    final bgColor = iconBgColor ?? const Color(0xFFF1F4F3);
+
     if (useIconContainer) {
       leadingWidget = Container(
         width: 40,
         height: 40,
         decoration: BoxDecoration(
-          color: const Color(0xFFF1F4F3),
+          color: bgColor,
           borderRadius: BorderRadius.circular(12),
         ),
-        child: Icon(icon, color: AppColors.primary, size: 20),
+        child: Icon(icon, color: primaryColor, size: 20),
       );
     } else {
-      leadingWidget = Icon(icon, color: AppColors.primary, size: 24);
+      leadingWidget = Icon(icon, color: primaryColor, size: 24);
     }
 
     Widget? trailingWidget = trailing;
@@ -57,7 +66,7 @@ class SettingsOptionTile extends StatelessWidget {
         style: TextStyle(
           fontWeight: FontWeight.bold,
           fontSize: useIconContainer ? 15 : 16,
-          color: useIconContainer ? AppColors.textPrimary : AppColors.primary,
+          color: titleColor ?? (useIconContainer ? AppColors.textPrimary : AppColors.primary),
           fontFamily: 'Inter',
         ),
       ),

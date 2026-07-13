@@ -236,6 +236,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         title: 'Idioma',
                         useIconContainer: true,
                         showArrow: false,
+                        iconColor: const Color(0xFF8FA89F),
+                        iconBgColor: const Color(0xFFEFF3F1),
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: const [
@@ -263,6 +265,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         title: 'Modo oscuro',
                         useIconContainer: true,
                         showArrow: false,
+                        iconColor: const Color(0xFF5C6BC0),
+                        iconBgColor: const Color(0xFFEFF0FA),
                         trailing: _buildSwitch(
                           value: _darkMode,
                           onChanged: (val) {
@@ -275,10 +279,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ),
                       const Divider(height: 1, indent: 68, endIndent: 16, color: Color(0xFFE2E7E4)),
                       SettingsOptionTile(
-                        icon: Icons.color_lens_outlined,
+                        icon: Icons.palette_outlined,
                         title: 'Tema y colores',
                         useIconContainer: true,
                         showArrow: false,
+                        iconColor: const Color(0xFF9CCC65),
+                        iconBgColor: const Color(0xFFF3F9ED),
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: const [
@@ -303,21 +309,141 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ],
                   ),
                 ),
+                const SizedBox(height: 16),
+
+                // PRIVACIDAD Y DATOS Section
+                _buildSectionHeader('Privacidad y datos'),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: const Color(0xFFE2E7E4), width: 1),
+                  ),
+                  child: Column(
+                    children: [
+                      SettingsOptionTile(
+                        icon: Icons.shield_outlined,
+                        title: 'Privacidad',
+                        subtitle: 'Control de datos personales',
+                        useIconContainer: true,
+                        iconColor: const Color(0xFF26A69A),
+                        iconBgColor: const Color(0xFFE0F2F1),
+                        onTap: () {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Ajustes de privacidad próximamente 🛡️')),
+                          );
+                        },
+                      ),
+                      const Divider(height: 1, indent: 68, endIndent: 16, color: Color(0xFFE2E7E4)),
+                      SettingsOptionTile(
+                        icon: Icons.storage_rounded,
+                        title: 'Exportar mis datos',
+                        useIconContainer: true,
+                        iconColor: const Color(0xFF8D6E63),
+                        iconBgColor: const Color(0xFFF5F0ED),
+                        onTap: () {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Exportando datos... 💾')),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // APLICACIÓN Section
+                _buildSectionHeader('Aplicación'),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: const Color(0xFFE2E7E4), width: 1),
+                  ),
+                  child: Column(
+                    children: [
+                      SettingsOptionTile(
+                        icon: Icons.help_outline_rounded,
+                        title: 'Ayuda y soporte',
+                        useIconContainer: true,
+                        iconColor: const Color(0xFF78909C),
+                        iconBgColor: const Color(0xFFECEFF1),
+                        onTap: () {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Soporte técnico próximamente ✉️')),
+                          );
+                        },
+                      ),
+                      const Divider(height: 1, indent: 68, endIndent: 16, color: Color(0xFFE2E7E4)),
+                      SettingsOptionTile(
+                        icon: Icons.info_outline_rounded,
+                        title: 'Sobre ECO2',
+                        subtitle: 'Versión 2.4.1',
+                        useIconContainer: true,
+                        iconColor: const Color(0xFF78909C),
+                        iconBgColor: const Color(0xFFECEFF1),
+                        onTap: () {},
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // ZONA DE RIESGO Section
+                _buildSectionHeader('Zona de riesgo', isRisk: true),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: const Color(0xFFE2E7E4), width: 1),
+                  ),
+                  child: Column(
+                    children: [
+                      SettingsOptionTile(
+                        icon: Icons.logout_rounded,
+                        title: 'Cerrar sesión',
+                        useIconContainer: true,
+                        iconColor: const Color(0xFF757575),
+                        iconBgColor: const Color(0xFFF5F5F5),
+                        titleColor: const Color(0xFF212121),
+                        onTap: () {
+                          userProvider.logout();
+                          Navigator.pushReplacementNamed(context, AppRoutes.welcome);
+                        },
+                      ),
+                      const Divider(height: 1, indent: 68, endIndent: 16, color: Color(0xFFE2E7E4)),
+                      SettingsOptionTile(
+                        icon: Icons.delete_outline_rounded,
+                        title: 'Eliminar cuenta',
+                        subtitle: 'Esta acción es permanente',
+                        useIconContainer: true,
+                        iconColor: const Color(0xFFE53935),
+                        iconBgColor: const Color(0xFFFFEBEE),
+                        titleColor: const Color(0xFFE53935),
+                        onTap: () {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Eliminar cuenta no disponible en esta demo 🛑')),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ),
                 const SizedBox(height: 40),
               ],
             ),
     );
   }
 
-  Widget _buildSectionHeader(String title) {
+  Widget _buildSectionHeader(String title, {bool isRisk = false}) {
     return Padding(
       padding: const EdgeInsets.only(left: 12.0, bottom: 8.0, top: 16.0),
       child: Text(
         title.toUpperCase(),
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.bold,
-          color: AppColors.textSecondary,
+          color: isRisk ? const Color(0xFFE53935) : AppColors.textSecondary,
           letterSpacing: 1.2,
           fontFamily: 'Inter',
         ),

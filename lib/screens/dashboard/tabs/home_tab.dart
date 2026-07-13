@@ -19,7 +19,7 @@ class HomeTab extends StatelessWidget {
     final plants = plantsProvider.userPlants;
 
     final screenWidth = MediaQuery.of(context).size.width;
-    final childAspectRatio = screenWidth < 360 ? 0.70 : 0.78;
+    final childAspectRatio = screenWidth < 360 ? 0.75 : 0.83;
     final bottomPadding = MediaQuery.of(context).padding.bottom + 35;
 
     return SingleChildScrollView(
@@ -51,6 +51,7 @@ class HomeTab extends StatelessWidget {
             GridView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
+              padding: EdgeInsets.zero,
               itemCount: plants.length >= 4 ? 4 : plants.length + 1,
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
@@ -73,10 +74,11 @@ class HomeTab extends StatelessWidget {
                 }
               },
             ),
+          const SizedBox(height: 24),
 
           // ── O2+ Banner ────────────────────────────────
           _buildO2Banner(context),
-          const SizedBox(height: 8),
+          const SizedBox(height: 16),
 
           // ── Mi Huella Verde header ────────────────────
           Row(
