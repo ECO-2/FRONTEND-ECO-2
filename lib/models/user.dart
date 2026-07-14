@@ -11,6 +11,10 @@ class User {
   final DateTime? birthDay;
   final String? role;
   final String? resetTokenHash;
+  final bool onboardingCompleted;
+  final bool? notificationsEnabled;
+  final int? reminderStartHour;
+  final int? reminderEndHour;
   final DateTime createdAt;
   final DateTime? updatedAt;
   final DateTime? deletedAt;
@@ -28,6 +32,10 @@ class User {
     this.birthDay,
     this.role,
     this.resetTokenHash,
+    this.onboardingCompleted = false,
+    this.notificationsEnabled,
+    this.reminderStartHour,
+    this.reminderEndHour,
     required this.createdAt,
     this.updatedAt,
     this.deletedAt,
@@ -37,19 +45,29 @@ class User {
     return User(
       id: json['id'] as String,
       email: json['email'] as String,
-      username: json['username'] as String,
+      username: json['username'] as String? ?? '',
       avatarUrl: json['avatar_url'] as String?,
       passwordHash: json['password_hash'] as String?,
       provider: json['provider'] as String?,
       mfaEnabled: json['mfa_enabled'] as bool? ?? false,
       planType: json['plan_type'] as String?,
       gender: json['gender'] as String?,
-      birthDay: json['birth_day'] != null ? DateTime.parse(json['birth_day'] as String) : null,
+      birthDay: json['birth_day'] != null
+          ? DateTime.tryParse(json['birth_day'] as String)
+          : null,
       role: json['role'] as String?,
       resetTokenHash: json['reset_token_hash'] as String?,
+      onboardingCompleted: json['onboarding_completed'] as bool? ?? false,
+      notificationsEnabled: json['notifications_enabled'] as bool?,
+      reminderStartHour: json['reminder_start_hour'] as int?,
+      reminderEndHour: json['reminder_end_hour'] as int?,
       createdAt: DateTime.parse(json['created_at'] as String),
-      updatedAt: json['updated_at'] != null ? DateTime.parse(json['updated_at'] as String) : null,
-      deletedAt: json['deleted_at'] != null ? DateTime.parse(json['deleted_at'] as String) : null,
+      updatedAt: json['updated_at'] != null
+          ? DateTime.tryParse(json['updated_at'] as String)
+          : null,
+      deletedAt: json['deleted_at'] != null
+          ? DateTime.tryParse(json['deleted_at'] as String)
+          : null,
     );
   }
 
@@ -67,6 +85,10 @@ class User {
       'birth_day': birthDay?.toIso8601String(),
       'role': role,
       'reset_token_hash': resetTokenHash,
+      'onboarding_completed': onboardingCompleted,
+      'notifications_enabled': notificationsEnabled,
+      'reminder_start_hour': reminderStartHour,
+      'reminder_end_hour': reminderEndHour,
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt?.toIso8601String(),
       'deleted_at': deletedAt?.toIso8601String(),
@@ -86,6 +108,10 @@ class User {
     DateTime? birthDay,
     String? role,
     String? resetTokenHash,
+    bool? onboardingCompleted,
+    bool? notificationsEnabled,
+    int? reminderStartHour,
+    int? reminderEndHour,
     DateTime? createdAt,
     DateTime? updatedAt,
     DateTime? deletedAt,
@@ -103,6 +129,10 @@ class User {
       birthDay: birthDay ?? this.birthDay,
       role: role ?? this.role,
       resetTokenHash: resetTokenHash ?? this.resetTokenHash,
+      onboardingCompleted: onboardingCompleted ?? this.onboardingCompleted,
+      notificationsEnabled: notificationsEnabled ?? this.notificationsEnabled,
+      reminderStartHour: reminderStartHour ?? this.reminderStartHour,
+      reminderEndHour: reminderEndHour ?? this.reminderEndHour,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       deletedAt: deletedAt ?? this.deletedAt,

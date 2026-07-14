@@ -43,24 +43,24 @@ class _RegisterScreenState extends State<RegisterScreen> {
       }
 
       final userProvider = Provider.of<UserProvider>(context, listen: false);
-      final success = await userProvider.loginMock(
+      final success = await userProvider.register(
         _emailController.text.trim(),
         _passwordController.text,
       );
 
       if (success && mounted) {
-        // Mock successful registration
-        if (userProvider.currentUser != null) {
-          userProvider.setUser(
-            userProvider.currentUser!.copyWith(
-              username: _usernameController.text.trim(),
-            ),
-          );
-        }
         Navigator.pushNamedAndRemoveUntil(
           context,
           AppRoutes.dashboard,
           (route) => false,
+        );
+      } else if (mounted && userProvider.errorMessage != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(userProvider.errorMessage!),
+            backgroundColor: Colors.red.shade700,
+            behavior: SnackBarBehavior.floating,
+          ),
         );
       }
     }

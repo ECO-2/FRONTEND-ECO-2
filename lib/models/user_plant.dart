@@ -26,26 +26,30 @@ class UserPlant {
   });
 
   factory UserPlant.fromJson(Map<String, dynamic> json) {
+    // El endpoint GET /plants devuelve la especie embebida bajo la clave 'species'.
+    final species = json['species'] as Map<String, dynamic>?;
+    final speciesName = species?['common_name'] as String?;
+
     return UserPlant(
       id: json['id'] as String,
       userId: json['user_id'] as String,
       speciesId: json['species_id'] as String,
-      nickname: json['nickname'] as String,
+      nickname: json['nickname'] as String? ?? '',
       healthStatus: json['health_status'] as String?,
       acquiredAt: json['acquired_at'] != null
-          ? DateTime.parse(json['acquired_at'] as String)
+          ? DateTime.tryParse(json['acquired_at'] as String)
           : null,
       lastWateredAt: json['last_watered_at'] != null
-          ? DateTime.parse(json['last_watered_at'] as String)
+          ? DateTime.tryParse(json['last_watered_at'] as String)
           : null,
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: json['updated_at'] != null
-          ? DateTime.parse(json['updated_at'] as String)
+          ? DateTime.tryParse(json['updated_at'] as String)
           : null,
       deletedAt: json['deleted_at'] != null
-          ? DateTime.parse(json['deleted_at'] as String)
+          ? DateTime.tryParse(json['deleted_at'] as String)
           : null,
-      name: (json['name'] ?? json['nickname'] ?? '') as String,
+      name: speciesName ?? json['name'] as String? ?? json['nickname'] as String? ?? '',
     );
   }
 
@@ -69,6 +73,7 @@ class UserPlant {
     String? userId,
     String? speciesId,
     String? nickname,
+    String? name,
     String? healthStatus,
     DateTime? acquiredAt,
     DateTime? lastWateredAt,
@@ -77,7 +82,7 @@ class UserPlant {
     DateTime? deletedAt,
   }) {
     return UserPlant(
-      name: name ?? name,
+      name: name ?? this.name,
       id: id ?? this.id,
       userId: userId ?? this.userId,
       speciesId: speciesId ?? this.speciesId,

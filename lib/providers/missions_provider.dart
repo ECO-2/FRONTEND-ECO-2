@@ -1,73 +1,118 @@
 import 'package:flutter/material.dart';
 import 'package:frontend_eco_2/models/models.dart';
+import 'package:frontend_eco_2/services/services.dart';
 
 class MissionsProvider with ChangeNotifier {
-  final List<Achievement> _achievements = [
-    Achievement(
-      id: 'a1',
-      name: 'Jardín Saludable',
-      conditionType: 'care_logs',
-      conditionValue: 5,
-      xpReward: 100,
-      description: 'Completa 5 tareas de cuidado para tus plantas.',
-    ),
-    Achievement(
-      id: 'a2',
-      name: 'Jardín Urbano',
-      conditionType: 'plant_count',
-      conditionValue: 5,
-      xpReward: 200,
-      description: 'Registra 5 plantas en tu jardín personal.',
-    ),
-    Achievement(
-      id: 'a3',
-      name: 'Primeros Pasos',
-      conditionType: 'plant_count',
-      conditionValue: 1,
-      xpReward: 50,
-      description: 'Registra tu primera planta en la aplicación.',
-    ),
-  ];
+  final GamificationService _gamificationService;
 
-  final List<String> _completedAchievementIds = ['a3']; // First steps is done
-  int _userSeeds = 240; // From Figma description (240 semillas acumuladas)
-  int _registeredPlantsCount = 2; // From Figma (2 de 5 plantas registradas)
+  List<Achievement> _achievements = [];
+  List<UserAchievement> _unlockedAchievements = [];
+  UserProgress? _progress;
+  bool _isLoading = false;
+  String? _errorMessage;
+
+  MissionsProvider({required GamificationService gamificationService})
+      : _gamificationService = gamificationService;
 
   List<Achievement> get achievements => _achievements;
-  List<String> get completedAchievementIds => _completedAchievementIds;
-  int get userSeeds => _userSeeds;
-  int get registeredPlantsCount => _registeredPlantsCount;
+  List<UserAchievement> get unlockedAchievements => _unlockedAchievements;
+  UserProgress? get progress => _progress;
+  bool get isLoading => _isLoading;
+  String? get errorMessage => _errorMessage;
 
-  bool isAchievementCompleted(String id) => _completedAchievementIds.contains(id);
+  /// IDs de logros ya desbloqueados por el usuario.
+  List<String> get completedAchievementIds =>
+      _unlockedAchievements.map((ua) => ua.achievementId).toList();
 
-  void addSeeds(int count) {
-    _userSeeds += count;
+  /// Semillas actuales del usuario (0 si no ha cargado aún).
+  int get userSeeds => _progress?.seeds ?? 0;
+
+  bool isAchievementCompleted(String id) =>
+      completedAchievementIds.contains(id);
+
+  void _setLoading(bool value) {
+    _isLoading = value;
     notifyListeners();
   }
 
-  bool spendSeeds(int count) {
-    if (_userSeeds >= count) {
-      _userSeeds -= count;
+  // ---------------------------------------------------------------------------
+  // Carga inicial
+  // ---------------------------------------------------------------------------
+
+  /// Carga progreso y logros del usuario desde la API.
+  Future<void> init() async {
+    _setLoading(true);
+    _errorMessage = null;
+    try {
+      final results = await Future.wait([
+        _gamificationService.getProgress(),
+        _gamificationService.getAchievements(),
+        _gamificationService.getMyAchievements(),
+      ]);
+      _progress = results[0] as UserProgress;
+      _achievements = results[1] as List<Achievement>;
+      _unlockedAchievements = results[2] as List<UserAchievement>;
+    } on ApiException catch (e) {
+      _errorMessage = e.message;
+    } catch (_) {
+      _errorMessage = 'Error al cargar misiones.';
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // XP y semillas
+  // ---------------------------------------------------------------------------
+
+  Future<void> addSeeds(int amount, {String reason = 'reward'}) async {
+    try {
+      _progress = await _gamificationService.updateSeeds(amount, reason);
+      notifyListeners();
+    } catch (_) {
+      // Actualización local como fallback
+      if (_progress != null) {
+        _progress = _progress!.copyWith(seeds: _progress!.seeds + amount);
+        notifyListeners();
+      }
+    }
+  }
+
+  Future<bool> spendSeeds(int amount) async {
+    if (userSeeds < amount) return false;
+    try {
+      _progress = await _gamificationService.updateSeeds(-amount, 'purchase');
       notifyListeners();
       return true;
+    } catch (_) {
+      return false;
     }
-    return false;
   }
 
+  Future<void> addXp(int amount, {String actionType = 'action'}) async {
+    try {
+      _progress = await _gamificationService.addXp(amount, actionType);
+      notifyListeners();
+    } catch (_) {}
+  }
+
+  // ---------------------------------------------------------------------------
+  // Desbloquear logro manualmente (si es necesario)
+  // ---------------------------------------------------------------------------
+
   void completeAchievement(String id) {
-    if (!_completedAchievementIds.contains(id)) {
-      _completedAchievementIds.add(id);
-      final ach = _achievements.firstWhere((a) => a.id == id);
-      addSeeds(ach.xpReward ~/ 5); // Add some seeds as reward
+    if (!completedAchievementIds.contains(id)) {
+      // Agregar localmente hasta que se recargue desde API
+      _unlockedAchievements.add(UserAchievement(
+        id: 'local_${DateTime.now().millisecondsSinceEpoch}',
+        userId: '',
+        achievementId: id,
+        unlockedAt: DateTime.now(),
+      ));
       notifyListeners();
     }
   }
 
-  void incrementRegisteredPlants() {
-    _registeredPlantsCount++;
-    if (_registeredPlantsCount >= 5) {
-      completeAchievement('a2');
-    }
-    notifyListeners();
-  }
+  // Mantenido por compatibilidad con código existente
+  void incrementRegisteredPlants() {}
 }

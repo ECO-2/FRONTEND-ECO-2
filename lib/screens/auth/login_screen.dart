@@ -30,7 +30,7 @@ class _LoginScreenState extends State<LoginScreen> {
   void _submit() async {
     if (_formKey.currentState!.validate()) {
       final userProvider = Provider.of<UserProvider>(context, listen: false);
-      final success = await userProvider.loginMock(
+      final success = await userProvider.login(
         _emailController.text.trim(),
         _passwordController.text,
       );
@@ -40,6 +40,14 @@ class _LoginScreenState extends State<LoginScreen> {
           context,
           AppRoutes.dashboard,
           (route) => false,
+        );
+      } else if (mounted && userProvider.errorMessage != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(userProvider.errorMessage!),
+            backgroundColor: Colors.red.shade700,
+            behavior: SnackBarBehavior.floating,
+          ),
         );
       }
     }

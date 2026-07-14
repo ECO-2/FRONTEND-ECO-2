@@ -177,10 +177,11 @@ class SeedStoreList extends StatelessWidget {
               elevation: 0,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
-            onPressed: () {
+            onPressed: () async {
               Navigator.of(ctx).pop();
-              final success = missionsProvider.spendSeeds(reward.cost);
+              final success = await missionsProvider.spendSeeds(reward.cost);
               if (success) {
+                if (!context.mounted) return;
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text('¡Canje exitoso!: ${reward.title} 🎁'),
