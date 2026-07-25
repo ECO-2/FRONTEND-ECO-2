@@ -36,9 +36,14 @@ class _LoginScreenState extends State<LoginScreen> {
       );
 
       if (success && mounted) {
+        final user = userProvider.currentUser;
+        final nextRoute = (user != null && user.onboardingCompleted)
+            ? AppRoutes.dashboard
+            : AppRoutes.onboarding;
+
         Navigator.pushNamedAndRemoveUntil(
           context,
-          AppRoutes.dashboard,
+          nextRoute,
           (route) => false,
         );
       } else if (mounted && userProvider.errorMessage != null) {

@@ -32,10 +32,6 @@ class HomeTab extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── Greeting ─────────────────────────────────
-          _buildGreeting(user?.username ?? 'Usuario'),
-          const SizedBox(height: 24),
-
           // ── Mi Jardín section ─────────────────────────
           _buildSectionHeader(
             title: 'Mi Jardín',
@@ -131,32 +127,6 @@ class HomeTab extends StatelessWidget {
           _buildMissionCard(context, missionsProvider),
         ],
       ),
-    );
-  }
-
-  Widget _buildGreeting(String username) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          '¡Hola, $username! 🌿',
-          style: const TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: AppColors.primaryDark,
-            fontFamily: 'DM Sans',
-          ),
-        ),
-        const SizedBox(height: 4),
-        const Text(
-          'Cuida tus plantas y reduce tu huella de CO₂',
-          style: TextStyle(
-            fontSize: 13,
-            color: AppColors.textSecondary,
-            fontFamily: 'Inter',
-          ),
-        ),
-      ],
     );
   }
 

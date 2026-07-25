@@ -43,8 +43,8 @@ class User {
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
-      id: json['id'] as String,
-      email: json['email'] as String,
+      id: json['id'] as String? ?? '',
+      email: json['email'] as String? ?? '',
       username: json['username'] as String? ?? '',
       avatarUrl: json['avatar_url'] as String?,
       passwordHash: json['password_hash'] as String?,
@@ -61,7 +61,9 @@ class User {
       notificationsEnabled: json['notifications_enabled'] as bool?,
       reminderStartHour: json['reminder_start_hour'] as int?,
       reminderEndHour: json['reminder_end_hour'] as int?,
-      createdAt: DateTime.parse(json['created_at'] as String),
+      createdAt: json['created_at'] != null
+          ? (DateTime.tryParse(json['created_at'] as String) ?? DateTime.now())
+          : DateTime.now(),
       updatedAt: json['updated_at'] != null
           ? DateTime.tryParse(json['updated_at'] as String)
           : null,

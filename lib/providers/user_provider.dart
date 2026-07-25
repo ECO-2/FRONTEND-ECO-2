@@ -149,6 +149,50 @@ class UserProvider with ChangeNotifier {
   }
 
   // ---------------------------------------------------------------------------
+  // Onboarding
+  // ---------------------------------------------------------------------------
+
+  /// Envía los datos del perfil inicial y marca onboarding_completed = true.
+  Future<bool> completeOnboarding({
+    String? username,
+    String? gender,
+    DateTime? birthDay,
+  }) async {
+    _setLoading(true);
+    _errorMessage = null;
+    try {
+      final updatedUser = await _userService.completeOnboarding(
+        username: username,
+        gender: gender,
+        birthDay: birthDay,
+      );
+      if (_currentUser != null) {
+        _currentUser = _currentUser!.copyWith(
+          username: updatedUser.username,
+          gender: updatedUser.gender,
+          birthDay: updatedUser.birthDay,
+          onboardingCompleted: true,
+        );
+      } else {
+        _currentUser = updatedUser;
+      }
+      _setLoading(false);
+      return true;
+    } on ApiException catch (e) {
+      _errorMessage = e.isConflict
+          ? 'Ese nombre de usuario ya está en uso.'
+          : e.message;
+      _setLoading(false);
+      return false;
+    } catch (e) {
+      debugPrint('Error en completeOnboarding: $e');
+      _errorMessage = 'Error al actualizar el perfil. Inténtalo nuevamente.';
+      _setLoading(false);
+      return false;
+    }
+  }
+
+  // ---------------------------------------------------------------------------
   // Logout
   // ---------------------------------------------------------------------------
 
