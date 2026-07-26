@@ -9,7 +9,7 @@ import 'package:frontend_eco_2/screens/dashboard/tabs/home_tab.dart';
 import 'package:frontend_eco_2/screens/dashboard/tabs/garden_tab.dart';
 import 'package:frontend_eco_2/screens/dashboard/tabs/scanner_tab.dart';
 import 'package:frontend_eco_2/screens/dashboard/tabs/profile_tab.dart';
-import 'package:frontend_eco_2/screens/premium/premium_upgrade_screen.dart';
+import 'package:frontend_eco_2/screens/store/store_screen.dart';
 import 'package:frontend_eco_2/widgets/dashboard/dashboard_header.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -35,7 +35,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
 
     final tabs = [
-      const PremiumUpgradeScreen(isTab: true), // O2+ -> Index 0
+      const StoreScreen(isTab: true), // Tienda -> Index 0
       const GardenTab(), // Jardin -> Index 1
       HomeTab(
         onViewAll: () {

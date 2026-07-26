@@ -34,8 +34,8 @@ class CustomBottomNavBar extends StatelessWidget {
         children: [
           _buildItem(
             index: 0,
-            label: 'O2 +',
-            iconBuilder: (color, isSelected) => _buildO2Icon(color),
+            label: 'Tienda',
+            iconBuilder: (color, isSelected) => _buildTiendaIcon(color),
           ),
           _buildItem(
             index: 1,
@@ -107,8 +107,8 @@ class CustomBottomNavBar extends StatelessWidget {
     );
   }
 
-  // Icon O2 + : Star inside a circle outline
-  Widget _buildO2Icon(Color color) {
+  // Icon Tienda : Storefront inside a circle outline
+  Widget _buildTiendaIcon(Color color) {
     return Container(
       width: 24,
       height: 24,
@@ -118,7 +118,7 @@ class CustomBottomNavBar extends StatelessWidget {
       ),
       alignment: Alignment.center,
       child: Icon(
-        Icons.star_rounded,
+        Icons.storefront_rounded,
         size: 14,
         color: color,
       ),

@@ -267,8 +267,8 @@ class ProfileTab extends StatelessWidget {
           SettingsOptionTile(
             icon: Icons.eco_outlined,
             title: 'Tienda de Semillas',
-            subtitle: 'Canjear semillas (10)',
-            onTap: () => Navigator.pushNamed(context, AppRoutes.greenFootprint), // or seed store route
+            subtitle: 'Canjear ${missionsProvider.userSeeds} semillas',
+            onTap: () => Navigator.pushNamed(context, AppRoutes.store),
           ),
           const Divider(height: 1, color: Color(0xFFE2E7E4)),
           SettingsOptionTile(

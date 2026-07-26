@@ -8,6 +8,7 @@ import 'package:frontend_eco_2/screens/profile/edit_profile_screen.dart';
 import 'package:frontend_eco_2/screens/settings/settings_screen.dart';
 import 'package:frontend_eco_2/screens/premium/premium_upgrade_screen.dart';
 import 'package:frontend_eco_2/screens/premium/checkout_screen.dart';
+import 'package:frontend_eco_2/screens/store/store_screen.dart';
 import 'package:frontend_eco_2/screens/premium/success_screen.dart';
 import 'package:frontend_eco_2/screens/profile/trophies_screen.dart';
 import 'package:frontend_eco_2/screens/profile/green_footprint_screen.dart';
@@ -36,6 +37,7 @@ class AppRoutes {
   static const String missions = '/missions';
   static const String trophies = '/trophies';
   static const String premiumUpgrade = '/premium-upgrade';
+  static const String store = '/store';
   static const String checkout = '/checkout';
   static const String success = '/success';
   static const String notifications = '/notifications';
@@ -101,6 +103,8 @@ class AppRoutes {
         return MaterialPageRoute(builder: (_) => const TrophiesScreen());
       case premiumUpgrade:
         return MaterialPageRoute(builder: (_) => const PremiumUpgradeScreen());
+      case store:
+        return MaterialPageRoute(builder: (_) => const StoreScreen());
       case checkout:
         return MaterialPageRoute(builder: (_) => const CheckoutScreen());
       case success:
