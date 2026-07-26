@@ -49,9 +49,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
       );
 
       if (success && mounted) {
+        // Usuario recién registrado → siempre va al onboarding.
         Navigator.pushNamedAndRemoveUntil(
           context,
-          AppRoutes.dashboard,
+          AppRoutes.onboarding,
           (route) => false,
         );
       } else if (mounted && userProvider.errorMessage != null) {

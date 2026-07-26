@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:frontend_eco_2/providers/providers.dart';
 import 'package:frontend_eco_2/services/services.dart';
 import 'package:frontend_eco_2/routing/app_routes.dart';
 import 'package:frontend_eco_2/theme/app_colors.dart';
+
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -67,9 +70,19 @@ class MyApp extends StatelessWidget {
         child: Consumer<ThemeProvider>(
           builder: (context, themeProvider, _) {
             return MaterialApp(
+              navigatorKey: navigatorKey,
               title: 'ECO2',
               themeMode: themeProvider.themeMode,
               debugShowCheckedModeBanner: false,
+              localizationsDelegates: const [
+                GlobalMaterialLocalizations.delegate,
+                GlobalWidgetsLocalizations.delegate,
+                GlobalCupertinoLocalizations.delegate,
+              ],
+              supportedLocales: const [
+                Locale('es', ''),
+                Locale('en', ''),
+              ],
               theme: ThemeData(
                 useMaterial3: true,
                 brightness: Brightness.light,
@@ -97,7 +110,7 @@ class MyApp extends StatelessWidget {
 }
 
 /// Widget que intenta restaurar la sesión existente al arrancar la app.
-/// Si hay tokens guardados, carga el usuario y redirige al dashboard.
+/// Si hay tokens guardados, carga el usuario y redirige al onboarding o dashboard.
 class _AppLoader extends StatefulWidget {
   final Widget child;
 
@@ -120,16 +133,31 @@ class _AppLoaderState extends State<_AppLoader> {
 
     if (!mounted) return;
 
-    // Si el usuario ya tiene sesión activa, ir al dashboard.
     if (userProvider.isAuthenticated) {
-      final plantsProvider = context.read<PlantsProvider>();
-      final missionsProvider = context.read<MissionsProvider>();
+      final user = userProvider.currentUser!;
+
+      if (!user.onboardingCompleted) {
+        // Onboarding pendiente — no cargar datos del dashboard todavía.
+        navigatorKey.currentState?.pushNamedAndRemoveUntil(
+          AppRoutes.onboarding,
+          (route) => false,
+        );
+        return;
+      }
 
       // Carga paralela de datos del dashboard.
+      final plantsProvider = context.read<PlantsProvider>();
+      final missionsProvider = context.read<MissionsProvider>();
       await Future.wait([
         plantsProvider.init(),
         missionsProvider.init(),
       ]);
+
+      if (!mounted) return;
+      navigatorKey.currentState?.pushNamedAndRemoveUntil(
+        AppRoutes.dashboard,
+        (route) => false,
+      );
     }
   }
 

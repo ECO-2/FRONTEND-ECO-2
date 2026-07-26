@@ -4,7 +4,6 @@ import 'package:frontend_eco_2/providers/providers.dart';
 
 // ── Color tokens ─────────────────────────────────────────────────────────
 const _kDark = Color(0xFF10454F);
-const _kBg = Color(0xFFF8FAF9);
 const _kTextMuted = Color(0xFF807F7F);
 const _kTextDark = Color(0xFF0D2B31);
 const _kLime = Color(0xFFBDE038);

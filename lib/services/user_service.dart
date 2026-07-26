@@ -31,4 +31,24 @@ class UserService {
     final data = await _client.patch('/user/profile', body: body) as Map<String, dynamic>;
     return User.fromJson(data);
   }
+
+  /// PATCH /user/onboarding — completa el perfil inicial del usuario tras el registro.
+  /// Todos los campos son opcionales y pueden enviarse de forma progresiva.
+  Future<User> completeOnboarding({
+    String? username,
+    String? gender,
+    DateTime? birthDay,
+  }) async {
+    final body = <String, dynamic>{};
+    if (username != null && username.isNotEmpty) body['username'] = username;
+    if (gender != null) body['gender'] = gender;
+    if (birthDay != null) {
+      // La API espera formato date (YYYY-MM-DD)
+      body['birth_day'] =
+          '${birthDay.year.toString().padLeft(4, '0')}-${birthDay.month.toString().padLeft(2, '0')}-${birthDay.day.toString().padLeft(2, '0')}';
+    }
+    final data =
+        await _client.patch('/user/onboarding', body: body) as Map<String, dynamic>;
+    return User.fromJson(data);
+  }
 }

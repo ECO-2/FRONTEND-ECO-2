@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend_eco_2/screens/auth/welcome_screen.dart';
 import 'package:frontend_eco_2/screens/auth/login_screen.dart';
 import 'package:frontend_eco_2/screens/auth/register_screen.dart';
+import 'package:frontend_eco_2/screens/auth/onboarding_screen.dart';
 import 'package:frontend_eco_2/screens/dashboard/dashboard_screen.dart';
 import 'package:frontend_eco_2/screens/notifications/notifications_screen.dart';
 import 'package:frontend_eco_2/screens/profile/edit_profile_screen.dart';
@@ -41,6 +42,7 @@ class AppRoutes {
   static const String checkout = '/checkout';
   static const String success = '/success';
   static const String notifications = '/notifications';
+  static const String onboarding = '/onboarding';
 
   static Route<dynamic> onGenerateRoute(RouteSettings routeSettings) {
     switch (routeSettings.name) {
@@ -55,6 +57,8 @@ class AppRoutes {
           builder: (_) => const DashboardScreen(),
           settings: routeSettings,
         );
+      case onboarding:
+        return MaterialPageRoute(builder: (_) => const OnboardingScreen());
       case notifications:
         return MaterialPageRoute(builder: (_) => const NotificationsScreen());
       
