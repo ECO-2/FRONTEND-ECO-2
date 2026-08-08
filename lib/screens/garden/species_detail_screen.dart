@@ -2,7 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:frontend_eco_2/models/models.dart';
 import 'package:frontend_eco_2/providers/plants_provider.dart';
-import 'package:frontend_eco_2/theme/app_colors.dart';
+import 'package:frontend_eco_2/utils/plant_visuals.dart';
+
+// Legacy mock species (s1-s5) still ship a real illustration asset; every
+// other (real, catalog-backed) species falls back to a category visual.
+const Map<String, String> _kLegacyAssetImages = {
+  's1': 'assets/images/monstera.png',
+  's2': 'assets/images/potus.png',
+  's3': 'assets/images/sansevieria.png',
+  's4': 'assets/images/ficus_lira.png',
+  's5': 'assets/images/cactus.png',
+};
 
 class SpeciesDetailScreen extends StatefulWidget {
   const SpeciesDetailScreen({super.key});
@@ -14,32 +24,6 @@ class SpeciesDetailScreen extends StatefulWidget {
 class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
   bool _isFavorited = false;
 
-  Color _getBackgroundColor(String id) {
-    switch (id) {
-      case 's1':
-        return const Color(0xFFF7F9F6);
-      case 's2':
-        return const Color(0xFFF2F7F2);
-      case 's3':
-        return const Color(0xFFF5F8F4);
-      case 's4':
-        return const Color(0xFFF0F5F2);
-      case 's5':
-        return const Color(0xFFFAF7F0);
-      default:
-        return const Color(0xFFF5F7F6);
-    }
-  }
-
-  String? _getAssetImage(String id) {
-    if (id == 's1') return 'assets/images/monstera.png';
-    if (id == 's2') return 'assets/images/potus.png';
-    if (id == 's3') return 'assets/images/sansevieria.png';
-    if (id == 's4') return 'assets/images/ficus_lira.png';
-    if (id == 's5') return 'assets/images/cactus.png';
-    return null;
-  }
-
   @override
   Widget build(BuildContext context) {
     final species = ModalRoute.of(context)?.settings.arguments as PlantSpecies?;
@@ -47,9 +31,18 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
       return const Scaffold(body: Center(child: Text('Especie no encontrada')));
     }
 
-    final bgColor = _getBackgroundColor(species.id);
-    final assetImage = _getAssetImage(species.id);
+    final visual = visualForCategory(species.category);
+    final bgColor = visual.background;
+    final assetImage = _kLegacyAssetImages[species.id];
     final bottomNavPadding = MediaQuery.of(context).padding.bottom;
+
+    // air_purification_score is a real DB field on a 0-9 scale (see backend
+    // seed data). CO2 grams/day and the "car distance" equivalent are a
+    // simple, clearly-labelled illustrative scale derived from that real
+    // score — not a separately measured value.
+    final purificationScore = species.airPurificationScore ?? 0;
+    final co2GramsPerDay = 1.0 + purificationScore * 0.4;
+    final carMetersEquivalent = 10 + purificationScore * 8;
 
     return Scaffold(
       backgroundColor: bgColor,
@@ -123,11 +116,9 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
                             child: assetImage != null
                                 ? Image.asset(assetImage, fit: BoxFit.contain)
                                 : Icon(
-                                    Icons.local_florist_rounded,
+                                    visual.icon,
                                     size: 140,
-                                    color: AppColors.primary.withValues(
-                                      alpha: 0.25,
-                                    ),
+                                    color: visual.color.withValues(alpha: 0.35),
                                   ),
                           ),
                         ),
@@ -144,14 +135,21 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
                               ).withValues(alpha: 0.75),
                               borderRadius: BorderRadius.circular(20),
                             ),
-                            child: const Text(
-                              '1 / 5',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                                fontFamily: 'Inter',
-                              ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(visual.icon, color: Colors.white, size: 13),
+                                const SizedBox(width: 6),
+                                Text(
+                                  visual.label,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    fontFamily: 'Inter',
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ),
@@ -226,13 +224,13 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       const Icon(
-                                        Icons.star_rounded,
-                                        color: Color(0xFFFFD54F),
+                                        Icons.air_rounded,
+                                        color: Color(0xFF689F38),
                                         size: 16,
                                       ),
                                       const SizedBox(width: 4),
                                       Text(
-                                        species.rating.toStringAsFixed(1),
+                                        '${species.airPurificationScore ?? 0}/9',
                                         style: const TextStyle(
                                           fontWeight: FontWeight.bold,
                                           fontSize: 13,
@@ -243,9 +241,9 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
                                   ),
                                 ),
                                 const SizedBox(height: 4),
-                                Text(
-                                  species.popularity,
-                                  style: const TextStyle(
+                                const Text(
+                                  'Purificación de aire',
+                                  style: TextStyle(
                                     fontSize: 11,
                                     color: Color(0xFF807F7F),
                                   ),
@@ -259,30 +257,31 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
                           spacing: 8,
                           runSpacing: 6,
                           children: species.detailTags.map((tag) {
-                            final isAir =
-                                tag == 'Aire purificador' ||
-                                tag == 'Filtro de toxinas';
+                            final style = styleForTagKind(tagKindFor(tag));
                             return Container(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 12,
                                 vertical: 6,
                               ),
                               decoration: BoxDecoration(
-                                color: isAir
-                                    ? const Color(0xFFEFF5EA)
-                                    : const Color(0xFFEFF2EF),
+                                color: style.background,
                                 borderRadius: BorderRadius.circular(20),
                               ),
-                              child: Text(
-                                tag,
-                                style: TextStyle(
-                                  color: isAir
-                                      ? const Color(0xFF689F38)
-                                      : const Color(0xFF4F5B5B),
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  fontFamily: 'Inter',
-                                ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(style.icon, size: 13, color: style.color),
+                                  const SizedBox(width: 5),
+                                  Text(
+                                    tag,
+                                    style: TextStyle(
+                                      color: style.color,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      fontFamily: 'Inter',
+                                    ),
+                                  ),
+                                ],
                               ),
                             );
                           }).toList(),
@@ -419,8 +418,8 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
                                 iconColor: const Color(0xFFFBC02D),
                                 iconBg: const Color(0xFFFFFDE7),
                                 label: 'Luz',
-                                value: species.lightRequirement ?? 'Indirecta',
-                                subText: 'Brillante',
+                                value: lightLabelEs(species.lightRequirement),
+                                subText: lightHintEs(species.lightRequirement),
                               ),
                             ),
                           ],
@@ -436,9 +435,7 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
                                 label: 'Temperatura',
                                 value:
                                     '${species.minTemperature ?? 15}-${species.maxTemperature ?? 28}°C',
-                                subText: species.category == 'Tropical'
-                                    ? 'Tropical'
-                                    : 'Templado',
+                                subText: categoryLabelEs(species.category),
                               ),
                             ),
                             const SizedBox(width: 12),
@@ -464,105 +461,101 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
                             color: const Color(0xFF10454F),
                             borderRadius: BorderRadius.circular(16),
                           ),
-                          child: Row(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Container(
-                                width: 44,
-                                height: 44,
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFBDE038),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: const Center(
-                                  child: Icon(
-                                    Icons.eco_rounded,
-                                    color: Color(0xFF10454F),
-                                    size: 24,
+                              Row(
+                                children: [
+                                  Container(
+                                    width: 44,
+                                    height: 44,
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFBDE038),
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: const Center(
+                                      child: Icon(
+                                        Icons.eco_rounded,
+                                        color: Color(0xFF10454F),
+                                        size: 24,
+                                      ),
+                                    ),
                                   ),
-                                ),
+                                  const SizedBox(width: 14),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'Absorbe ~${co2GramsPerDay.toStringAsFixed(1)}g de CO₂/día',
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 14,
+                                            fontFamily: 'Inter',
+                                          ),
+                                        ),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          'Equivalente a un auto recorriendo ${carMetersEquivalent}m',
+                                          style: const TextStyle(
+                                            color: Color(0xFFBDE038),
+                                            fontSize: 12,
+                                            fontFamily: 'Inter',
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
                               ),
-                              const SizedBox(width: 14),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Absorbe ~${(1.5 + (species.airPurificationScore ?? 50) / 100 * 2).toStringAsFixed(1)}g de CO₂/día',
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 14,
-                                        fontFamily: 'Inter',
+                              const SizedBox(height: 14),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    'Nivel de purificación',
+                                    style: TextStyle(
+                                      color: Colors.white.withValues(alpha: 0.75),
+                                      fontSize: 11,
+                                      fontFamily: 'Inter',
+                                    ),
+                                  ),
+                                  Text(
+                                    '$purificationScore/9',
+                                    style: const TextStyle(
+                                      color: Color(0xFFBDE038),
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.bold,
+                                      fontFamily: 'Inter',
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 6),
+                              Row(
+                                children: List.generate(9, (index) {
+                                  final filled = index < purificationScore;
+                                  return Expanded(
+                                    child: Container(
+                                      height: 6,
+                                      margin: EdgeInsets.only(
+                                        left: index == 0 ? 0 : 2,
+                                        right: index == 8 ? 0 : 2,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: filled
+                                            ? const Color(0xFFBDE038)
+                                            : Colors.white.withValues(alpha: 0.15),
+                                        borderRadius: BorderRadius.circular(3),
                                       ),
                                     ),
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      'Equivalente a un auto recorriendo ${(20 + (species.airPurificationScore ?? 50) * 0.15).toInt()}m',
-                                      style: const TextStyle(
-                                        color: Color(0xFFBDE038),
-                                        fontSize: 12,
-                                        fontFamily: 'Inter',
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                                  );
+                                }),
                               ),
                             ],
                           ),
                         ),
-                        const SizedBox(height: 16),
-                        if (species.isToxic)
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 14,
-                            ),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFFFF3E0),
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(
-                                color: const Color(0xFFFFB74D),
-                                width: 1,
-                              ),
-                            ),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: const [
-                                Icon(
-                                  Icons.warning_amber_rounded,
-                                  color: Color(0xFFF57C00),
-                                  size: 22,
-                                ),
-                                SizedBox(width: 12),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'Tóxica para mascotas',
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 14,
-                                          color: Color(0xFFE65100),
-                                          fontFamily: 'Inter',
-                                        ),
-                                      ),
-                                      SizedBox(height: 2),
-                                      Text(
-                                        'Mantener fuera del alcance de gatos y perros',
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          color: Color(0xFFE65100),
-                                          fontFamily: 'Inter',
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
                         const SizedBox(height: 32),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,

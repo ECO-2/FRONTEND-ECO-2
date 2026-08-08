@@ -4,6 +4,7 @@ import 'package:frontend_eco_2/models/models.dart';
 import 'package:frontend_eco_2/providers/providers.dart';
 import 'package:frontend_eco_2/routing/app_routes.dart';
 import 'package:frontend_eco_2/theme/app_colors.dart';
+import 'package:frontend_eco_2/utils/plant_visuals.dart';
 import 'package:frontend_eco_2/widgets/garden/add_plant_modal.dart';
 
 // ── Figma color tokens ────────────────────────────────────────────────────
@@ -26,13 +27,35 @@ class GardenTab extends StatefulWidget {
 
 class _GardenTabState extends State<GardenTab> {
   String _searchQuery = '';
-  String _selectedCategory = 'Todas';
   bool _isGridView = false;
   int _selectedFilter = 0;
 
+  // Catalog filters. Category/light store the raw API enum value (or
+  // 'all'); difficulty stores the exact label PlantSpecies.difficulty
+  // returns (or 'Todas').
+  String _selectedCategoryValue = 'all';
+  String _selectedDifficulty = 'Todas';
+  String _selectedLight = 'all';
+
   final TextEditingController _searchController = TextEditingController();
 
-  final List<String> _categories = ['Todas', 'Suculentas', 'Tropicales', 'Cactus'];
+  // Quick-access chips show only the most common categories; the rest are
+  // reachable from the full filter sheet (tune button).
+  static const List<String> _quickCategoryKeys = ['succulent', 'tropical', 'cactus'];
+  static const List<String> _allCategoryKeys = [
+    'tropical',
+    'succulent',
+    'cactus',
+    'fern',
+    'flowering',
+    'herb',
+    'tree',
+    'other',
+  ];
+  static const List<String> _difficultyOptions = ['Todas', 'Muy fácil', 'Fácil', 'Media'];
+  static const List<String> _lightKeys = ['low', 'medium', 'high', 'indirect'];
+
+  bool get _hasAdvancedFilters => _selectedDifficulty != 'Todas' || _selectedLight != 'all';
 
   @override
   void dispose() {
@@ -40,7 +63,10 @@ class _GardenTabState extends State<GardenTab> {
     super.dispose();
   }
 
-  Color _getSpeciesBg(String id) {
+  // Legacy mock species (s1-s5) keep their bespoke background/illustration;
+  // every real catalog species (real UUID from the backend) gets a
+  // category-based visual instead of a single generic placeholder.
+  Color _getSpeciesBg(String id, {String? category}) {
     switch (id) {
       case 's1':
         return const Color(0xFFF2F7F2);
@@ -53,7 +79,7 @@ class _GardenTabState extends State<GardenTab> {
       case 's5':
         return const Color(0xFFF5F2E8);
       default:
-        return const Color(0xFFF0F4F2);
+        return visualForCategory(category).background;
     }
   }
 
@@ -159,342 +185,234 @@ class _GardenTabState extends State<GardenTab> {
     final filteredCatalog = catalog.where((species) {
       final matchesSearch = species.commonName.toLowerCase().contains(_searchQuery.toLowerCase()) ||
           species.scientificName.toLowerCase().contains(_searchQuery.toLowerCase());
-      final matchesCategory = _selectedCategory == 'Todas' || species.category == _selectedCategory;
-      return matchesSearch && matchesCategory;
+      final matchesCategory =
+          _selectedCategoryValue == 'all' || species.category == _selectedCategoryValue;
+      final matchesDifficulty =
+          _selectedDifficulty == 'Todas' || species.difficulty == _selectedDifficulty;
+      final matchesLight = _selectedLight == 'all' || species.lightRequirement == _selectedLight;
+      return matchesSearch && matchesCategory && matchesDifficulty && matchesLight;
     }).toList();
 
-    // Trends list: Monstera, Sansevieria, Cactus Saguaro
-    final trends = catalog.where((s) => s.id == 's1' || s.id == 's3' || s.id == 's5').toList();
+    // "Tendencias": no hay datos de popularidad/analítica en el backend, así
+    // que se usan las especies con mejor puntaje real de purificación de
+    // aire (air_purification_score) como criterio honesto de destacadas.
+    final trends = [...catalog]
+      ..sort((a, b) => (b.airPurificationScore ?? 0).compareTo(a.airPurificationScore ?? 0));
+    final topTrends = trends.take(5).toList();
+    final showTrends = _searchQuery.isEmpty && _selectedCategoryValue == 'all' && !_hasAdvancedFilters;
 
-    return ListView(
-      padding: const EdgeInsets.only(bottom: 120),
-      children: [
-        // ── Search Field + Search Button ──
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Row(
-            children: [
-              Expanded(
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFEFF1EF),
-                    borderRadius: BorderRadius.circular(24),
-                  ),
-                  padding: const EdgeInsets.symmetric(horizontal: 14),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.search_rounded, color: _kTextMuted, size: 20),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: TextField(
-                          controller: _searchController,
-                          onChanged: (val) {
-                            setState(() {
-                              _searchQuery = val;
-                            });
-                          },
-                          decoration: const InputDecoration(
-                            hintText: 'Buscar mi planta...',
-                            hintStyle: TextStyle(
-                              color: _kTextMuted,
-                              fontSize: 13,
-                              fontFamily: 'Inter',
-                            ),
-                            border: InputBorder.none,
-                            isDense: true,
-                            contentPadding: EdgeInsets.symmetric(vertical: 12),
-                          ),
-                        ),
-                      ),
-                      if (_searchQuery.isNotEmpty)
-                        GestureDetector(
-                          onTap: () {
-                            _searchController.clear();
-                            setState(() {
-                              _searchQuery = '';
-                            });
-                          },
-                          child: const Icon(Icons.close_rounded, color: _kTextMuted, size: 18),
-                        ),
-                    ],
-                  ),
-                ),
+    // A single real scrollable (CustomScrollView + SliverGrid/SliverList)
+    // instead of a ListView.builder/GridView.builder nested with
+    // shrinkWrap+NeverScrollableScrollPhysics inside an outer ListView.
+    // shrinkWrap forces Flutter to lay out every item up front to measure
+    // the shrink-wrapped extent, defeating lazy building — with 50+ catalog
+    // cards that meant all of them were built (images, badges, buttons)
+    // even though only ~4 are ever visible. Slivers keep this lazy no
+    // matter how large the catalog grows, with no pagination/"load more"
+    // UI needed.
+    return CustomScrollView(
+      slivers: [
+        SliverToBoxAdapter(child: _buildCatalogSearchBar()),
+        SliverToBoxAdapter(child: _buildCatalogFilterChips()),
+        if (showTrends) SliverToBoxAdapter(child: _buildTrendsSection(context, topTrends)),
+        SliverToBoxAdapter(child: _buildExplorarHeader(filteredCatalog.length)),
+        if (filteredCatalog.isEmpty)
+          SliverToBoxAdapter(child: _buildEmptyCatalogState())
+        else if (_isGridView)
+          SliverPadding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            sliver: SliverGrid(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: 12,
+                mainAxisSpacing: 12,
+                childAspectRatio: 0.62,
               ),
-              const SizedBox(width: 10),
-              // Circular search icon button
-              Container(
-                height: 48,
-                width: 48,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  shape: BoxShape.circle,
-                  border: Border.all(color: const Color(0xFFE5EAE7), width: 1.2),
-                ),
-                child: const Icon(Icons.search_rounded, color: _kDark, size: 20),
+              delegate: SliverChildBuilderDelegate(
+                (context, index) =>
+                    _buildGridCatalogCard(context, filteredCatalog[index], plantsProvider),
+                childCount: filteredCatalog.length,
               ),
-            ],
+            ),
+          )
+        else
+          SliverPadding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            sliver: SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (context, index) =>
+                    _buildListCatalogCard(context, filteredCatalog[index], plantsProvider),
+                childCount: filteredCatalog.length,
+              ),
+            ),
           ),
-        ),
+        const SliverToBoxAdapter(child: SizedBox(height: 120)),
+      ],
+    );
+  }
 
-        // ── Filter Chips ──
-        const SizedBox(height: 8),
-        SizedBox(
-          height: 42,
-          child: Row(
-            children: [
-              Expanded(
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  itemCount: _categories.length,
-                  itemBuilder: (context, i) {
-                    final cat = _categories[i];
-                    final selected = _selectedCategory == cat;
-                    return Padding(
-                      padding: const EdgeInsets.only(right: 8),
-                      child: GestureDetector(
-                        onTap: () => setState(() => _selectedCategory = cat),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 8),
-                          decoration: BoxDecoration(
-                            color: selected ? _kDark : Colors.white,
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
-                              color: selected ? _kDark : const Color(0xFFE5EAE7),
-                              width: 1.2,
-                            ),
-                          ),
-                          child: Center(
-                            child: Text(
-                              cat,
-                              style: TextStyle(
-                                fontFamily: 'DM Sans',
-                                fontWeight: FontWeight.bold,
-                                fontSize: 12,
-                                color: selected ? Colors.white : _kTextDark,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
+  Widget _buildCatalogSearchBar() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Row(
+        children: [
+          Expanded(
+            child: Container(
+              decoration: BoxDecoration(
+                color: const Color(0xFFEFF1EF),
+                borderRadius: BorderRadius.circular(24),
               ),
-              // Filter icon button
-              Padding(
-                padding: const EdgeInsets.only(right: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 14),
+              child: Row(
+                children: [
+                  const Icon(Icons.search_rounded, color: _kTextMuted, size: 20),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: TextField(
+                      controller: _searchController,
+                      onChanged: (val) {
+                        setState(() {
+                          _searchQuery = val;
+                        });
+                      },
+                      decoration: const InputDecoration(
+                        hintText: 'Buscar mi planta...',
+                        hintStyle: TextStyle(
+                          color: _kTextMuted,
+                          fontSize: 13,
+                          fontFamily: 'Inter',
+                        ),
+                        border: InputBorder.none,
+                        isDense: true,
+                        contentPadding: EdgeInsets.symmetric(vertical: 12),
+                      ),
+                    ),
+                  ),
+                  if (_searchQuery.isNotEmpty)
+                    GestureDetector(
+                      onTap: () {
+                        _searchController.clear();
+                        setState(() {
+                          _searchQuery = '';
+                        });
+                      },
+                      child: const Icon(Icons.close_rounded, color: _kTextMuted, size: 18),
+                    ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(width: 10),
+          // Circular search icon button
+          Container(
+            height: 48,
+            width: 48,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+              border: Border.all(color: const Color(0xFFE5EAE7), width: 1.2),
+            ),
+            child: const Icon(Icons.search_rounded, color: _kDark, size: 20),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCatalogFilterChips() {
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: SizedBox(
+        height: 42,
+        child: Row(
+          children: [
+            Expanded(
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                children: [
+                  _buildQuickCategoryChip('Todas', 'all'),
+                  ..._quickCategoryKeys.map(
+                    (key) => _buildQuickCategoryChip(categoryLabelEs(key), key),
+                  ),
+                ],
+              ),
+            ),
+            // Filter icon button — opens the full filter sheet (category,
+            // difficulty, light).
+            Padding(
+              padding: const EdgeInsets.only(right: 16),
+              child: GestureDetector(
+                onTap: () => _openFilterSheet(context),
                 child: Container(
                   height: 38,
                   width: 38,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: _hasAdvancedFilters ? _kDark : Colors.white,
                     borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: const Color(0xFFE5EAE7), width: 1.2),
+                    border: Border.all(
+                      color: _hasAdvancedFilters ? _kDark : const Color(0xFFE5EAE7),
+                      width: 1.2,
+                    ),
                   ),
-                  child: const Icon(Icons.tune_rounded, color: _kDark, size: 18),
+                  child: Icon(
+                    Icons.tune_rounded,
+                    color: _hasAdvancedFilters ? Colors.white : _kDark,
+                    size: 18,
+                  ),
                 ),
               ),
-            ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildQuickCategoryChip(String label, String value) {
+    final selected = _selectedCategoryValue == value;
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: GestureDetector(
+        onTap: () => setState(() => _selectedCategoryValue = value),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            color: selected ? _kDark : Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: selected ? _kDark : const Color(0xFFE5EAE7),
+              width: 1.2,
+            ),
+          ),
+          child: Center(
+            child: Text(
+              label,
+              style: TextStyle(
+                fontFamily: 'DM Sans',
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+                color: selected ? Colors.white : _kTextDark,
+              ),
+            ),
           ),
         ),
+      ),
+    );
+  }
 
-        // ── Trends Section ──
-        if (_searchQuery.isEmpty && _selectedCategory == 'Todas') ...[
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 24, 16, 12),
-            child: Row(
-              children: const [
-                Icon(Icons.trending_up_rounded, color: Colors.orange, size: 20),
-                SizedBox(width: 6),
-                Text(
-                  'Tendencias esta semana',
-                  style: TextStyle(
-                    fontFamily: 'DM Sans',
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                    color: _kTextDark,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          SizedBox(
-            height: 255,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              itemCount: trends.length,
-              itemBuilder: (context, idx) {
-                final species = trends[idx];
-                final isS1 = species.id == 's1';
-                final isS3 = species.id == 's3';
-                final likes = isS1
-                    ? '1.2K'
-                    : isS3
-                        ? '987'
-                        : '450';
-                final commonNameText = isS1
-                    ? 'Monstera deliciosa'
-                    : isS3
-                        ? 'Sansevieria'
-                        : species.commonName;
-                final subtitleText = isS1
-                    ? 'Costilla de Adán'
-                    : isS3
-                        ? 'Lengua de Suegra'
-                        : species.scientificName;
-
-                return GestureDetector(
-                  onTap: () {
-                    Navigator.pushNamed(
-                      context,
-                      AppRoutes.speciesDetail,
-                      arguments: species,
-                    );
-                  },
-                  child: Container(
-                    width: 165,
-                    margin: const EdgeInsets.only(right: 12, bottom: 8),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: const Color(0xFFE5EAE7), width: 1.2),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.02),
-                          blurRadius: 4,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    clipBehavior: Clip.antiAlias,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Image Container with heart badge
-                        Expanded(
-                          child: Stack(
-                            fit: StackFit.expand,
-                            children: [
-                              Container(
-                                color: _getSpeciesBg(species.id),
-                                alignment: Alignment.center,
-                                padding: const EdgeInsets.all(12),
-                                child: species.id == 's1'
-                                    ? Image.asset('assets/images/monstera.png', fit: BoxFit.contain)
-                                    : Icon(
-                                        Icons.local_florist_rounded,
-                                        size: 48,
-                                        color: _kDark.withValues(alpha: 0.25),
-                                      ),
-                              ),
-                              // Floating heart badge
-                              Positioned(
-                                top: 8,
-                                right: 8,
-                                child: Container(
-                                  padding: const EdgeInsets.all(6),
-                                  decoration: const BoxDecoration(
-                                    color: Colors.white,
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: const Icon(
-                                    Icons.favorite_rounded,
-                                    color: Colors.orange,
-                                    size: 14,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        // Details
-                        Padding(
-                          padding: const EdgeInsets.all(12),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                commonNameText,
-                                style: const TextStyle(
-                                  fontFamily: 'DM Sans',
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14,
-                                  color: _kTextDark,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                subtitleText,
-                                style: const TextStyle(
-                                  fontFamily: 'DM Sans',
-                                  fontSize: 11,
-                                  color: _kTextMuted,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              const SizedBox(height: 8),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 8, vertical: 4),
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFFF2F4EB),
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    child: Text(
-                                      species.difficulty,
-                                      style: const TextStyle(
-                                        fontSize: 9,
-                                        fontWeight: FontWeight.bold,
-                                        color: _kDark,
-                                      ),
-                                    ),
-                                  ),
-                                  Row(
-                                    children: [
-                                      const Icon(Icons.favorite_rounded,
-                                          color: Colors.orange, size: 10),
-                                      const SizedBox(width: 2),
-                                      Text(
-                                        likes,
-                                        style: const TextStyle(
-                                          fontSize: 9,
-                                          fontWeight: FontWeight.bold,
-                                          color: _kTextDark,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
-
-        // ── Explorar Especies Section ──
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 24, 16, 12),
+  Widget _buildTrendsSection(BuildContext context, List<PlantSpecies> topTrends) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Padding(
+          padding: EdgeInsets.fromLTRB(16, 24, 16, 12),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'Explorar especies',
+              Icon(Icons.trending_up_rounded, color: Colors.orange, size: 20),
+              SizedBox(width: 6),
+              Text(
+                'Tendencias esta semana',
                 style: TextStyle(
                   fontFamily: 'DM Sans',
                   fontWeight: FontWeight.bold,
@@ -502,79 +420,453 @@ class _GardenTabState extends State<GardenTab> {
                   color: _kTextDark,
                 ),
               ),
-              Row(
-                children: [
-                  Text(
-                    '${filteredCatalog.length} plantas',
+            ],
+          ),
+        ),
+        SizedBox(
+          height: 255,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            itemCount: topTrends.length,
+            itemBuilder: (context, idx) {
+              final species = topTrends[idx];
+              final visual = visualForCategory(species.category);
+              final purificationScore = species.airPurificationScore ?? 0;
+              final commonNameText = species.commonName;
+              final subtitleText = species.scientificName;
+
+              return GestureDetector(
+                onTap: () {
+                  Navigator.pushNamed(
+                    context,
+                    AppRoutes.speciesDetail,
+                    arguments: species,
+                  );
+                },
+                child: Container(
+                  width: 165,
+                  margin: const EdgeInsets.only(right: 12, bottom: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: const Color(0xFFE5EAE7), width: 1.2),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.02),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Image Container with purification badge
+                      Expanded(
+                        child: Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            Container(
+                              color: _getSpeciesBg(species.id, category: species.category),
+                              alignment: Alignment.center,
+                              padding: const EdgeInsets.all(12),
+                              child: species.id == 's1'
+                                  ? Image.asset('assets/images/monstera.png', fit: BoxFit.contain)
+                                  : Icon(
+                                      visual.icon,
+                                      size: 48,
+                                      color: visual.color.withValues(alpha: 0.4),
+                                    ),
+                            ),
+                            // Floating purification badge (real air_purification_score)
+                            Positioned(
+                              top: 8,
+                              right: 8,
+                              child: Container(
+                                padding: const EdgeInsets.all(6),
+                                decoration: const BoxDecoration(
+                                  color: Colors.white,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.air_rounded,
+                                  color: Colors.orange,
+                                  size: 14,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      // Details
+                      Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              commonNameText,
+                              style: const TextStyle(
+                                fontFamily: 'DM Sans',
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                                color: _kTextDark,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              subtitleText,
+                              style: const TextStyle(
+                                fontFamily: 'DM Sans',
+                                fontSize: 11,
+                                color: _kTextMuted,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 8),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 8, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFF2F4EB),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Text(
+                                    species.difficulty,
+                                    style: const TextStyle(
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.bold,
+                                      color: _kDark,
+                                    ),
+                                  ),
+                                ),
+                                Row(
+                                  children: [
+                                    const Icon(Icons.air_rounded,
+                                        color: Colors.orange, size: 10),
+                                    const SizedBox(width: 2),
+                                    Text(
+                                      '$purificationScore/9',
+                                      style: const TextStyle(
+                                        fontSize: 9,
+                                        fontWeight: FontWeight.bold,
+                                        color: _kTextDark,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildExplorarHeader(int resultCount) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 24, 16, 12),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          const Text(
+            'Explorar especies',
+            style: TextStyle(
+              fontFamily: 'DM Sans',
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+              color: _kTextDark,
+            ),
+          ),
+          Row(
+            children: [
+              Text(
+                '$resultCount plantas',
+                style: const TextStyle(
+                  fontFamily: 'DM Sans',
+                  fontSize: 12,
+                  color: _kTextMuted,
+                ),
+              ),
+              const SizedBox(width: 8),
+              // Grid/List toggle button
+              GestureDetector(
+                onTap: () => setState(() => _isGridView = !_isGridView),
+                child: Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: const Color(0xFFE5EAE7), width: 1.2),
+                  ),
+                  child: Icon(
+                    _isGridView ? Icons.view_list_rounded : Icons.grid_view_rounded,
+                    size: 16,
+                    color: _kDark,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyCatalogState() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 16),
+      child: Column(
+        children: [
+          Icon(Icons.search_off_rounded, size: 40, color: _kTextMuted.withValues(alpha: 0.6)),
+          const SizedBox(height: 12),
+          const Text(
+            'No se encontraron especies con estos filtros',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontFamily: 'Inter',
+              fontWeight: FontWeight.w600,
+              color: _kTextMuted,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Small colored tag chip shared by the catalog list/grid cards, reusing
+  // the same tag color system as species detail and My Garden cards.
+  Widget _buildSpeciesTagChip(String tag, {double fontSize = 9}) {
+    final style = styleForTagKind(tagKindFor(tag));
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+      decoration: BoxDecoration(
+        color: style.background,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(style.icon, size: fontSize + 1, color: style.color),
+          const SizedBox(width: 3),
+          Text(
+            tag,
+            style: TextStyle(
+              fontSize: fontSize,
+              fontWeight: FontWeight.w600,
+              color: style.color,
+              fontFamily: 'Inter',
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _openFilterSheet(BuildContext context) {
+    String tempCategory = _selectedCategoryValue;
+    String tempDifficulty = _selectedDifficulty;
+    String tempLight = _selectedLight;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) {
+        return StatefulBuilder(
+          builder: (sheetContext, setSheetState) {
+            Widget sectionTitle(String text) => Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Text(
+                    text,
                     style: const TextStyle(
                       fontFamily: 'DM Sans',
-                      fontSize: 12,
-                      color: _kTextMuted,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                      color: _kTextDark,
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  // Grid/List toggle button
-                  GestureDetector(
-                    onTap: () => setState(() => _isGridView = !_isGridView),
+                );
+
+            Widget filterChip(String label, bool selected, VoidCallback onTap) {
+              return GestureDetector(
+                onTap: onTap,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: selected ? _kDark : Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: selected ? _kDark : const Color(0xFFE5EAE7),
+                      width: 1.2,
+                    ),
+                  ),
+                  child: Text(
+                    label,
+                    style: TextStyle(
+                      fontFamily: 'DM Sans',
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                      color: selected ? Colors.white : _kTextDark,
+                    ),
+                  ),
+                ),
+              );
+            }
+
+            return Container(
+              padding: EdgeInsets.fromLTRB(
+                  20, 16, 20, MediaQuery.of(sheetContext).viewInsets.bottom + 24),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
                     child: Container(
-                      padding: const EdgeInsets.all(6),
+                      width: 38,
+                      height: 5,
                       decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: const Color(0xFFE5EAE7), width: 1.2),
+                        color: const Color(0xFFE2E7E4),
+                        borderRadius: BorderRadius.circular(10),
                       ),
-                      child: Icon(
-                        _isGridView ? Icons.view_list_rounded : Icons.grid_view_rounded,
-                        size: 16,
-                        color: _kDark,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Filtros',
+                        style: TextStyle(
+                          fontFamily: 'DM Sans',
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                          color: _kTextDark,
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () => setSheetState(() {
+                          tempCategory = 'all';
+                          tempDifficulty = 'Todas';
+                          tempLight = 'all';
+                        }),
+                        child: const Text(
+                          'Limpiar',
+                          style: TextStyle(color: _kTextMuted, fontFamily: 'Inter'),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  sectionTitle('Categoría'),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      filterChip('Todas', tempCategory == 'all',
+                          () => setSheetState(() => tempCategory = 'all')),
+                      ..._allCategoryKeys.map(
+                        (key) => filterChip(
+                          categoryLabelEs(key),
+                          tempCategory == key,
+                          () => setSheetState(() => tempCategory = key),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  sectionTitle('Dificultad'),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: _difficultyOptions
+                        .map(
+                          (option) => filterChip(
+                            option,
+                            tempDifficulty == option,
+                            () => setSheetState(() => tempDifficulty = option),
+                          ),
+                        )
+                        .toList(),
+                  ),
+                  const SizedBox(height: 20),
+                  sectionTitle('Luz'),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      filterChip('Todas', tempLight == 'all',
+                          () => setSheetState(() => tempLight = 'all')),
+                      ..._lightKeys.map(
+                        (key) => filterChip(
+                          lightLabelEs(key),
+                          tempLight == key,
+                          () => setSheetState(() => tempLight = key),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: _kDark,
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _selectedCategoryValue = tempCategory;
+                          _selectedDifficulty = tempDifficulty;
+                          _selectedLight = tempLight;
+                        });
+                        Navigator.pop(sheetContext);
+                      },
+                      child: const Text(
+                        'Aplicar filtros',
+                        style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Inter'),
                       ),
                     ),
                   ),
                 ],
               ),
-            ],
-          ),
-        ),
-
-        if (_isGridView)
-          // Grid View
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemCount: filteredCatalog.length,
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              crossAxisSpacing: 12,
-              mainAxisSpacing: 12,
-              childAspectRatio: 0.72,
-            ),
-            itemBuilder: (context, index) {
-              final species = filteredCatalog[index];
-              return _buildGridCatalogCard(context, species, plantsProvider);
-            },
-          )
-        else
-          // List View (horizontal layout cards as shown in screenshot)
-          ListView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemCount: filteredCatalog.length,
-            itemBuilder: (context, index) {
-              final species = filteredCatalog[index];
-              return _buildListCatalogCard(context, species, plantsProvider);
-            },
-          ),
-      ],
+            );
+          },
+        );
+      },
     );
   }
 
   Widget _buildListCatalogCard(BuildContext context, PlantSpecies species, PlantsProvider plantsProvider) {
     final isMonstera = species.id == 's1';
-    final isPothos = species.id == 's2';
-    final nameToDisplay = isPothos ? 'Pothos dorado' : species.commonName;
-    final subtitleToDisplay = isPothos ? 'Epipremnum' : species.scientificName;
+    final visual = visualForCategory(species.category);
+    final nameToDisplay = species.commonName;
+    final subtitleToDisplay = species.scientificName;
 
     return GestureDetector(
       onTap: () {
@@ -606,14 +898,14 @@ class _GardenTabState extends State<GardenTab> {
               // Image container (left)
               Container(
                 width: 110,
-                color: _getSpeciesBg(species.id),
+                color: _getSpeciesBg(species.id, category: species.category),
                 padding: const EdgeInsets.all(12),
                 child: isMonstera
                     ? Image.asset('assets/images/monstera.png', fit: BoxFit.contain)
                     : Icon(
-                        Icons.local_florist_rounded,
+                        visual.icon,
                         size: 40,
-                        color: _kDark.withValues(alpha: 0.25),
+                        color: visual.color.withValues(alpha: 0.4),
                       ),
               ),
               // Details container (right)
@@ -647,21 +939,28 @@ class _GardenTabState extends State<GardenTab> {
                         overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 6),
-                      // Difficulty badge
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF2F4EB),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          species.difficulty,
-                          style: const TextStyle(
-                            fontSize: 9,
-                            fontWeight: FontWeight.bold,
-                            color: _kDark,
+                      // Difficulty + real species tags (category, light, water)
+                      Wrap(
+                        spacing: 6,
+                        runSpacing: 6,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF2F4EB),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              species.difficulty,
+                              style: const TextStyle(
+                                fontSize: 9,
+                                fontWeight: FontWeight.bold,
+                                color: _kDark,
+                              ),
+                            ),
                           ),
-                        ),
+                          ...species.tags.take(2).map((tag) => _buildSpeciesTagChip(tag)),
+                        ],
                       ),
                       const SizedBox(height: 8),
                       // Add Button
@@ -716,8 +1015,8 @@ class _GardenTabState extends State<GardenTab> {
 
   Widget _buildGridCatalogCard(BuildContext context, PlantSpecies species, PlantsProvider plantsProvider) {
     final isMonstera = species.id == 's1';
-    final isPothos = species.id == 's2';
-    final nameToDisplay = isPothos ? 'Pothos dorado' : species.commonName;
+    final visual = visualForCategory(species.category);
+    final nameToDisplay = species.commonName;
 
     return GestureDetector(
       onTap: () {
@@ -746,15 +1045,15 @@ class _GardenTabState extends State<GardenTab> {
           children: [
             Expanded(
               child: Container(
-                color: _getSpeciesBg(species.id),
+                color: _getSpeciesBg(species.id, category: species.category),
                 alignment: Alignment.center,
                 padding: const EdgeInsets.all(12),
                 child: isMonstera
                     ? Image.asset('assets/images/monstera.png', fit: BoxFit.contain)
                     : Icon(
-                        Icons.local_florist_rounded,
+                        visual.icon,
                         size: 40,
-                        color: _kDark.withValues(alpha: 0.25),
+                        color: visual.color.withValues(alpha: 0.4),
                       ),
               ),
             ),
@@ -786,6 +1085,10 @@ class _GardenTabState extends State<GardenTab> {
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 6),
+                  if (species.tags.isNotEmpty) ...[
+                    _buildSpeciesTagChip(species.tags.first, fontSize: 8),
+                    const SizedBox(height: 6),
+                  ],
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -846,8 +1149,13 @@ class _GardenTabState extends State<GardenTab> {
         return DateTime.now().difference(p.lastWateredAt!).inDays >= 7;
       }
       final info = plantsProvider.speciesCatalog.firstWhere((s) => s.id == p.speciesId, orElse: () => catalogFallback(p.speciesId));
-      if (_selectedFilter == 2) return info.category == 'Interior' || info.category == 'Tropical'; // Interior
-      if (_selectedFilter == 3) return info.category == 'Exterior' || info.category == 'Cactus'; // Exterior
+      // "Interior"/"Exterior" aren't real API categories — approximate them
+      // from the real category enum (typical indoor houseplants vs.
+      // outdoor/full-sun species).
+      const indoorCategories = {'tropical', 'fern', 'flowering', 'herb', 'other'};
+      const outdoorCategories = {'cactus', 'succulent', 'tree'};
+      if (_selectedFilter == 2) return indoorCategories.contains(info.category); // Interior
+      if (_selectedFilter == 3) return outdoorCategories.contains(info.category); // Exterior
       return true;
     }).toList();
 
@@ -877,6 +1185,10 @@ class _GardenTabState extends State<GardenTab> {
                     padding: const EdgeInsets.only(bottom: 10),
                     child: _PlantListCard(
                       plant: plant,
+                      species: plantsProvider.speciesCatalog.firstWhere(
+                        (s) => s.id == plant.speciesId,
+                        orElse: () => catalogFallback(plant.speciesId),
+                      ),
                       onTap: () => Navigator.pushNamed(
                         context,
                         AppRoutes.plantDetail,
@@ -1155,42 +1467,47 @@ const _kSpeciesData = {
   ),
 };
 
-const _kDefaultSpecies = _GardenSpecies(
-  scientificName: 'Especie desconocida',
-  tags: ['Planta'],
-  imageBg: Color(0xFFEAF3EC),
-);
-
 class _GardenSpecies {
   final String scientificName;
   final List<String> tags;
   final Color imageBg;
   final String? assetImage;
+  final IconData placeholderIcon;
+  final Color placeholderIconColor;
   const _GardenSpecies({
     required this.scientificName,
     required this.tags,
     required this.imageBg,
     this.assetImage,
+    this.placeholderIcon = Icons.local_florist_rounded,
+    this.placeholderIconColor = AppColors.primary,
   });
-}
 
-IconData _tagIcon(String tag) {
-  final t = tag.toLowerCase();
-  if (t.contains('tropical')) return Icons.spa_rounded;
-  if (t.contains('luz')) return Icons.center_focus_strong_rounded;
-  if (t.contains('riego') || t.contains('agua')) return Icons.water_drop_rounded;
-  if (t.contains('sol')) return Icons.wb_sunny_rounded;
-  return Icons.eco_rounded;
+  // Real catalog species (real UUID from the backend) don't have a legacy
+  // illustration, so they get a category-based icon/color instead of the
+  // single generic placeholder every species used to share.
+  factory _GardenSpecies.fromReal(PlantSpecies species) {
+    final visual = visualForCategory(species.category);
+    return _GardenSpecies(
+      scientificName: species.scientificName,
+      tags: species.tags,
+      imageBg: visual.background,
+      placeholderIcon: visual.icon,
+      placeholderIconColor: visual.color,
+    );
+  }
 }
 
 // ── Plant list card — Mi Jardín horizontal ────────────────────────────────────
 class _PlantListCard extends StatelessWidget {
   final UserPlant plant;
+  final PlantSpecies species;
   final VoidCallback onTap;
   final VoidCallback onWater;
 
   const _PlantListCard({
     required this.plant,
+    required this.species,
     required this.onTap,
     required this.onWater,
   });
@@ -1201,7 +1518,7 @@ class _PlantListCard extends StatelessWidget {
         ? 99
         : DateTime.now().difference(plant.lastWateredAt!).inDays;
     final needsWater = daysSinceWater >= 7;
-    final sp = _kSpeciesData[plant.speciesId] ?? _kDefaultSpecies;
+    final sp = _kSpeciesData[plant.speciesId] ?? _GardenSpecies.fromReal(species);
 
     // Badge on image: "! Riego" in lime green when needs water, "✓ Riego" in sage green when up-to-date
     final riegoBadgeBg = needsWater ? const Color(0xFFBDE038) : const Color(0xFF789D8C);
@@ -1249,16 +1566,16 @@ class _PlantListCard extends StatelessWidget {
                                 sp.assetImage!,
                                 fit: BoxFit.contain,
                                 errorBuilder: (_, _, _) => Icon(
-                                  Icons.local_florist_rounded,
+                                  sp.placeholderIcon,
                                   size: 56,
-                                  color: AppColors.primary.withValues(alpha: 0.5),
+                                  color: sp.placeholderIconColor.withValues(alpha: 0.5),
                                 ),
                               ),
                             )
                           : Icon(
-                              Icons.local_florist_rounded,
+                              sp.placeholderIcon,
                               size: 56,
-                              color: AppColors.primary.withValues(alpha: 0.5),
+                              color: sp.placeholderIconColor.withValues(alpha: 0.5),
                             ),
                     ),
                   ),
@@ -1429,23 +1746,24 @@ class _PlantListCard extends StatelessWidget {
   }
 
   Widget _buildTag(String text) {
+    final style = styleForTagKind(tagKindFor(text));
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: const Color(0xFFEFF2F1),
+        color: style.background,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(_tagIcon(text), size: 12, color: const Color(0xFF10454F)),
+          Icon(style.icon, size: 12, color: style.color),
           const SizedBox(width: 4),
           Text(
             text,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 10,
               fontWeight: FontWeight.w600,
-              color: Color(0xFF10454F),
+              color: style.color,
               fontFamily: 'Inter',
             ),
           ),

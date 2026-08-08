@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:frontend_eco_2/models/models.dart';
 import 'package:frontend_eco_2/providers/providers.dart';
 import 'package:frontend_eco_2/routing/app_routes.dart';
 import 'package:frontend_eco_2/theme/app_colors.dart';
@@ -57,12 +58,23 @@ class HomeTab extends StatelessWidget {
               ),
               itemBuilder: (context, index) {
                 if (index < plants.length) {
+                  final plant = plants[index];
                   return PlantCard(
-                    plant: plants[index],
+                    plant: plant,
+                    species: plantsProvider.speciesCatalog.firstWhere(
+                      (s) => s.id == plant.speciesId,
+                      orElse: () => PlantSpecies(
+                        id: plant.speciesId,
+                        scientificName: 'Especie desconocida',
+                        commonName: 'Planta',
+                        waterFrequencyDays: 7,
+                        createdAt: DateTime.now(),
+                      ),
+                    ),
                     onTap: () => Navigator.pushNamed(
                       context,
                       AppRoutes.plantDetail,
-                      arguments: plants[index],
+                      arguments: plant,
                     ),
                   );
                 } else {

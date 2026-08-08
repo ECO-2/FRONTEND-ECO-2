@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:frontend_eco_2/models/models.dart';
+import 'package:frontend_eco_2/providers/providers.dart';
 import 'package:frontend_eco_2/routing/app_routes.dart';
+import 'package:frontend_eco_2/utils/plant_visuals.dart';
 import 'package:frontend_eco_2/widgets/common/custom_status_bar.dart';
 import 'package:frontend_eco_2/widgets/common/custom_bottom_nav_bar.dart';
 
@@ -10,6 +13,27 @@ import 'widgets/care_sheet_content.dart';
 import 'widgets/care_status_card.dart';
 import 'widgets/species_care_grid.dart';
 import 'widgets/care_history_list.dart';
+
+// Legacy mock species (s1-s3) keep their curated SpeciesData entry; every
+// real catalog species (real UUID from the backend) gets one built from its
+// actual fields instead of falling back to the same generic placeholder.
+SpeciesData _resolveSpeciesData(BuildContext context, String speciesId) {
+  final legacy = speciesDataMap[speciesId];
+  if (legacy != null) return legacy;
+
+  final plantsProvider = Provider.of<PlantsProvider>(context, listen: false);
+  final species = plantsProvider.speciesCatalog.firstWhere(
+    (s) => s.id == speciesId,
+    orElse: () => PlantSpecies(
+      id: speciesId,
+      scientificName: 'Especie desconocida',
+      commonName: 'Planta',
+      waterFrequencyDays: 7,
+      createdAt: DateTime.now(),
+    ),
+  );
+  return SpeciesData.fromReal(species);
+}
 
 class PlantDetailScreen extends StatelessWidget {
   const PlantDetailScreen({super.key});
@@ -21,7 +45,7 @@ class PlantDetailScreen extends StatelessWidget {
       return const Scaffold(body: Center(child: Text('Planta no encontrada')));
     }
 
-    final sp = speciesDataMap[plant.speciesId] ?? defaultSpecies;
+    final sp = _resolveSpeciesData(context, plant.speciesId);
 
     // Calculate dynamic dates for mock care history and status card
     final lastWatered =
@@ -50,10 +74,10 @@ class PlantDetailScreen extends StatelessWidget {
                 color: sp.bg,
                 child: sp.assetImage != null
                     ? Image.asset(sp.assetImage!, fit: BoxFit.contain)
-                    : const Icon(
-                        Icons.local_florist_rounded,
+                    : Icon(
+                        sp.placeholderIcon,
                         size: 80,
-                        color: Color(0xFFB0B0B0),
+                        color: sp.placeholderIconColor.withValues(alpha: 0.6),
                       ),
               ),
             ),
@@ -143,28 +167,34 @@ class PlantDetailScreen extends StatelessWidget {
                         Wrap(
                           spacing: 8,
                           runSpacing: 8,
-                          children: sp.tags
-                              .map(
-                                (tag) => Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 6,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFFDFE2D6),
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                  child: Text(
+                          children: sp.tags.map((tag) {
+                            final style = styleForTagKind(tagKindFor(tag));
+                            return Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                color: style.background,
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(style.icon, size: 12, color: style.color),
+                                  const SizedBox(width: 5),
+                                  Text(
                                     tag,
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontSize: 11,
                                       fontWeight: FontWeight.w600,
-                                      color: Color(0xFF1A3B35),
+                                      color: style.color,
                                     ),
                                   ),
-                                ),
-                              )
-                              .toList(),
+                                ],
+                              ),
+                            );
+                          }).toList(),
                         ),
                         const SizedBox(height: 16),
                         const Divider(
@@ -449,7 +479,7 @@ class PlantDetailScreen extends StatelessWidget {
   }
 
   void _showCareSheet(BuildContext context, UserPlant plant) {
-    final sp = speciesDataMap[plant.speciesId] ?? defaultSpecies;
+    final sp = _resolveSpeciesData(context, plant.speciesId);
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,

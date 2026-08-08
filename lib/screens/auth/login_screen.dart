@@ -37,15 +37,29 @@ class _LoginScreenState extends State<LoginScreen> {
 
       if (success && mounted) {
         final user = userProvider.currentUser;
-        final nextRoute = (user != null && user.onboardingCompleted)
-            ? AppRoutes.dashboard
-            : AppRoutes.onboarding;
 
-        Navigator.pushNamedAndRemoveUntil(
-          context,
-          nextRoute,
-          (route) => false,
-        );
+        if (user != null && user.onboardingCompleted) {
+          // Cargar catálogo de plantas y progreso antes de entrar al
+          // dashboard (mismo patrón que onboarding_screen.dart al terminar
+          // o saltar el onboarding). Sin esto, PlantsProvider.speciesCatalog
+          // se queda vacío tras un login normal y el catálogo no aparece.
+          final plantsProvider = context.read<PlantsProvider>();
+          final missionsProvider = context.read<MissionsProvider>();
+          await Future.wait([plantsProvider.init(), missionsProvider.init()]);
+          if (!mounted) return;
+
+          Navigator.pushNamedAndRemoveUntil(
+            context,
+            AppRoutes.dashboard,
+            (route) => false,
+          );
+        } else {
+          Navigator.pushNamedAndRemoveUntil(
+            context,
+            AppRoutes.onboarding,
+            (route) => false,
+          );
+        }
       } else if (mounted && userProvider.errorMessage != null) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
