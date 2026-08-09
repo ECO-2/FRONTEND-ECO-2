@@ -72,8 +72,8 @@ class PlantsProvider with ChangeNotifier {
   // Agregar planta
   // ---------------------------------------------------------------------------
 
-  void addPlantFromSpecies(PlantSpecies species, {String? nickname}) {
-    addPlant(nickname ?? species.commonName, species.id, species.commonName);
+  Future<bool> addPlantFromSpecies(PlantSpecies species, {String? nickname}) {
+    return addPlant(nickname ?? species.commonName, species.id, species.commonName);
   }
 
   /// Devuelve true si la planta se agregó correctamente, false si falló

@@ -4,6 +4,7 @@ import 'package:frontend_eco_2/models/models.dart';
 import 'package:frontend_eco_2/providers/providers.dart';
 import 'package:frontend_eco_2/routing/app_routes.dart';
 import 'package:frontend_eco_2/theme/app_colors.dart';
+import 'package:frontend_eco_2/utils/achievement_feedback.dart';
 import 'package:frontend_eco_2/utils/plant_visuals.dart';
 import 'package:frontend_eco_2/widgets/garden/add_plant_modal.dart';
 
@@ -61,6 +62,45 @@ class _GardenTabState extends State<GardenTab> {
   void dispose() {
     _searchController.dispose();
     super.dispose();
+  }
+
+  /// Agrega [species] al jardín del usuario y, si tuvo éxito, otorga XP real
+  /// y revisa logros de tipo `user_plants` — usado por los botones rápidos
+  /// "Añadir" del catálogo (a diferencia de AddPlantModal, que hace lo mismo
+  /// pero con selección de apodo).
+  Future<void> _addSpeciesToGarden(
+    BuildContext context,
+    PlantSpecies species,
+    PlantsProvider plantsProvider,
+  ) async {
+    final success = await plantsProvider.addPlantFromSpecies(species);
+    if (!context.mounted) return;
+
+    if (!success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(plantsProvider.errorMessage ?? 'No se pudo agregar la planta.'),
+          backgroundColor: AppColors.error,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ),
+      );
+      return;
+    }
+
+    final missionsProvider = Provider.of<MissionsProvider>(context, listen: false);
+    final unlocked = await missionsProvider.onPlantAdded(plantsProvider.userPlants.length);
+    if (!context.mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('¡${species.commonName} añadida a tu jardín! 🌿'),
+        backgroundColor: AppColors.primary,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      ),
+    );
+    showAchievementUnlockedSnackbars(context, unlocked);
   }
 
   // Legacy mock species (s1-s5) keep their bespoke background/illustration;
@@ -965,19 +1005,7 @@ class _GardenTabState extends State<GardenTab> {
                       const SizedBox(height: 8),
                       // Add Button
                       GestureDetector(
-                        onTap: () {
-                          plantsProvider.addPlantFromSpecies(species);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('¡${species.commonName} añadida a tu jardín! 🌿'),
-                              backgroundColor: AppColors.primary,
-                              behavior: SnackBarBehavior.floating,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                            ),
-                          );
-                        },
+                        onTap: () => _addSpeciesToGarden(context, species, plantsProvider),
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
                           decoration: BoxDecoration(
@@ -1108,18 +1136,7 @@ class _GardenTabState extends State<GardenTab> {
                         ),
                       ),
                       GestureDetector(
-                        onTap: () {
-                          plantsProvider.addPlantFromSpecies(species);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('¡${species.commonName} añadida a tu jardín! 🌿'),
-                              backgroundColor: AppColors.primary,
-                              behavior: SnackBarBehavior.floating,
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10)),
-                            ),
-                          );
-                        },
+                        onTap: () => _addSpeciesToGarden(context, species, plantsProvider),
                         child: Container(
                           padding: const EdgeInsets.all(4),
                           decoration: const BoxDecoration(
@@ -1536,104 +1553,104 @@ class _PlantListCard extends StatelessWidget {
 
     return GestureDetector(
       onTap: onTap,
-      child: IntrinsicHeight(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // ── LEFT CONTAINER: Image box ─────────────────────────
-            Container(
-              width: 145,
-              constraints: const BoxConstraints(minHeight: 145),
-              decoration: BoxDecoration(
-                color: sp.imageBg,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color: const Color(0xFF5E7A82),
-                  width: 1.5,
-                ),
-              ),
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  // Image
-                  Positioned.fill(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: sp.assetImage != null
-                          ? ClipRRect(
-                              borderRadius: BorderRadius.circular(12),
-                              child: Image.asset(
-                                sp.assetImage!,
-                                fit: BoxFit.contain,
-                                errorBuilder: (_, _, _) => Icon(
-                                  sp.placeholderIcon,
-                                  size: 56,
-                                  color: sp.placeholderIconColor.withValues(alpha: 0.5),
-                                ),
-                              ),
-                            )
-                          : Icon(
-                              sp.placeholderIcon,
-                              size: 56,
-                              color: sp.placeholderIconColor.withValues(alpha: 0.5),
-                            ),
-                    ),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: const Color(0xFFE5EAE7),
+            width: 1.2,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.02),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // ── LEFT CONTAINER: Image box ─────────────────────────
+              Container(
+                width: 110,
+                constraints: const BoxConstraints(minHeight: 130),
+                decoration: BoxDecoration(
+                  color: sp.imageBg,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: const Color(0xFF5E7A82),
+                    width: 1.5,
                   ),
-                  // "! Riego" Badge — top-right
-                  Positioned(
-                    top: 10,
-                    right: 10,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
+                ),
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    // Image
+                    Positioned.fill(
+                      child: Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: sp.assetImage != null
+                            ? ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: Image.asset(
+                                  sp.assetImage!,
+                                  fit: BoxFit.contain,
+                                  errorBuilder: (_, _, _) => Icon(
+                                    sp.placeholderIcon,
+                                    size: 48,
+                                    color: sp.placeholderIconColor.withValues(alpha: 0.5),
+                                  ),
+                                ),
+                              )
+                            : Icon(
+                                sp.placeholderIcon,
+                                size: 48,
+                                color: sp.placeholderIconColor.withValues(alpha: 0.5),
+                              ),
                       ),
-                      decoration: BoxDecoration(
-                        color: riegoBadgeBg,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Text(
-                        riegoBadgeText,
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w800,
-                          color: riegoBadgeColor,
-                          fontFamily: 'Inter',
+                    ),
+                    // "! Riego" Badge — top-right
+                    Positioned(
+                      top: 6,
+                      right: 6,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 3,
+                        ),
+                        decoration: BoxDecoration(
+                          color: riegoBadgeBg,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          riegoBadgeText,
+                          style: TextStyle(
+                            fontSize: 9,
+                            fontWeight: FontWeight.w800,
+                            color: riegoBadgeColor,
+                            fontFamily: 'Inter',
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 12),
-
-            // ── RIGHT CONTAINER: Info card ────────────────────────
-            Expanded(
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: const Color(0xFFE5EAE7),
-                    width: 1.2,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.02),
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
-                    ),
                   ],
                 ),
+              ),
+              const SizedBox(width: 16),
+
+              // ── RIGHT CONTAINER: Info column ────────────────────────
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     // Title + Chevron
                     Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Expanded(
                           child: Text(
@@ -1641,22 +1658,21 @@ class _PlantListCard extends StatelessWidget {
                             style: const TextStyle(
                               fontFamily: 'DM Sans',
                               fontWeight: FontWeight.w700,
-                              fontSize: 22,
+                              fontSize: 18,
                               color: _kTextDark,
                             ),
-                            maxLines: 1,
+                            maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                        const SizedBox(width: 4),
                         const Icon(
                           Icons.chevron_right_rounded,
-                          size: 24,
+                          size: 22,
                           color: _kTextDark,
                         ),
                       ],
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 2),
 
                     // Scientific name
                     Text(
@@ -1664,17 +1680,19 @@ class _PlantListCard extends StatelessWidget {
                       style: const TextStyle(
                         fontFamily: 'DM Sans',
                         fontWeight: FontWeight.w400,
-                        fontSize: 15,
+                        fontSize: 14,
                         color: _kTextMuted,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 10),
 
                     // Status Row (Status Pill + Days Label)
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
+                    Wrap(
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      spacing: 8,
+                      runSpacing: 4,
                       children: [
                         Container(
                           padding: const EdgeInsets.symmetric(
@@ -1683,7 +1701,7 @@ class _PlantListCard extends StatelessWidget {
                           ),
                           decoration: BoxDecoration(
                             color: statusBg,
-                            borderRadius: BorderRadius.circular(20),
+                            borderRadius: BorderRadius.circular(16),
                             border: Border.all(
                               color: statusBorderColor,
                               width: 1.2,
@@ -1697,7 +1715,7 @@ class _PlantListCard extends StatelessWidget {
                                 size: 12,
                                 color: statusTextColor,
                               ),
-                              const SizedBox(width: 6),
+                              const SizedBox(width: 4),
                               Text(
                                 statusText,
                                 style: TextStyle(
@@ -1710,21 +1728,17 @@ class _PlantListCard extends StatelessWidget {
                             ],
                           ),
                         ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Text(
-                            daysLabel,
-                            style: const TextStyle(
-                              fontFamily: 'Inter',
-                              fontSize: 12,
-                              color: Color(0xFF807F7F),
-                            ),
-                            overflow: TextOverflow.ellipsis,
+                        Text(
+                          daysLabel,
+                          style: const TextStyle(
+                            fontFamily: 'Inter',
+                            fontSize: 12,
+                            color: Color(0xFF807F7F),
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 10),
 
                     // Tags Row
                     Wrap(
@@ -1738,8 +1752,8 @@ class _PlantListCard extends StatelessWidget {
                   ],
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

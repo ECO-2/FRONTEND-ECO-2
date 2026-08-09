@@ -2,21 +2,44 @@ import 'package:flutter/material.dart';
 import 'package:frontend_eco_2/models/models.dart';
 import 'package:frontend_eco_2/services/services.dart';
 
+/// Tipo de condición usada por los logros sembrados en el backend
+/// (Achievement.conditionType). Centralizado acá porque tanto el conteo
+/// como el chequeo de desbloqueo dependen de conocer estos valores.
+class AchievementConditions {
+  static const onboardingCompleted = 'onboarding_completed';
+  static const userPlants = 'user_plants';
+  static const careLogs = 'care_logs';
+  static const plantScans = 'plant_scans';
+  static const roomsCreated = 'rooms_created';
+}
+
+/// action_type usado al otorgar XP por registrar un cuidado — se reutiliza
+/// para reconstruir cuántos cuidados reales se han hecho a partir del
+/// historial de XP (GET /progress/xp-logs), sin necesitar un endpoint de
+/// conteo aparte en el backend.
+const _kCareLogActionType = 'care_log';
+
 class MissionsProvider with ChangeNotifier {
   final GamificationService _gamificationService;
+  final CareService _careService;
 
   List<Achievement> _achievements = [];
   List<UserAchievement> _unlockedAchievements = [];
   UserProgress? _progress;
+  int _careLogCount = 0;
   bool _isLoading = false;
   String? _errorMessage;
 
-  MissionsProvider({required GamificationService gamificationService})
-      : _gamificationService = gamificationService;
+  MissionsProvider({
+    required GamificationService gamificationService,
+    required CareService careService,
+  })  : _gamificationService = gamificationService,
+        _careService = careService;
 
   List<Achievement> get achievements => _achievements;
   List<UserAchievement> get unlockedAchievements => _unlockedAchievements;
   UserProgress? get progress => _progress;
+  int get careLogCount => _careLogCount;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
@@ -24,11 +47,34 @@ class MissionsProvider with ChangeNotifier {
   List<String> get completedAchievementIds =>
       _unlockedAchievements.map((ua) => ua.achievementId).toList();
 
+  /// Logros aún no desbloqueados, ordenados por qué tan cerca está el
+  /// usuario de cumplir la condición — útil para mostrar "el próximo logro"
+  /// como si fuera una misión activa, sin necesitar un backend de misiones.
+  List<Achievement> get lockedAchievements =>
+      _achievements.where((a) => !isAchievementCompleted(a.id)).toList();
+
   /// Semillas actuales del usuario (0 si no ha cargado aún).
   int get userSeeds => _progress?.seeds ?? 0;
 
   bool isAchievementCompleted(String id) =>
       completedAchievementIds.contains(id);
+
+  /// Progreso actual (0-N) hacia la condición de un logro, para barras de
+  /// progreso reales en vez de porcentajes inventados.
+  int progressFor(Achievement achievement) {
+    switch (achievement.conditionType) {
+      case AchievementConditions.userPlants:
+        return _userPlantsCount;
+      case AchievementConditions.careLogs:
+        return _careLogCount;
+      case AchievementConditions.onboardingCompleted:
+        return isAchievementCompleted(achievement.id) ? 1 : 0;
+      default:
+        return 0; // plant_scans / rooms_created: sin dato real todavía.
+    }
+  }
+
+  int _userPlantsCount = 0;
 
   void _setLoading(bool value) {
     _isLoading = value;
@@ -48,10 +94,14 @@ class MissionsProvider with ChangeNotifier {
         _gamificationService.getProgress(),
         _gamificationService.getAchievements(),
         _gamificationService.getMyAchievements(),
+        _gamificationService.getXpLogs(),
       ]);
       _progress = results[0] as UserProgress;
       _achievements = results[1] as List<Achievement>;
       _unlockedAchievements = results[2] as List<UserAchievement>;
+      final xpLogs = results[3] as List<XpLog>;
+      _careLogCount =
+          xpLogs.where((log) => log.actionType == _kCareLogActionType).length;
     } on ApiException catch (e) {
       _errorMessage = e.message;
     } catch (_) {
@@ -97,22 +147,90 @@ class MissionsProvider with ChangeNotifier {
   }
 
   // ---------------------------------------------------------------------------
-  // Desbloquear logro manualmente (si es necesario)
+  // Acciones reales del usuario → XP + logros
   // ---------------------------------------------------------------------------
 
-  void completeAchievement(String id) {
-    if (!completedAchievementIds.contains(id)) {
-      // Agregar localmente hasta que se recargue desde API
-      _unlockedAchievements.add(UserAchievement(
-        id: 'local_${DateTime.now().millisecondsSinceEpoch}',
-        userId: '',
-        achievementId: id,
-        unlockedAt: DateTime.now(),
-      ));
+  /// Registra un cuidado real (POST /care/logs), otorga XP, y desbloquea
+  /// cualquier logro de tipo `care_logs` que se haya alcanzado.
+  ///
+  /// Devuelve `null` si falló (ver [errorMessage]), o la lista de logros
+  /// recién desbloqueados (vacía si el registro fue exitoso pero no
+  /// desbloqueó ninguno) — null en vez de una lista vacía en ambos casos
+  /// para que la UI pueda distinguir "falló" de "no había nada que
+  /// desbloquear" sin depender del estado previo de [errorMessage].
+  Future<List<Achievement>?> logCare({
+    required String userPlantId,
+    required String taskType,
+  }) async {
+    _errorMessage = null;
+    try {
+      await _careService.createCareLog(userPlantId: userPlantId, taskType: taskType);
+    } on ApiException catch (e) {
+      _errorMessage = e.message;
       notifyListeners();
+      return null;
+    } catch (_) {
+      _errorMessage = 'No se pudo registrar el cuidado.';
+      notifyListeners();
+      return null;
     }
+
+    _careLogCount++;
+    await addXp(10, actionType: _kCareLogActionType);
+    return _unlockEligible(AchievementConditions.careLogs, _careLogCount);
   }
 
-  // Mantenido por compatibilidad con código existente
-  void incrementRegisteredPlants() {}
+  /// Debe llamarse justo después de agregar una planta exitosamente, con el
+  /// total real de plantas del usuario (PlantsProvider.userPlants.length).
+  /// Otorga XP y desbloquea logros de tipo `user_plants` alcanzados.
+  Future<List<Achievement>> onPlantAdded(int totalPlantCount) async {
+    _userPlantsCount = totalPlantCount;
+    await addXp(15, actionType: 'plant_added');
+    return _unlockEligible(AchievementConditions.userPlants, totalPlantCount);
+  }
+
+  /// Sincroniza el contador de plantas sin otorgar XP ni desbloquear nada —
+  /// para usarse justo después de cargar PlantsProvider (login/onboarding/
+  /// arranque de la app), así `progressFor()` muestra el progreso real desde
+  /// el primer render en vez de arrancar en 0 hasta la próxima planta.
+  void syncUserPlantsCount(int totalPlantCount) {
+    if (_userPlantsCount == totalPlantCount) return;
+    _userPlantsCount = totalPlantCount;
+    notifyListeners();
+  }
+
+  /// Debe llamarse justo después de completar (o saltar) el onboarding.
+  Future<List<Achievement>> onOnboardingCompleted() {
+    return _unlockEligible(AchievementConditions.onboardingCompleted, 1);
+  }
+
+  /// Revisa los logros de [conditionType] cuyo `conditionValue` ya se
+  /// alcanzó con [currentValue] y aún no están desbloqueados, los desbloquea
+  /// contra la API real, y devuelve la lista de los que se desbloquearon
+  /// ahora mismo (para que la UI pueda celebrarlo).
+  Future<List<Achievement>> _unlockEligible(String conditionType, int currentValue) async {
+    final eligible = _achievements.where((a) =>
+        a.conditionType == conditionType &&
+        currentValue >= a.conditionValue &&
+        !isAchievementCompleted(a.id));
+
+    final unlocked = <Achievement>[];
+    for (final achievement in eligible) {
+      try {
+        final userAchievement =
+            await _gamificationService.unlockAchievement(achievement.id);
+        _unlockedAchievements.add(userAchievement);
+        unlocked.add(achievement);
+      } on ApiException catch (e) {
+        // 409 = ya estaba desbloqueado (ej. otra sesión/dispositivo se
+        // adelantó) — no es un error real, solo lo ignoramos.
+        if (!e.isConflict) _errorMessage = e.message;
+      } catch (_) {
+        // Falla de red puntual: se reintentará la próxima vez que se
+        // cumpla la condición (ej. al agregar la siguiente planta).
+      }
+    }
+    if (unlocked.isNotEmpty) notifyListeners();
+    return unlocked;
+  }
 }

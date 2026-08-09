@@ -46,6 +46,7 @@ class _LoginScreenState extends State<LoginScreen> {
           final plantsProvider = context.read<PlantsProvider>();
           final missionsProvider = context.read<MissionsProvider>();
           await Future.wait([plantsProvider.init(), missionsProvider.init()]);
+          missionsProvider.syncUserPlantsCount(plantsProvider.userPlants.length);
           if (!mounted) return;
 
           Navigator.pushNamedAndRemoveUntil(

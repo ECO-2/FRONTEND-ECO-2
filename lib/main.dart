@@ -19,6 +19,7 @@ void main() async {
   final userService = UserService(apiClient);
   final plantsService = PlantsService(apiClient);
   final gamificationService = GamificationService(apiClient);
+  final careService = CareService(apiClient);
 
   runApp(MyApp(
     storage: storage,
@@ -26,6 +27,7 @@ void main() async {
     userService: userService,
     plantsService: plantsService,
     gamificationService: gamificationService,
+    careService: careService,
   ));
 }
 
@@ -35,6 +37,7 @@ class MyApp extends StatelessWidget {
   final UserService userService;
   final PlantsService plantsService;
   final GamificationService gamificationService;
+  final CareService careService;
 
   const MyApp({
     super.key,
@@ -43,6 +46,7 @@ class MyApp extends StatelessWidget {
     required this.userService,
     required this.plantsService,
     required this.gamificationService,
+    required this.careService,
   });
 
   @override
@@ -61,8 +65,10 @@ class MyApp extends StatelessWidget {
           create: (_) => PlantsProvider(plantsService: plantsService),
         ),
         ChangeNotifierProvider(
-          create: (_) =>
-              MissionsProvider(gamificationService: gamificationService),
+          create: (_) => MissionsProvider(
+            gamificationService: gamificationService,
+            careService: careService,
+          ),
         ),
         ChangeNotifierProvider(create: (_) => NotificationsProvider()),
       ],
@@ -152,6 +158,7 @@ class _AppLoaderState extends State<_AppLoader> {
         plantsProvider.init(),
         missionsProvider.init(),
       ]);
+      missionsProvider.syncUserPlantsCount(plantsProvider.userPlants.length);
 
       if (!mounted) return;
       navigatorKey.currentState?.pushNamedAndRemoveUntil(

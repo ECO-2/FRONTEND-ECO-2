@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:frontend_eco_2/models/models.dart';
 import 'package:frontend_eco_2/providers/providers.dart';
 import 'package:frontend_eco_2/theme/app_colors.dart';
+import 'package:frontend_eco_2/utils/achievement_feedback.dart';
 import 'package:frontend_eco_2/utils/plant_visuals.dart';
 
 class AddPlantModal extends StatefulWidget {
@@ -70,6 +71,11 @@ class _AddPlantModalState extends State<AddPlantModal> {
     if (!mounted) return;
 
     if (success) {
+      final missionsProvider = Provider.of<MissionsProvider>(context, listen: false);
+      final unlocked =
+          await missionsProvider.onPlantAdded(plantsProvider.userPlants.length);
+      if (!mounted) return;
+
       Navigator.of(context).pop();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -79,6 +85,7 @@ class _AddPlantModalState extends State<AddPlantModal> {
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         ),
       );
+      showAchievementUnlockedSnackbars(context, unlocked);
     } else {
       setState(() => _isSubmitting = false);
       ScaffoldMessenger.of(context).showSnackBar(

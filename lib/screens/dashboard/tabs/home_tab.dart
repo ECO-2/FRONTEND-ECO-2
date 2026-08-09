@@ -419,8 +419,47 @@ class HomeTab extends StatelessWidget {
   }
 
   Widget _buildMissionCard(BuildContext context, MissionsProvider mp) {
-    final progress = mp.userSeeds / 250.0; // mock target
-    final clampedProgress = progress.clamp(0.0, 1.0);
+    // Sin backend de "misiones" real, se muestra el logro rastreable más
+    // cercano a completarse (mismo criterio que Misiones/Trofeos) en vez de
+    // un progreso inventado a partir de las semillas.
+    const trackable = {
+      AchievementConditions.userPlants,
+      AchievementConditions.careLogs,
+      AchievementConditions.onboardingCompleted,
+    };
+    final candidates = mp.lockedAchievements.where((a) => trackable.contains(a.conditionType)).toList()
+      ..sort((a, b) =>
+          (a.conditionValue - mp.progressFor(a)).compareTo(b.conditionValue - mp.progressFor(b)));
+
+    if (candidates.isEmpty) {
+      return Container(
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(15),
+          border: Border.all(color: AppColors.primary.withValues(alpha: 0.25), width: 1),
+        ),
+        padding: const EdgeInsets.all(16),
+        child: const Row(
+          children: [
+            Icon(Icons.emoji_events_rounded, color: AppColors.primary, size: 22),
+            SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                '¡Completaste todos los logros disponibles!',
+                style: TextStyle(color: AppColors.textPrimary, fontFamily: 'Inter'),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final achievement = candidates.first;
+    final current = mp.progressFor(achievement);
+    final clampedProgress =
+        achievement.conditionValue == 0 ? 1.0 : (current / achievement.conditionValue).clamp(0.0, 1.0);
+    final unitLabel = achievement.conditionType == AchievementConditions.careLogs ? 'cuidados' : 'plantas';
 
     return Container(
       width: double.infinity,
@@ -442,9 +481,9 @@ class HomeTab extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Jardin Urbano',
-                      style: TextStyle(
+                    Text(
+                      achievement.name,
+                      style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 24,
                         color: AppColors.textPrimary,
@@ -453,7 +492,9 @@ class HomeTab extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      '${(clampedProgress * 5).floor()}/5 plantas',
+                      achievement.conditionType == AchievementConditions.onboardingCompleted
+                          ? (current >= achievement.conditionValue ? 'Completado' : 'Pendiente')
+                          : '$current/${achievement.conditionValue} $unitLabel',
                       style: const TextStyle(
                         fontSize: 16,
                         color: AppColors.textSecondary,
@@ -507,9 +548,9 @@ class HomeTab extends StatelessWidget {
                   color: AppColors.accentLight,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Text(
-                  '+50 semillas',
-                  style: TextStyle(
+                child: Text(
+                  '+${achievement.xpReward} XP',
+                  style: const TextStyle(
                     color: AppColors.primaryDark,
                     fontWeight: FontWeight.bold,
                     fontSize: 12,

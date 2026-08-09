@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:frontend_eco_2/providers/providers.dart';
 import 'package:frontend_eco_2/routing/app_routes.dart';
 import 'package:frontend_eco_2/theme/app_colors.dart';
+import 'package:frontend_eco_2/utils/achievement_feedback.dart';
 import 'package:frontend_eco_2/widgets/common/custom_button.dart';
 import 'package:frontend_eco_2/widgets/common/custom_text_field.dart';
 
@@ -128,8 +129,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       final plantsProvider = context.read<PlantsProvider>();
       final missionsProvider = context.read<MissionsProvider>();
       await Future.wait([plantsProvider.init(), missionsProvider.init()]);
+      missionsProvider.syncUserPlantsCount(plantsProvider.userPlants.length);
+      final unlocked = await missionsProvider.onOnboardingCompleted();
 
       if (!mounted) return;
+      showAchievementUnlockedSnackbars(context, unlocked);
       Navigator.pushNamedAndRemoveUntil(
         context,
         AppRoutes.dashboard,
@@ -147,10 +151,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   void _skip() async {
-    // El usuario omite el onboarding — ir directo al dashboard
+    // El usuario omite el onboarding — ir directo al dashboard. No se
+    // desbloquea el logro "Primeros Pasos" acá porque, al saltar, nunca se
+    // llamó completeOnboarding() — el usuario no completó el onboarding de
+    // verdad, así que el backend tampoco marca onboarding_completed.
     final plantsProvider = context.read<PlantsProvider>();
     final missionsProvider = context.read<MissionsProvider>();
     await Future.wait([plantsProvider.init(), missionsProvider.init()]);
+    missionsProvider.syncUserPlantsCount(plantsProvider.userPlants.length);
     if (!mounted) return;
     Navigator.pushNamedAndRemoveUntil(
       context,

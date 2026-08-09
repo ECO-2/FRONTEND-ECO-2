@@ -2,7 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:frontend_eco_2/models/models.dart';
 import 'package:frontend_eco_2/providers/providers.dart';
+import 'package:frontend_eco_2/theme/app_colors.dart';
+import 'package:frontend_eco_2/utils/achievement_feedback.dart';
 import 'species_data.dart';
+
+// Etiqueta visible en español -> task_type real que espera el backend
+// (enum TaskType de Prisma: watering/fertilizing/pruning/repotting/...).
+const Map<String, String> _kCareTaskTypes = {
+  'Riego': 'watering',
+  'Fertilización': 'fertilizing',
+  'Poda': 'pruning',
+  'Trasplante': 'repotting',
+};
 
 class CareSheetContent extends StatefulWidget {
   final UserPlant plant;
@@ -23,6 +34,7 @@ class _CareSheetContentState extends State<CareSheetContent> {
   String _selectedDateOption = 'Hoy';
   DateTime _customDate = DateTime.now();
   final TextEditingController _noteController = TextEditingController();
+  bool _isSubmitting = false;
 
   @override
   void dispose() {
@@ -307,6 +319,7 @@ class _CareSheetContentState extends State<CareSheetContent> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF0D2B31),
                   foregroundColor: Colors.white,
+                  disabledBackgroundColor: const Color(0xFF0D2B31).withValues(alpha: 0.5),
                   elevation: 0,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
@@ -314,43 +327,77 @@ class _CareSheetContentState extends State<CareSheetContent> {
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   minimumSize: const Size.fromHeight(50),
                 ),
-                onPressed: () {
-                  // Submit logic
-                  DateTime finalDate = DateTime.now();
-                  if (_selectedDateOption == 'Ayer') {
-                    finalDate = DateTime.now().subtract(const Duration(days: 1));
-                  } else if (_selectedDateOption == 'Otra fecha') {
-                    finalDate = _customDate;
-                  }
-                  
-                  if (_selectedType == 'Riego') {
-                    plantsProvider.waterPlant(widget.plant.id, date: finalDate);
-                  }
-                  
-                  Navigator.pop(context);
-                  
-                  // Show success feedback
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Cuidado registrado: $_selectedType 🌿'),
-                      backgroundColor: const Color(0xFF0D2B31),
-                      duration: const Duration(seconds: 2),
-                    ),
-                  );
-                },
-                child: const Text(
-                  'Registrar cuidado',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 15,
-                  ),
-                ),
+                onPressed: _isSubmitting ? null : () => _submit(plantsProvider),
+                child: _isSubmitting
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.5,
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                        ),
+                      )
+                    : const Text(
+                        'Registrar cuidado',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                        ),
+                      ),
               ),
             ],
           ),
         ),
       ),
     );
+  }
+
+  Future<void> _submit(PlantsProvider plantsProvider) async {
+    setState(() => _isSubmitting = true);
+
+    DateTime finalDate = DateTime.now();
+    if (_selectedDateOption == 'Ayer') {
+      finalDate = DateTime.now().subtract(const Duration(days: 1));
+    } else if (_selectedDateOption == 'Otra fecha') {
+      finalDate = _customDate;
+    }
+
+    final missionsProvider = Provider.of<MissionsProvider>(context, listen: false);
+    final unlocked = await missionsProvider.logCare(
+      userPlantId: widget.plant.id,
+      taskType: _kCareTaskTypes[_selectedType]!,
+    );
+
+    if (unlocked == null) {
+      if (!mounted) return;
+      setState(() => _isSubmitting = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(missionsProvider.errorMessage ?? 'No se pudo registrar el cuidado.'),
+          backgroundColor: AppColors.error,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ),
+      );
+      return;
+    }
+
+    // El riego además actualiza last_watered_at, que es lo que mueve el
+    // badge "necesita riego" en el resto de la app.
+    if (_selectedType == 'Riego') {
+      await plantsProvider.waterPlant(widget.plant.id, date: finalDate);
+    }
+
+    if (!mounted) return;
+    Navigator.pop(context);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Cuidado registrado: $_selectedType 🌿'),
+        backgroundColor: const Color(0xFF0D2B31),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+    showAchievementUnlockedSnackbars(context, unlocked);
   }
 
   Widget _buildTypeCard({

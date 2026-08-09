@@ -50,4 +50,20 @@ class GamificationService {
         .map((e) => UserAchievement.fromJson(e as Map<String, dynamic>))
         .toList();
   }
+
+  /// POST /gamification/achievements/{id}/unlock
+  Future<UserAchievement> unlockAchievement(String achievementId) async {
+    final data = await _client
+        .post('/gamification/achievements/$achievementId/unlock') as Map<String, dynamic>;
+    return UserAchievement.fromJson(data);
+  }
+
+  /// GET /gamification/progress/xp-logs — historial de XP ganado, usado para
+  /// reconstruir contadores reales (ej. cuántos cuidados se han registrado)
+  /// sin necesitar un endpoint de agregación aparte.
+  Future<List<XpLog>> getXpLogs() async {
+    final data =
+        await _client.get('/gamification/progress/xp-logs') as List<dynamic>;
+    return data.map((e) => XpLog.fromJson(e as Map<String, dynamic>)).toList();
+  }
 }

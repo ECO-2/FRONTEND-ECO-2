@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:frontend_eco_2/models/models.dart';
-import 'package:frontend_eco_2/providers/plants_provider.dart';
+import 'package:frontend_eco_2/providers/providers.dart';
+import 'package:frontend_eco_2/theme/app_colors.dart';
+import 'package:frontend_eco_2/utils/achievement_feedback.dart';
 import 'package:frontend_eco_2/utils/plant_visuals.dart';
 
 // Legacy mock species (s1-s5) still ship a real illustration asset; every
@@ -682,26 +684,7 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
                       ),
                       padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
-                    onPressed: () {
-                      Provider.of<PlantsProvider>(
-                        context,
-                        listen: false,
-                      ).addPlantFromSpecies(species);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            '¡${species.commonName} añadida a tu jardín! 🌿',
-                            style: const TextStyle(fontWeight: FontWeight.w600),
-                          ),
-                          backgroundColor: const Color(0xFF10454F),
-                          behavior: SnackBarBehavior.floating,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                      );
-                      Navigator.pop(context);
-                    },
+                    onPressed: () => _addToGarden(context, species),
                     icon: const Icon(
                       Icons.add,
                       size: 22,
@@ -751,6 +734,42 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
         ],
       ),
     );
+  }
+
+  Future<void> _addToGarden(BuildContext context, PlantSpecies species) async {
+    final plantsProvider = Provider.of<PlantsProvider>(context, listen: false);
+    final success = await plantsProvider.addPlantFromSpecies(species);
+    if (!context.mounted) return;
+
+    if (!success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(plantsProvider.errorMessage ?? 'No se pudo agregar la planta.'),
+          backgroundColor: AppColors.error,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+      );
+      return;
+    }
+
+    final missionsProvider = Provider.of<MissionsProvider>(context, listen: false);
+    final unlocked = await missionsProvider.onPlantAdded(plantsProvider.userPlants.length);
+    if (!context.mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          '¡${species.commonName} añadida a tu jardín! 🌿',
+          style: const TextStyle(fontWeight: FontWeight.w600),
+        ),
+        backgroundColor: const Color(0xFF10454F),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+    );
+    showAchievementUnlockedSnackbars(context, unlocked);
+    Navigator.pop(context);
   }
 
   Widget _buildCareCard({
