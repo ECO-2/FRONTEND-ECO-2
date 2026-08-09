@@ -12,9 +12,14 @@ class SpeciesData {
   final String light;
   final String temp;
   final String co2;
+  final String humidity;
   final String personalNote;
   final IconData placeholderIcon;
   final Color placeholderIconColor;
+  // Guía de cuidado en lenguaje llano: dónde ubicarla y cómo regarla,
+  // pensada para orientar a alguien que recién la agrega a su jardín.
+  final String placementHint;
+  final String careGuide;
 
   const SpeciesData({
     required this.scientific,
@@ -26,9 +31,12 @@ class SpeciesData {
     required this.light,
     required this.temp,
     required this.co2,
+    this.humidity = '40-60%',
     required this.personalNote,
     this.placeholderIcon = Icons.local_florist_rounded,
     this.placeholderIconColor = const Color(0xFFB0B0B0),
+    this.placementHint = 'Luz filtrada, lejos de corrientes de aire.',
+    required this.careGuide,
   });
 
   // Real catalog species (real UUID from the backend) don't have a legacy
@@ -49,9 +57,12 @@ class SpeciesData {
       light: lightLabelEs(species.lightRequirement),
       temp: '${species.minTemperature ?? 15}-${species.maxTemperature ?? 30}°C',
       co2: '${co2Grams.toStringAsFixed(1)} g/día',
+      humidity: species.humidityRange,
       personalNote: 'Aún no has agregado notas para esta planta.',
       placeholderIcon: visual.icon,
       placeholderIconColor: visual.color,
+      placementHint: lightHintEs(species.lightRequirement),
+      careGuide: species.description,
     );
   }
 }
@@ -67,7 +78,12 @@ const speciesDataMap = {
     light: 'Indirecta',
     temp: '18-27°C',
     co2: '3.2 g/día',
+    humidity: '50-70%',
     personalNote: 'Le encanta el salón. La riego los domingos. Última vez noté hoja nueva emergiendo...',
+    placementHint: 'Cerca de una ventana, sin sol directo sobre las hojas.',
+    careGuide: 'Prefiere luz indirecta abundante y sustrato que drene bien. '
+        'Riega cada 7 días dejando secar los primeros centímetros de tierra entre riegos, '
+        'y agradece un ambiente húmedo (rocíala o acércala a otras plantas).',
   ),
   's2': SpeciesData(
     scientific: 'Epipremnum aureum',
@@ -78,7 +94,11 @@ const speciesDataMap = {
     light: 'Indirecta',
     temp: '15-30°C',
     co2: '2.5 g/día',
+    humidity: '40-60%',
     personalNote: 'Crece muy rápido en la repisa. Es súper resistente y perdona algún olvido de riego.',
+    placementHint: 'Luz indirecta o media; tolera rincones con menos luz.',
+    careGuide: 'Muy tolerante y fácil de cuidar: riega cada 7 días dejando secar el sustrato entre '
+        'riegos, y sitúala donde reciba luz indirecta. Poda las ramas largas para que crezca más tupida.',
   ),
   's3': SpeciesData(
     scientific: 'Sansevieria trifasciata',
@@ -89,7 +109,11 @@ const speciesDataMap = {
     light: 'Adaptable',
     temp: '10-35°C',
     co2: '1.8 g/día',
+    humidity: '20-40%',
     personalNote: 'Ideal para el dormitorio. Prácticamente no necesita atención, dejar secar del todo el sustrato.',
+    placementHint: 'Se adapta a casi cualquier luz, incluso rincones oscuros.',
+    careGuide: 'Una de las plantas más resistentes que existen. Riega solo cada 20 días, dejando secar '
+        'el sustrato por completo — el exceso de agua es su principal riesgo, no la falta de ella.',
   ),
 };
 

@@ -1,67 +1,48 @@
 import 'package:flutter/material.dart';
+import 'package:frontend_eco_2/models/models.dart';
+import 'package:frontend_eco_2/utils/care_task_labels.dart';
 
+/// Historial real de cuidados de una planta (GET /care/plants/{id}/logs).
+/// Antes esto mostraba 2 de 3 entradas completamente inventadas
+/// (`DateTime.now().subtract(Duration(days: 27))` fijo, sin relación con la
+/// planta real) — ahora refleja lo que el usuario realmente registró.
 class CareHistoryList extends StatelessWidget {
-  final DateTime lastWatered;
-  final int daysSinceWater;
+  final List<CareLog> logs;
 
-  const CareHistoryList({
-    super.key,
-    required this.lastWatered,
-    required this.daysSinceWater,
-  });
+  const CareHistoryList({super.key, required this.logs});
 
   @override
   Widget build(BuildContext context) {
+    if (logs.isEmpty) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF8FAF9),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: const Color(0xFFE2E7E4)),
+        ),
+        child: const Text(
+          'Aún no has registrado cuidados para esta planta.',
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 12, color: Color(0xFF807F7F), fontFamily: 'Inter'),
+        ),
+      );
+    }
+
+    final sorted = [...logs]..sort((a, b) => b.performedAt.compareTo(a.performedAt));
+    final recent = sorted.take(5);
+
     return Column(
-      children: [
-        _buildCareHistoryItem(
-          title: 'Riego',
-          dateText: _formatDate(lastWatered),
-          timeAgoText: daysSinceWater == 0
-              ? 'hoy'
-              : daysSinceWater == 1
-                  ? 'ayer'
-                  : 'hace $daysSinceWater días',
-          icon: Icons.water_drop_rounded,
-          iconColor: const Color(0xFF4A90D9),
-          iconBgColor: const Color(0xFFEAF3FC),
-        ),
-        _buildCareHistoryItem(
-          title: 'Fertilización',
-          dateText: _formatDate(DateTime.now().subtract(const Duration(days: 27))),
-          timeAgoText: 'hace 27 días',
-          icon: Icons.wb_sunny_rounded,
-          iconColor: const Color(0xFFFABF2E),
-          iconBgColor: const Color(0xFFFFF9E6),
-        ),
-        _buildCareHistoryItem(
-          title: 'Riego',
-          dateText: _formatDate(DateTime.now().subtract(const Duration(days: 15))),
-          timeAgoText: 'hace 15 días',
-          icon: Icons.water_drop_rounded,
-          iconColor: const Color(0xFF4A90D9),
-          iconBgColor: const Color(0xFFEAF3FC),
-        ),
-      ],
+      children: recent.map((log) => _buildCareHistoryItem(log)).toList(),
     );
   }
 
-  String _formatDate(DateTime dt) {
-    final months = [
-      'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
-      'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'
-    ];
-    return '${dt.day.toString().padLeft(2, '0')} ${months[dt.month - 1]} ${dt.year}';
-  }
+  Widget _buildCareHistoryItem(CareLog log) {
+    final visual = careTaskVisual(log.taskType);
+    final daysAgo = DateTime.now().difference(log.performedAt).inDays;
+    final timeAgoText = daysAgo <= 0 ? 'hoy' : daysAgo == 1 ? 'ayer' : 'hace $daysAgo días';
 
-  Widget _buildCareHistoryItem({
-    required String title,
-    required String dateText,
-    required String timeAgoText,
-    required IconData icon,
-    required Color iconColor,
-    required Color iconBgColor,
-  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
@@ -69,15 +50,8 @@ class CareHistoryList extends StatelessWidget {
           Container(
             width: 40,
             height: 40,
-            decoration: BoxDecoration(
-              color: iconBgColor,
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              icon,
-              color: iconColor,
-              size: 18,
-            ),
+            decoration: BoxDecoration(color: visual.background, shape: BoxShape.circle),
+            child: Icon(visual.icon, color: visual.color, size: 18),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -85,7 +59,7 @@ class CareHistoryList extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  title,
+                  visual.label,
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 14,
@@ -94,7 +68,7 @@ class CareHistoryList extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  dateText,
+                  _formatDate(log.performedAt),
                   style: const TextStyle(
                     fontSize: 12,
                     color: Color(0xFF807F7F),
@@ -106,14 +80,18 @@ class CareHistoryList extends StatelessWidget {
           ),
           Text(
             timeAgoText,
-            style: const TextStyle(
-              fontSize: 12,
-              color: Color(0xFF807F7F),
-              fontFamily: 'Inter',
-            ),
+            style: const TextStyle(fontSize: 12, color: Color(0xFF807F7F), fontFamily: 'Inter'),
           ),
         ],
       ),
     );
+  }
+
+  String _formatDate(DateTime dt) {
+    const months = [
+      'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
+      'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic',
+    ];
+    return '${dt.day.toString().padLeft(2, '0')} ${months[dt.month - 1]} ${dt.year}';
   }
 }

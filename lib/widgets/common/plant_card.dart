@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend_eco_2/models/models.dart';
 import 'package:frontend_eco_2/theme/app_colors.dart';
 import 'package:frontend_eco_2/utils/plant_visuals.dart';
+import 'tag_chips_row.dart';
 
 // ── Species metadata ──────────────────────────────────────────────────────────
 class PlantSpeciesInfo {
@@ -197,47 +198,15 @@ class PlantCard extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 8),
-                  // Tag chips
-                  Wrap(
-                    spacing: 4,
-                    runSpacing: 4,
-                    children: info.tags
-                        .take(MediaQuery.of(context).size.width < 360 ? 1 : 2)
-                        .map((tag) => _buildTag(tag))
-                        .toList(),
-                  ),
+                  // Tag chips — una sola línea con scroll horizontal para no
+                  // deformar el área de la imagen si hay varios tags o son
+                  // largos (ver tag_chips_row.dart).
+                  TagChipsRow(tags: info.tags.take(3).toList()),
                 ],
               ),
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildTag(String text) {
-    final style = styleForTagKind(tagKindFor(text));
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-      decoration: BoxDecoration(
-        color: style.background,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(style.icon, size: 10, color: style.color),
-          const SizedBox(width: 3),
-          Text(
-            text,
-            style: TextStyle(
-              fontSize: 9,
-              fontWeight: FontWeight.w600,
-              color: style.color,
-              fontFamily: 'Inter',
-            ),
-          ),
-        ],
       ),
     );
   }

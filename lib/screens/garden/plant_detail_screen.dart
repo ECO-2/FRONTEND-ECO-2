@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:frontend_eco_2/models/models.dart';
 import 'package:frontend_eco_2/providers/providers.dart';
 import 'package:frontend_eco_2/routing/app_routes.dart';
+import 'package:frontend_eco_2/services/services.dart';
 import 'package:frontend_eco_2/utils/plant_visuals.dart';
 import 'package:frontend_eco_2/widgets/common/custom_status_bar.dart';
 import 'package:frontend_eco_2/widgets/common/custom_bottom_nav_bar.dart';
@@ -11,6 +12,7 @@ import 'package:frontend_eco_2/widgets/common/custom_bottom_nav_bar.dart';
 import 'widgets/species_data.dart';
 import 'widgets/care_sheet_content.dart';
 import 'widgets/care_status_card.dart';
+import 'widgets/care_guide_card.dart';
 import 'widgets/species_care_grid.dart';
 import 'widgets/care_history_list.dart';
 
@@ -46,11 +48,6 @@ class PlantDetailScreen extends StatelessWidget {
     }
 
     final sp = _resolveSpeciesData(context, plant.speciesId);
-
-    // Calculate dynamic dates for mock care history and status card
-    final lastWatered =
-        plant.lastWateredAt ?? DateTime.now().subtract(const Duration(days: 8));
-    final daysSinceWater = DateTime.now().difference(lastWatered).inDays;
 
     final statusBarHeight = MediaQuery.of(context).padding.top;
     const appBarHeight = 64.0;
@@ -206,6 +203,10 @@ class PlantDetailScreen extends StatelessWidget {
 
                         // ── Care Status Card ──
                         CareStatusCard(plant: plant, sp: sp),
+                        const SizedBox(height: 20),
+
+                        // ── Care Guide (orientación: dónde ubicarla y cómo cuidarla) ──
+                        CareGuideCard(sp: sp),
                         const SizedBox(height: 24),
 
                         // ── Action Buttons ──
@@ -315,9 +316,24 @@ class PlantDetailScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 12),
 
-                        CareHistoryList(
-                          lastWatered: lastWatered,
-                          daysSinceWater: daysSinceWater,
+                        FutureBuilder<List<CareLog>>(
+                          future: Provider.of<CareService>(context, listen: false)
+                              .getCareLogs(plant.id),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState == ConnectionState.waiting) {
+                              return const Padding(
+                                padding: EdgeInsets.symmetric(vertical: 24),
+                                child: Center(
+                                  child: SizedBox(
+                                    width: 22,
+                                    height: 22,
+                                    child: CircularProgressIndicator(strokeWidth: 2.5),
+                                  ),
+                                ),
+                              );
+                            }
+                            return CareHistoryList(logs: snapshot.data ?? const []);
+                          },
                         ),
                         const SizedBox(height: 24),
 

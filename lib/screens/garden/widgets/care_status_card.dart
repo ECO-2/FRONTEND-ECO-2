@@ -20,6 +20,7 @@ class CareStatusCard extends StatelessWidget {
     
     final isOverdue = daysSinceWater > sp.waterFreqDays;
     final overdueDays = isOverdue ? daysSinceWater - sp.waterFreqDays : 0;
+    final daysRemaining = isOverdue ? 0 : sp.waterFreqDays - daysSinceWater;
 
     return Container(
       width: double.infinity,
@@ -149,7 +150,7 @@ class CareStatusCard extends StatelessWidget {
                 child: Column(
                   children: [
                     Text(
-                      isOverdue ? '+$overdueDays\u{0064}' : '0d',
+                      isOverdue ? '+$overdueDays\u{0064}' : '${daysRemaining}d',
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 22,
@@ -158,7 +159,7 @@ class CareStatusCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      isOverdue ? 'vencido' : 'de retraso',
+                      isOverdue ? 'vencido' : 'restantes',
                       style: const TextStyle(fontSize: 10, color: Color(0xFF807F7F)),
                     ),
                   ],

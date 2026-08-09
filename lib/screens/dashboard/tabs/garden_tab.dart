@@ -8,6 +8,7 @@ import 'package:frontend_eco_2/utils/achievement_feedback.dart';
 import 'package:frontend_eco_2/utils/plant_visuals.dart';
 import 'package:frontend_eco_2/widgets/garden/add_plant_modal.dart';
 import 'package:frontend_eco_2/screens/garden/widgets/needs_care_modal.dart';
+import 'package:frontend_eco_2/widgets/common/tag_chips_row.dart';
 
 // ── Figma color tokens ────────────────────────────────────────────────────
 const _kDark = Color(0xFF10454F);
@@ -691,35 +692,6 @@ class _GardenTabState extends State<GardenTab> {
     );
   }
 
-  // Small colored tag chip shared by the catalog list/grid cards, reusing
-  // the same tag color system as species detail and My Garden cards.
-  Widget _buildSpeciesTagChip(String tag, {double fontSize = 9}) {
-    final style = styleForTagKind(tagKindFor(tag));
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-      decoration: BoxDecoration(
-        color: style.background,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(style.icon, size: fontSize + 1, color: style.color),
-          const SizedBox(width: 3),
-          Text(
-            tag,
-            style: TextStyle(
-              fontSize: fontSize,
-              fontWeight: FontWeight.w600,
-              color: style.color,
-              fontFamily: 'Inter',
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   void _openFilterSheet(BuildContext context) {
     String tempCategory = _selectedCategoryValue;
     String tempDifficulty = _selectedDifficulty;
@@ -980,10 +952,10 @@ class _GardenTabState extends State<GardenTab> {
                         overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 6),
-                      // Difficulty + real species tags (category, light, water)
-                      Wrap(
-                        spacing: 6,
-                        runSpacing: 6,
+                      // Difficulty (fijo) + tags de la especie en una sola
+                      // línea con scroll horizontal — nunca se apilan a una
+                      // segunda línea ni empujan el resto de la tarjeta.
+                      Row(
                         children: [
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
@@ -1000,7 +972,8 @@ class _GardenTabState extends State<GardenTab> {
                               ),
                             ),
                           ),
-                          ...species.tags.take(2).map((tag) => _buildSpeciesTagChip(tag)),
+                          const SizedBox(width: 6),
+                          Expanded(child: TagChipsRow(tags: species.tags)),
                         ],
                       ),
                       const SizedBox(height: 8),
@@ -1115,7 +1088,7 @@ class _GardenTabState extends State<GardenTab> {
                   ),
                   const SizedBox(height: 6),
                   if (species.tags.isNotEmpty) ...[
-                    _buildSpeciesTagChip(species.tags.first, fontSize: 8),
+                    TagChipsRow(tags: species.tags.take(2).toList(), fontSize: 8, iconSize: 9),
                     const SizedBox(height: 6),
                   ],
                   Row(
@@ -1943,14 +1916,14 @@ class _PlantListCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 10),
 
-                    // Tags Row
-                    Wrap(
-                      spacing: 4,
-                      runSpacing: 4,
-                      children: sp.tags
-                          .take(3)
-                          .map((tag) => _buildTag(tag))
-                          .toList(),
+                    // Tags Row — una sola línea con scroll horizontal, no se
+                    // apila ni deforma la tarjeta sin importar cuántos tags
+                    // tenga la especie.
+                    TagChipsRow(
+                      tags: sp.tags,
+                      fontSize: 10,
+                      iconSize: 12,
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                     ),
                   ],
                 ),
@@ -1962,32 +1935,6 @@ class _PlantListCard extends StatelessWidget {
     );
   }
 
-  Widget _buildTag(String text) {
-    final style = styleForTagKind(tagKindFor(text));
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(
-        color: style.background,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(style.icon, size: 12, color: style.color),
-          const SizedBox(width: 4),
-          Text(
-            text,
-            style: TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.w600,
-              color: style.color,
-              fontFamily: 'Inter',
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 // ── Plant grid card — Mi Jardín en cuadrícula ──────────────────────────────

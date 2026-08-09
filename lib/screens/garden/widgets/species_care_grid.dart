@@ -12,46 +12,65 @@ class SpeciesCareGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    return Column(
       children: [
-        Expanded(
-          child: Column(
-            children: [
-              _buildCareGridCard(
+        Row(
+          children: [
+            Expanded(
+              child: _buildCareGridCard(
                 icon: Icons.water_drop_outlined,
                 iconColor: const Color(0xFF4A90D9),
                 label: 'Riego',
                 value: sp.waterFreq,
               ),
-              const SizedBox(height: 10),
-              _buildCareGridCard(
-                icon: Icons.thermostat_outlined,
-                iconColor: const Color(0xFFF56B1C),
-                label: 'Temp.',
-                value: sp.temp,
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: Column(
-            children: [
-              _buildCareGridCard(
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: _buildCareGridCard(
                 icon: Icons.wb_sunny_outlined,
                 iconColor: const Color(0xFFFABF2E),
                 label: 'Luz',
                 value: sp.light,
               ),
-              const SizedBox(height: 10),
-              _buildCareGridCard(
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        Row(
+          children: [
+            Expanded(
+              child: _buildCareGridCard(
+                icon: Icons.thermostat_outlined,
+                iconColor: const Color(0xFFF56B1C),
+                label: 'Temp.',
+                value: sp.temp,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: _buildCareGridCard(
+                icon: Icons.opacity_rounded,
+                iconColor: const Color(0xFF00796B),
+                label: 'Humedad',
+                value: sp.humidity,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        Row(
+          children: [
+            Expanded(
+              child: _buildCareGridCard(
                 icon: Icons.eco_outlined,
                 iconColor: AppColors.primary,
                 label: 'O₂ CO₂',
                 value: sp.co2,
               ),
-            ],
-          ),
+            ),
+            const SizedBox(width: 10),
+            const Expanded(child: SizedBox.shrink()),
+          ],
         ),
       ],
     );

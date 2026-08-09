@@ -53,6 +53,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        Provider<CareService>.value(value: careService),
         ChangeNotifierProvider(
           create: (_) => UserProvider(
             authService: authService,
