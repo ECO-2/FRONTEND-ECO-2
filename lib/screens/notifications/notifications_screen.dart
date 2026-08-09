@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:frontend_eco_2/models/models.dart';
 import 'package:frontend_eco_2/providers/providers.dart';
 import 'package:frontend_eco_2/routing/app_routes.dart';
 
@@ -8,8 +9,66 @@ const _kBg = Color(0xFFF8FAF9);
 const _kTextMuted = Color(0xFF807F7F);
 const _kTextDark = Color(0xFF0D2B31);
 
-class NotificationsScreen extends StatelessWidget {
+class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key});
+
+  @override
+  State<NotificationsScreen> createState() => _NotificationsScreenState();
+}
+
+class _NotificationsScreenState extends State<NotificationsScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _sync());
+  }
+
+  /// Reconstruye las notificaciones a partir del estado real de la app cada
+  /// vez que se abre esta pantalla — antes eran 6 notificaciones fijas sin
+  /// relación con los datos del usuario.
+  void _sync() {
+    if (!mounted) return;
+    final plantsProvider = Provider.of<PlantsProvider>(context, listen: false);
+    final missionsProvider = Provider.of<MissionsProvider>(context, listen: false);
+    final notifProvider = Provider.of<NotificationsProvider>(context, listen: false);
+
+    final plantsNeedingWater = plantsProvider.userPlants.where((p) {
+      final species = plantsProvider.speciesCatalog.firstWhere(
+        (s) => s.id == p.speciesId,
+        orElse: () => PlantSpecies(
+          id: p.speciesId,
+          scientificName: '',
+          commonName: '',
+          waterFrequencyDays: 7,
+          createdAt: DateTime.now(),
+        ),
+      );
+      if (p.lastWateredAt == null) return true;
+      return DateTime.now().difference(p.lastWateredAt!).inDays >= species.waterFrequencyDays;
+    }).map((p) => (plantId: p.id, plantNickname: p.nickname)).toList();
+
+    final recentAchievements = missionsProvider.unlockedAchievements.map((ua) {
+      final achievement = missionsProvider.achievements
+          .where((a) => a.id == ua.achievementId);
+      final title = achievement.isEmpty
+          ? 'Nuevo logro'
+          : '${achievement.first.name} (+${achievement.first.xpReward} XP'
+              '${achievement.first.seedReward > 0 ? ' · +${achievement.first.seedReward} semillas' : ''})';
+      return (achievementId: ua.achievementId, title: title, unlockedAt: ua.unlockedAt);
+    }).toList();
+
+    final cutoff = DateTime.now().subtract(const Duration(days: 30));
+    final recentlyAddedPlants = plantsProvider.userPlants
+        .where((p) => p.createdAt.isAfter(cutoff))
+        .map((p) => (plantId: p.id, plantNickname: p.nickname, addedAt: p.createdAt))
+        .toList();
+
+    notifProvider.syncFromAppState(
+      plantsNeedingWater: plantsNeedingWater,
+      recentAchievements: recentAchievements,
+      recentlyAddedPlants: recentlyAddedPlants,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -170,16 +229,6 @@ class NotificationsScreen extends StatelessWidget {
         iconColor = const Color(0xFFFABF2E);
         iconBg = const Color(0xFFFFF8E1);
         break;
-      case 'mission':
-        icon = Icons.assignment_rounded;
-        iconColor = _kDark;
-        iconBg = const Color(0xFFE0EFF1);
-        break;
-      case 'tip':
-        icon = Icons.lightbulb_rounded;
-        iconColor = const Color(0xFFFF9800);
-        iconBg = const Color(0xFFFFF3E0);
-        break;
       default:
         icon = Icons.info_rounded;
         iconColor = Colors.grey;
@@ -192,10 +241,8 @@ class NotificationsScreen extends StatelessWidget {
 
     return InkWell(
       onTap: () {
-        Provider.of<NotificationsProvider>(
-          context,
-          listen: false,
-        ).markAsRead(notification.id);
+        Provider.of<NotificationsProvider>(context, listen: false).markAsRead(notification.id);
+        _handleNotificationTap(context, notification);
       },
       child: Container(
         color: isUnread ? _kDark.withValues(alpha: 0.04) : Colors.transparent,
@@ -272,6 +319,21 @@ class NotificationsScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  void _handleNotificationTap(BuildContext context, dynamic notification) {
+    final referenceId = notification.referenceId as String?;
+    if (referenceId == null) return;
+
+    if (notification.type == 'warning' || notification.type == 'info') {
+      final plantsProvider = Provider.of<PlantsProvider>(context, listen: false);
+      final plant = plantsProvider.userPlants.where((p) => p.id == referenceId);
+      if (plant.isNotEmpty) {
+        Navigator.pushNamed(context, AppRoutes.plantDetail, arguments: plant.first);
+      }
+    } else if (notification.type == 'achievement') {
+      Navigator.pushNamed(context, AppRoutes.trophies);
+    }
   }
 
   String _formatTimeAgo(DateTime date) {

@@ -23,18 +23,37 @@ SpeciesData _resolveSpeciesData(BuildContext context, String speciesId) {
   final legacy = speciesDataMap[speciesId];
   if (legacy != null) return legacy;
 
-  final plantsProvider = Provider.of<PlantsProvider>(context, listen: false);
-  final species = plantsProvider.speciesCatalog.firstWhere(
-    (s) => s.id == speciesId,
-    orElse: () => PlantSpecies(
-      id: speciesId,
-      scientificName: 'Especie desconocida',
-      commonName: 'Planta',
-      waterFrequencyDays: 7,
-      createdAt: DateTime.now(),
-    ),
-  );
+  final species = _resolveRealSpecies(context, speciesId);
   return SpeciesData.fromReal(species);
+}
+
+/// Especie real del catálogo (para navegar a SpeciesDetailScreen, que espera
+/// un [PlantSpecies] completo). Para las 3 especies legacy (s1-s3, sin fila
+/// real en el catálogo) se sintetiza una a partir de su [SpeciesData]
+/// curada, para que "ver ficha completa" funcione también con ellas.
+PlantSpecies _resolveRealSpecies(BuildContext context, String speciesId) {
+  final plantsProvider = Provider.of<PlantsProvider>(context, listen: false);
+  final found = plantsProvider.speciesCatalog.where((s) => s.id == speciesId);
+  if (found.isNotEmpty) return found.first;
+
+  final legacy = speciesDataMap[speciesId];
+  if (legacy != null) {
+    return PlantSpecies(
+      id: speciesId,
+      scientificName: legacy.scientific,
+      commonName: legacy.scientific,
+      waterFrequencyDays: legacy.waterFreqDays,
+      createdAt: DateTime.now(),
+    );
+  }
+
+  return PlantSpecies(
+    id: speciesId,
+    scientificName: 'Especie desconocida',
+    commonName: 'Planta',
+    waterFrequencyDays: 7,
+    createdAt: DateTime.now(),
+  );
 }
 
 class PlantDetailScreen extends StatelessWidget {
@@ -292,7 +311,11 @@ class PlantDetailScreen extends StatelessWidget {
                               ),
                             ),
                             GestureDetector(
-                              onTap: () {},
+                              onTap: () => Navigator.pushNamed(
+                                context,
+                                AppRoutes.careHistory,
+                                arguments: plant,
+                              ),
                               child: const Row(
                                 children: [
                                   Text(
@@ -351,7 +374,11 @@ class PlantDetailScreen extends StatelessWidget {
                               ),
                             ),
                             GestureDetector(
-                              onTap: () {},
+                              onTap: () => Navigator.pushNamed(
+                                context,
+                                AppRoutes.speciesDetail,
+                                arguments: _resolveRealSpecies(context, plant.speciesId),
+                              ),
                               child: const Row(
                                 children: [
                                   Text(

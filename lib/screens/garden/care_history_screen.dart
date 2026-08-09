@@ -1,26 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:frontend_eco_2/models/models.dart';
+import 'package:frontend_eco_2/services/services.dart';
+import 'package:frontend_eco_2/utils/care_task_labels.dart';
 import 'package:frontend_eco_2/widgets/common/custom_app_bar.dart';
 
-class _CareEvent {
-  final String type; // Riego, Fertilización, Poda
-  final String dateStr; // 20 Abr, 12 Abr, etc.
-  final String description;
-  final IconData icon;
-  final Color iconColor;
-  final Color iconBgColor;
-  final Color dotColor;
+const _kFilterTaskTypes = {
+  'Riegos': 'watering',
+  'Podas': 'pruning',
+  'Abonos': 'fertilizing',
+};
 
-  const _CareEvent({
-    required this.type,
-    required this.dateStr,
-    required this.description,
-    required this.icon,
-    required this.iconColor,
-    required this.iconBgColor,
-    required this.dotColor,
-  });
-}
+const _kMonths = [
+  'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+  'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
+];
 
 class CareHistoryScreen extends StatefulWidget {
   const CareHistoryScreen({super.key});
@@ -31,59 +25,52 @@ class CareHistoryScreen extends StatefulWidget {
 
 class _CareHistoryScreenState extends State<CareHistoryScreen> {
   String _selectedFilter = 'Todos';
+  UserPlant? _plant;
+  List<CareLog>? _logs;
+  String? _error;
 
-  final List<_CareEvent> _events = const [
-    _CareEvent(
-      type: 'Riego',
-      dateStr: '20 Abr',
-      description: '~200ml · agua tibia',
-      icon: Icons.water_drop_rounded,
-      iconColor: Color(0xFF4A90D9),
-      iconBgColor: Color(0xFFEAF3FC),
-      dotColor: Color(0xFF164650),
-    ),
-    _CareEvent(
-      type: 'Fertilización',
-      dateStr: '12 Abr',
-      description: 'Nutri-líquido · dilución 1:10',
-      icon: Icons.grain_rounded,
-      iconColor: Color(0xFF8A9A65),
-      iconBgColor: Color(0xFFEFF5E4),
-      dotColor: Color(0xFF8A9A65),
-    ),
-    _CareEvent(
-      type: 'Riego',
-      dateStr: '5 Abr',
-      description: 'Tierra seca · ~180ml',
-      icon: Icons.water_drop_rounded,
-      iconColor: Color(0xFF4A90D9),
-      iconBgColor: Color(0xFFEAF3FC),
-      dotColor: Color(0xFF164650),
-    ),
-    _CareEvent(
-      type: 'Poda',
-      dateStr: '2 Abr',
-      description: 'Hoja amarilla inferior',
-      icon: Icons.content_cut_rounded,
-      iconColor: Color(0xFFF56B1C),
-      iconBgColor: Color(0xFFFFF0EC),
-      dotColor: Color(0xFFF56B1C),
-    ),
-  ];
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_plant == null) {
+      _plant = ModalRoute.of(context)?.settings.arguments as UserPlant?;
+      _loadLogs();
+    }
+  }
+
+  Future<void> _loadLogs() async {
+    final plant = _plant;
+    if (plant == null) return;
+    try {
+      final logs = await Provider.of<CareService>(context, listen: false).getCareLogs(plant.id);
+      if (!mounted) return;
+      setState(() => _logs = logs);
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _error = 'No se pudo cargar el historial.');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final plant = ModalRoute.of(context)?.settings.arguments as UserPlant?;
-    final nickname = plant?.nickname ?? 'Mi Monstera';
+    final nickname = _plant?.nickname ?? 'esta planta';
+    final logs = _logs ?? const <CareLog>[];
 
-    // Filter events
-    final filteredEvents = _events.where((e) {
+    final riegos = logs.where((l) => l.taskType == 'watering').length;
+    final fertilizaciones = logs.where((l) => l.taskType == 'fertilizing').length;
+    final podas = logs.where((l) => l.taskType == 'pruning').length;
+
+    final filteredLogs = logs.where((l) {
       if (_selectedFilter == 'Todos') return true;
-      if (_selectedFilter == 'Riegos') return e.type == 'Riego';
-      if (_selectedFilter == 'Podas') return e.type == 'Poda';
-      if (_selectedFilter == 'Abonos') return e.type == 'Fertilización';
-      return true;
-    }).toList();
+      return l.taskType == _kFilterTaskTypes[_selectedFilter];
+    }).toList()
+      ..sort((a, b) => b.performedAt.compareTo(a.performedAt));
+
+    final grouped = <String, List<CareLog>>{};
+    for (final log in filteredLogs) {
+      final key = '${_kMonths[log.performedAt.month - 1]} ${log.performedAt.year}';
+      grouped.putIfAbsent(key, () => []).add(log);
+    }
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -116,14 +103,7 @@ class _CareHistoryScreenState extends State<CareHistoryScreen> {
         ),
         actions: [
           GestureDetector(
-            onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Descargando historial de cuidados... 💾'),
-                  duration: Duration(seconds: 2),
-                ),
-              );
-            },
+            onTap: () => _showComingSoon(context),
             child: Container(
               width: 40,
               height: 40,
@@ -131,307 +111,268 @@ class _CareHistoryScreenState extends State<CareHistoryScreen> {
                 color: Colors.white.withValues(alpha: 0.15),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
-                Icons.download_rounded,
-                size: 18,
-                color: Colors.white,
-              ),
+              child: const Icon(Icons.download_rounded, size: 18, color: Colors.white),
             ),
           ),
           const SizedBox(width: 16),
         ],
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Upper counts card
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(vertical: 20),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: const Color(0xFFE2E7E4),
-                        width: 1.2,
-                      ),
-                    ),
-                    child: Row(
+      body: _logs == null && _error == null
+          ? const Center(child: CircularProgressIndicator())
+          : Column(
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Expanded(
-                          child: _buildMetricCol(
-                            icon: Icons.water_drop_rounded,
-                            iconColor: const Color(0xFF4A90D9),
-                            iconBgColor: const Color(0xFFEAF3FC),
-                            value: '24',
-                            label: 'Riegos',
+                        if (_error != null)
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 16),
+                            child: Text(_error!, style: const TextStyle(color: Colors.red)),
                           ),
-                        ),
+                        // Upper counts card — totales reales del historial completo.
                         Container(
-                          width: 1,
-                          height: 40,
-                          color: const Color(0xFFE2E7E4),
-                        ),
-                        Expanded(
-                          child: _buildMetricCol(
-                            icon: Icons.grain_rounded,
-                            iconColor: const Color(0xFF8A9A65),
-                            iconBgColor: const Color(0xFFEFF5E4),
-                            value: '5',
-                            label: 'Fertilización',
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(vertical: 20),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: const Color(0xFFE2E7E4), width: 1.2),
                           ),
-                        ),
-                        Container(
-                          width: 1,
-                          height: 40,
-                          color: const Color(0xFFE2E7E4),
-                        ),
-                        Expanded(
-                          child: _buildMetricCol(
-                            icon: Icons.content_cut_rounded,
-                            iconColor: const Color(0xFFF56B1C),
-                            iconBgColor: const Color(0xFFFFF0EC),
-                            value: '2',
-                            label: 'Podas',
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-
-                  // Filter Row
-                  Row(
-                    children: [
-                      Expanded(
-                        child: SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
                           child: Row(
                             children: [
-                              _buildFilterChip('Todos'),
-                              const SizedBox(width: 8),
-                              _buildFilterChip('Riegos'),
-                              const SizedBox(width: 8),
-                              _buildFilterChip('Podas'),
-                              const SizedBox(width: 8),
-                              _buildFilterChip('Abonos'),
+                              Expanded(
+                                child: _buildMetricCol(
+                                  icon: Icons.water_drop_rounded,
+                                  iconColor: const Color(0xFF4A90D9),
+                                  iconBgColor: const Color(0xFFEAF3FC),
+                                  value: '$riegos',
+                                  label: 'Riegos',
+                                ),
+                              ),
+                              Container(width: 1, height: 40, color: const Color(0xFFE2E7E4)),
+                              Expanded(
+                                child: _buildMetricCol(
+                                  icon: Icons.grain_rounded,
+                                  iconColor: const Color(0xFF8A9A65),
+                                  iconBgColor: const Color(0xFFEFF5E4),
+                                  value: '$fertilizaciones',
+                                  label: 'Fertilización',
+                                ),
+                              ),
+                              Container(width: 1, height: 40, color: const Color(0xFFE2E7E4)),
+                              Expanded(
+                                child: _buildMetricCol(
+                                  icon: Icons.content_cut_rounded,
+                                  iconColor: const Color(0xFFF56B1C),
+                                  iconBgColor: const Color(0xFFFFF0EC),
+                                  value: '$podas',
+                                  label: 'Podas',
+                                ),
+                              ),
                             ],
                           ),
                         ),
-                      ),
-                      const SizedBox(width: 12),
-                      Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(
-                            color: const Color(0xFFE2E7E4),
-                            width: 1.2,
-                          ),
-                        ),
-                        child: const Icon(
-                          Icons.filter_list_rounded,
-                          color: Color(0xFF0D2B31),
-                          size: 18,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
+                        const SizedBox(height: 24),
 
-                  // List Header
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        'Abril 2026',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                          color: Color(0xFF0D2B31),
-                        ),
-                      ),
-                      Text(
-                        '${filteredEvents.length} eventos',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Color(0xFF807F7F),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Timeline List
-                  ListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: filteredEvents.length,
-                    itemBuilder: (context, index) {
-                      final event = filteredEvents[index];
-                      final isFirst = index == 0;
-                      final isLast = index == filteredEvents.length - 1;
-
-                      return IntrinsicHeight(
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                        // Filter Row
+                        Row(
                           children: [
-                            // Timeline visual
-                            SizedBox(
-                              width: 40,
-                              child: Stack(
-                                alignment: Alignment.center,
-                                children: [
-                                  // Line
-                                  Positioned(
-                                    top: isFirst ? 28 : 0,
-                                    bottom: isLast ? 28 : 0,
-                                    left: 19,
-                                    child: Container(
-                                      width: 2,
-                                      color: const Color(0xFFE2E7E4),
-                                    ),
-                                  ),
-                                  // Dot
-                                  Positioned(
-                                    top: 20,
-                                    child: Container(
-                                      width: 14,
-                                      height: 14,
-                                      decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        shape: BoxShape.circle,
-                                        border: Border.all(
-                                          color: event.dotColor,
-                                          width: 3.5,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            // Event Card
                             Expanded(
-                              child: Padding(
-                                padding: const EdgeInsets.only(bottom: 12.0),
-                                child: Container(
-                                  padding: const EdgeInsets.all(12),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(16),
-                                    border: Border.all(
-                                      color: const Color(0xFFE2E7E4),
-                                      width: 1.2,
-                                    ),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Container(
-                                        width: 36,
-                                        height: 36,
-                                        decoration: BoxDecoration(
-                                          color: event.iconBgColor,
-                                          shape: BoxShape.circle,
-                                        ),
-                                        alignment: Alignment.center,
-                                        child: Icon(
-                                          event.icon,
-                                          color: event.iconColor,
-                                          size: 18,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 12),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Row(
-                                              children: [
-                                                Text(
-                                                  event.type,
-                                                  style: const TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 14,
-                                                    color: Color(0xFF0D2B31),
-                                                  ),
-                                                ),
-                                                const SizedBox(width: 8),
-                                                Text(
-                                                  event.dateStr,
-                                                  style: const TextStyle(
-                                                    fontSize: 11,
-                                                    color: Color(0xFF807F7F),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                            const SizedBox(height: 2),
-                                            Text(
-                                              event.description,
-                                              style: const TextStyle(
-                                                fontSize: 12,
-                                                color: Color(0xFF807F7F),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
+                              child: SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                child: Row(
+                                  children: [
+                                    _buildFilterChip('Todos'),
+                                    const SizedBox(width: 8),
+                                    _buildFilterChip('Riegos'),
+                                    const SizedBox(width: 8),
+                                    _buildFilterChip('Podas'),
+                                    const SizedBox(width: 8),
+                                    _buildFilterChip('Abonos'),
+                                  ],
                                 ),
                               ),
                             ),
                           ],
                         ),
-                      );
-                    },
-                  ),
-                ],
-              ),
-            ),
-          ),
-          // Bottom Export Button
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
-            child: OutlinedButton.icon(
-              style: OutlinedButton.styleFrom(
-                foregroundColor: const Color(0xFF0D2B31),
-                side: const BorderSide(color: Color(0xFF0D2B31), width: 1.5),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                minimumSize: const Size.fromHeight(50),
-              ),
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text(
-                      'Historial exportado al calendario con éxito 📅',
+                        const SizedBox(height: 24),
+
+                        if (grouped.isEmpty)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 32),
+                            child: Center(
+                              child: Text(
+                                logs.isEmpty
+                                    ? 'Aún no has registrado cuidados para esta planta.'
+                                    : 'No hay eventos para este filtro.',
+                                style: const TextStyle(color: Color(0xFF807F7F)),
+                              ),
+                            ),
+                          )
+                        else
+                          for (final entry in grouped.entries) ...[
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  entry.key,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                    color: Color(0xFF0D2B31),
+                                  ),
+                                ),
+                                Text(
+                                  '${entry.value.length} evento${entry.value.length == 1 ? '' : 's'}',
+                                  style: const TextStyle(fontSize: 12, color: Color(0xFF807F7F)),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 16),
+                            ListView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: entry.value.length,
+                              itemBuilder: (context, index) {
+                                final log = entry.value[index];
+                                final visual = careTaskVisual(log.taskType);
+                                final isFirst = index == 0;
+                                final isLast = index == entry.value.length - 1;
+
+                                return IntrinsicHeight(
+                                  child: Row(
+                                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                                    children: [
+                                      SizedBox(
+                                        width: 40,
+                                        child: Stack(
+                                          alignment: Alignment.center,
+                                          children: [
+                                            Positioned(
+                                              top: isFirst ? 28 : 0,
+                                              bottom: isLast ? 28 : 0,
+                                              left: 19,
+                                              child: Container(width: 2, color: const Color(0xFFE2E7E4)),
+                                            ),
+                                            Positioned(
+                                              top: 20,
+                                              child: Container(
+                                                width: 14,
+                                                height: 14,
+                                                decoration: BoxDecoration(
+                                                  color: Colors.white,
+                                                  shape: BoxShape.circle,
+                                                  border: Border.all(color: visual.color, width: 3.5),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Expanded(
+                                        child: Padding(
+                                          padding: const EdgeInsets.only(bottom: 12.0),
+                                          child: Container(
+                                            padding: const EdgeInsets.all(12),
+                                            decoration: BoxDecoration(
+                                              color: Colors.white,
+                                              borderRadius: BorderRadius.circular(16),
+                                              border: Border.all(color: const Color(0xFFE2E7E4), width: 1.2),
+                                            ),
+                                            child: Row(
+                                              children: [
+                                                Container(
+                                                  width: 36,
+                                                  height: 36,
+                                                  decoration:
+                                                      BoxDecoration(color: visual.background, shape: BoxShape.circle),
+                                                  alignment: Alignment.center,
+                                                  child: Icon(visual.icon, color: visual.color, size: 18),
+                                                ),
+                                                const SizedBox(width: 12),
+                                                Expanded(
+                                                  child: Column(
+                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                    children: [
+                                                      Row(
+                                                        children: [
+                                                          Text(
+                                                            visual.label,
+                                                            style: const TextStyle(
+                                                              fontWeight: FontWeight.bold,
+                                                              fontSize: 14,
+                                                              color: Color(0xFF0D2B31),
+                                                            ),
+                                                          ),
+                                                          const SizedBox(width: 8),
+                                                          Text(
+                                                            _formatDay(log.performedAt),
+                                                            style: const TextStyle(
+                                                              fontSize: 11,
+                                                              color: Color(0xFF807F7F),
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            ),
+                            const SizedBox(height: 8),
+                          ],
+                      ],
                     ),
-                    duration: Duration(seconds: 2),
                   ),
-                );
-              },
-              icon: const Icon(Icons.calendar_today_rounded, size: 16),
-              label: const Text(
-                'Exportar a calendario',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-              ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+                  child: OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: const Color(0xFF0D2B31),
+                      side: const BorderSide(color: Color(0xFF0D2B31), width: 1.5),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      minimumSize: const Size.fromHeight(50),
+                    ),
+                    onPressed: () => _showComingSoon(context),
+                    icon: const Icon(Icons.calendar_today_rounded, size: 16),
+                    label: const Text(
+                      'Exportar a calendario',
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ),
-        ],
+    );
+  }
+
+  void _showComingSoon(BuildContext context) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Esta función estará disponible próximamente.'),
+        duration: Duration(seconds: 2),
       ),
     );
+  }
+
+  String _formatDay(DateTime dt) {
+    const monthsShort = [
+      'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic',
+    ];
+    return '${dt.day} ${monthsShort[dt.month - 1]}';
   }
 
   Widget _buildMetricCol({
@@ -454,20 +395,13 @@ class _CareHistoryScreenState extends State<CareHistoryScreen> {
           fit: BoxFit.scaleDown,
           child: Text(
             value,
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 20,
-              color: Color(0xFF0D2B31),
-            ),
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: Color(0xFF0D2B31)),
           ),
         ),
         const SizedBox(height: 2),
         FittedBox(
           fit: BoxFit.scaleDown,
-          child: Text(
-            label,
-            style: const TextStyle(fontSize: 11, color: Color(0xFF807F7F)),
-          ),
+          child: Text(label, style: const TextStyle(fontSize: 11, color: Color(0xFF807F7F))),
         ),
       ],
     );
@@ -477,19 +411,13 @@ class _CareHistoryScreenState extends State<CareHistoryScreen> {
     final isSelected = _selectedFilter == label;
 
     return GestureDetector(
-      onTap: () {
-        setState(() {
-          _selectedFilter = label;
-        });
-      },
+      onTap: () => setState(() => _selectedFilter = label),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
           color: isSelected ? const Color(0xFF0D2B31) : Colors.white,
           borderRadius: BorderRadius.circular(20),
-          border: isSelected
-              ? null
-              : Border.all(color: const Color(0xFFE2E7E4), width: 1.2),
+          border: isSelected ? null : Border.all(color: const Color(0xFFE2E7E4), width: 1.2),
         ),
         child: Text(
           label,

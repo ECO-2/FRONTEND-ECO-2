@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
-        android:label="frontend_eco_2"
+        android:label="ECO2"
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon">
         <activity
