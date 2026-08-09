@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:frontend_eco_2/models/models.dart';
 import 'package:frontend_eco_2/providers/providers.dart';
 import 'package:frontend_eco_2/theme/app_colors.dart';
+import 'package:frontend_eco_2/utils/plant_visuals.dart';
 
 class AddPlantModal extends StatefulWidget {
   const AddPlantModal({super.key});
@@ -13,41 +14,116 @@ class AddPlantModal extends StatefulWidget {
 
 class _AddPlantModalState extends State<AddPlantModal> {
   final _nameController = TextEditingController();
+  final _searchController = TextEditingController();
+  final _nameFocusNode = FocusNode();
+
   PlantSpecies? _selectedSpecies;
+  String _searchQuery = '';
+  bool _isSubmitting = false;
+  bool _nicknameEditedByUser = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Sin esto el botón "Añadir planta" no reacciona mientras se escribe
+    // (TextEditingController no dispara setState por sí solo).
+    _nameController.addListener(_onNameChanged);
+  }
+
+  void _onNameChanged() {
+    if (_nameController.text.isNotEmpty) _nicknameEditedByUser = true;
+    setState(() {});
+  }
 
   @override
   void dispose() {
+    _nameController.removeListener(_onNameChanged);
     _nameController.dispose();
+    _searchController.dispose();
+    _nameFocusNode.dispose();
     super.dispose();
   }
 
-  void _submit() {
-    final nickname = _nameController.text.trim();
-    if (nickname.isEmpty || _selectedSpecies == null) return;
+  void _selectSpecies(PlantSpecies species) {
+    setState(() {
+      _selectedSpecies = species;
+      // Sugerencia de nombre a partir de la especie — solo si el usuario
+      // no ha escrito nada propio todavía, para no pisar lo que ya puso.
+      if (!_nicknameEditedByUser) {
+        _nameController.text = species.commonName;
+      }
+    });
+  }
 
-    Provider.of<PlantsProvider>(context, listen: false)
-        .addPlant(nickname, _selectedSpecies!.id, _selectedSpecies!.commonName);
-    Navigator.of(context).pop();
+  bool get _canSubmit =>
+      _nameController.text.trim().isNotEmpty && _selectedSpecies != null && !_isSubmitting;
+
+  Future<void> _submit() async {
+    if (!_canSubmit) return;
+    final nickname = _nameController.text.trim();
+    final species = _selectedSpecies!;
+
+    setState(() => _isSubmitting = true);
+    final plantsProvider = Provider.of<PlantsProvider>(context, listen: false);
+    final success = await plantsProvider.addPlant(nickname, species.id, species.commonName);
+
+    if (!mounted) return;
+
+    if (success) {
+      Navigator.of(context).pop();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('¡$nickname añadida a tu jardín! 🌿'),
+          backgroundColor: AppColors.primary,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ),
+      );
+    } else {
+      setState(() => _isSubmitting = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(plantsProvider.errorMessage ?? 'No se pudo agregar la planta.'),
+          backgroundColor: AppColors.error,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final bottomPadding = MediaQuery.of(context).viewInsets.bottom;
-    final plantsProvider = Provider.of<PlantsProvider>(context);
-    final availableSpecies = plantsProvider.speciesCatalog;
+    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+    final safeBottom = MediaQuery.of(context).padding.bottom;
+    final maxHeight = MediaQuery.of(context).size.height * 0.88;
 
-    return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      padding: EdgeInsets.fromLTRB(24, 20, 24, 24 + bottomPadding),
-      child: SingleChildScrollView(
+    final plantsProvider = Provider.of<PlantsProvider>(context);
+    final catalog = plantsProvider.speciesCatalog;
+    final filteredCatalog = _searchQuery.isEmpty
+        ? catalog
+        : catalog.where((sp) {
+            final q = _searchQuery.toLowerCase();
+            return sp.commonName.toLowerCase().contains(q) ||
+                sp.scientificName.toLowerCase().contains(q);
+          }).toList();
+
+    return AnimatedPadding(
+      duration: const Duration(milliseconds: 150),
+      curve: Curves.easeOut,
+      padding: EdgeInsets.only(bottom: bottomInset),
+      child: Container(
+        constraints: BoxConstraints(maxHeight: maxHeight),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
         child: Column(
+          mainAxisSize: MainAxisSize.max,
           crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
           children: [
-            // ── Handle + header ───────────────────────
+            // ── Handle ─────────────────────────────────
+            const SizedBox(height: 12),
             Center(
               child: Container(
                 width: 36,
@@ -58,152 +134,330 @@ class _AddPlantModalState extends State<AddPlantModal> {
                 ),
               ),
             ),
-            const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Añadir nueva planta',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.primaryDark,
-                    fontFamily: 'DM Sans',
-                  ),
-                ),
-                GestureDetector(
-                  onTap: () => Navigator.pop(context),
-                  child: const Icon(Icons.close_rounded,
-                      color: AppColors.textSecondary),
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 16),
 
-            // ── Name field ────────────────────────────
-            const Text(
-              'Nombre de tu planta',
-              style: TextStyle(
-                fontWeight: FontWeight.w600,
-                fontSize: 13,
-                color: AppColors.textPrimary,
-                fontFamily: 'Inter',
+            // ── Header ─────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Expanded(
+                    child: Text(
+                      'Añadir nueva planta',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primaryDark,
+                        fontFamily: 'DM Sans',
+                      ),
+                    ),
+                  ),
+                  Material(
+                    color: Colors.transparent,
+                    shape: const CircleBorder(),
+                    clipBehavior: Clip.antiAlias,
+                    child: InkWell(
+                      onTap: () => Navigator.of(context).pop(),
+                      child: const SizedBox(
+                        width: 44,
+                        height: 44,
+                        child: Icon(
+                          Icons.close_rounded,
+                          color: AppColors.textSecondary,
+                          size: 22,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+
+            // ── Name field ─────────────────────────────
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Nombre de tu planta',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                      color: AppColors.textPrimary,
+                      fontFamily: 'Inter',
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: _nameController,
+                    focusNode: _nameFocusNode,
+                    textCapitalization: TextCapitalization.sentences,
+                    textInputAction: TextInputAction.done,
+                    decoration: InputDecoration(
+                      hintText: 'ej. Mi Monstera',
+                      hintStyle: const TextStyle(color: AppColors.textMuted),
+                      filled: true,
+                      fillColor: const Color(0xFFF5F7F5),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none,
+                      ),
+                      contentPadding:
+                          const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            // ── Species search ─────────────────────────
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Especie',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                      color: AppColors.textPrimary,
+                      fontFamily: 'Inter',
+                    ),
+                  ),
+                  if (_selectedSpecies != null)
+                    Text(
+                      _selectedSpecies!.commonName,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.primary,
+                        fontFamily: 'Inter',
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                ],
               ),
             ),
             const SizedBox(height: 8),
-            TextField(
-              controller: _nameController,
-              textCapitalization: TextCapitalization.sentences,
-              decoration: InputDecoration(
-                hintText: 'ej. Mi Monstera',
-                hintStyle: const TextStyle(color: AppColors.textMuted),
-                filled: true,
-                fillColor: const Color(0xFFF5F7F5),
-                border: OutlineInputBorder(
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF5F7F5),
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
                 ),
-                contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16, vertical: 14),
-              ),
-            ),
-            const SizedBox(height: 20),
-
-            // ── Species selector ──────────────────────
-            const Text(
-              'Especie',
-              style: TextStyle(
-                fontWeight: FontWeight.w600,
-                fontSize: 13,
-                color: AppColors.textPrimary,
-                fontFamily: 'Inter',
-              ),
-            ),
-            const SizedBox(height: 10),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: availableSpecies.map((sp) {
-                final selected = _selectedSpecies?.id == sp.id;
-                return GestureDetector(
-                  onTap: () => setState(() => _selectedSpecies = sp),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 180),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 14, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: selected
-                          ? AppColors.primary
-                          : AppColors.primary.withValues(alpha: 0.06),
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                        color: selected
-                            ? AppColors.primary
-                            : AppColors.primary.withValues(alpha: 0.2),
+                padding: const EdgeInsets.symmetric(horizontal: 14),
+                child: Row(
+                  children: [
+                    const Icon(Icons.search_rounded, color: AppColors.textMuted, size: 20),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: TextField(
+                        controller: _searchController,
+                        onChanged: (val) => setState(() => _searchQuery = val),
+                        decoration: const InputDecoration(
+                          hintText: 'Buscar especie...',
+                          hintStyle: TextStyle(color: AppColors.textMuted, fontSize: 13),
+                          border: InputBorder.none,
+                          isDense: true,
+                          contentPadding: EdgeInsets.symmetric(vertical: 12),
+                        ),
                       ),
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          sp.commonName,
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 13,
-                            color:
-                                selected ? Colors.white : AppColors.textPrimary,
-                            fontFamily: 'Inter',
-                          ),
+                    if (_searchQuery.isNotEmpty)
+                      GestureDetector(
+                        onTap: () {
+                          _searchController.clear();
+                          setState(() => _searchQuery = '');
+                        },
+                        child: const Icon(Icons.close_rounded,
+                            color: AppColors.textMuted, size: 18),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+
+            // ── Species list (scrolls independently so the button below
+            // always stays visible, even with 50+ real species) ────────
+            Expanded(
+              child: _buildSpeciesList(plantsProvider, filteredCatalog),
+            ),
+
+            // ── Helper text + submit button ────────────
+            Padding(
+              padding: EdgeInsets.fromLTRB(24, 12, 24, 16 + safeBottom),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (!_canSubmit && !_isSubmitting)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 10),
+                      child: Text(
+                        _selectedSpecies == null
+                            ? 'Elige una especie de la lista para continuar.'
+                            : 'Ponle un nombre a tu planta para continuar.',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: AppColors.textMuted,
+                          fontFamily: 'Inter',
                         ),
-                        Text(
-                          sp.scientificName,
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontStyle: FontStyle.italic,
-                            color: selected
-                                ? Colors.white70
-                                : AppColors.textSecondary,
-                            fontFamily: 'Inter',
-                          ),
+                      ),
+                    ),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                        disabledBackgroundColor: AppColors.primary.withValues(alpha: 0.4),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                      ],
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        elevation: 0,
+                      ),
+                      onPressed: _canSubmit ? _submit : null,
+                      child: _isSubmitting
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2.5,
+                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                              ),
+                            )
+                          : const Text(
+                              'Añadir planta',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 15,
+                                fontFamily: 'Inter',
+                              ),
+                            ),
                     ),
                   ),
-                );
-              }).toList(),
-            ),
-            const SizedBox(height: 32),
-
-            // ── Submit button ─────────────────────────
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  elevation: 0,
-                ),
-                onPressed: (_nameController.text.isNotEmpty &&
-                        _selectedSpecies != null)
-                    ? _submit
-                    : null,
-                child: const Text(
-                  'Añadir planta',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 15,
-                    fontFamily: 'Inter',
-                  ),
-                ),
+                ],
               ),
             ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildSpeciesList(PlantsProvider plantsProvider, List<PlantSpecies> filteredCatalog) {
+    if (plantsProvider.isLoading && plantsProvider.speciesCatalog.isEmpty) {
+      return const Center(
+        child: CircularProgressIndicator(strokeWidth: 2.5, color: AppColors.primary),
+      );
+    }
+
+    if (filteredCatalog.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.search_off_rounded,
+                  size: 32, color: AppColors.textMuted.withValues(alpha: 0.6)),
+              const SizedBox(height: 8),
+              Text(
+                _searchQuery.isEmpty
+                    ? 'No hay especies disponibles todavía.'
+                    : 'No se encontraron especies para "$_searchQuery".',
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 13, color: AppColors.textMuted),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return ListView.separated(
+      padding: const EdgeInsets.fromLTRB(24, 0, 24, 4),
+      itemCount: filteredCatalog.length,
+      separatorBuilder: (_, _) => const SizedBox(height: 8),
+      itemBuilder: (context, index) {
+        final species = filteredCatalog[index];
+        final selected = _selectedSpecies?.id == species.id;
+        final visual = visualForCategory(species.category);
+
+        return GestureDetector(
+          onTap: () => _selectSpecies(species),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 150),
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: selected ? AppColors.primary.withValues(alpha: 0.08) : Colors.white,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: selected ? AppColors.primary : const Color(0xFFE5EAE7),
+                width: selected ? 1.5 : 1.2,
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: visual.background,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  alignment: Alignment.center,
+                  child: Icon(visual.icon, color: visual.color, size: 20),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        species.commonName,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                          color: AppColors.textPrimary,
+                          fontFamily: 'Inter',
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        species.scientificName,
+                        style: const TextStyle(
+                          fontSize: 11,
+                          fontStyle: FontStyle.italic,
+                          color: AppColors.textSecondary,
+                          fontFamily: 'Inter',
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Icon(
+                  selected ? Icons.check_circle_rounded : Icons.circle_outlined,
+                  color: selected ? AppColors.primary : const Color(0xFFCDD5D1),
+                  size: 22,
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

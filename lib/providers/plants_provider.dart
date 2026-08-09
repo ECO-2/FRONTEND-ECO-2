@@ -76,7 +76,10 @@ class PlantsProvider with ChangeNotifier {
     addPlant(nickname ?? species.commonName, species.id, species.commonName);
   }
 
-  Future<void> addPlant(String nickname, String speciesId, String name) async {
+  /// Devuelve true si la planta se agregó correctamente, false si falló
+  /// (con [errorMessage] explicando por qué), para que la UI que llama
+  /// pueda mostrar feedback real en vez de asumir éxito.
+  Future<bool> addPlant(String nickname, String speciesId, String name) async {
     try {
       final newPlant = await _plantsService.addPlant(
         speciesId: speciesId,
@@ -85,12 +88,15 @@ class PlantsProvider with ChangeNotifier {
       );
       _userPlants.add(newPlant);
       notifyListeners();
+      return true;
     } on ApiException catch (e) {
       _errorMessage = e.message;
       notifyListeners();
+      return false;
     } catch (_) {
       _errorMessage = 'Error al agregar la planta.';
       notifyListeners();
+      return false;
     }
   }
 
