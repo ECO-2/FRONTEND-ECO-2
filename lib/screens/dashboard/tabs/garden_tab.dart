@@ -7,17 +7,17 @@ import 'package:frontend_eco_2/theme/app_colors.dart';
 import 'package:frontend_eco_2/utils/achievement_feedback.dart';
 import 'package:frontend_eco_2/utils/plant_visuals.dart';
 import 'package:frontend_eco_2/widgets/garden/add_plant_modal.dart';
+import 'package:frontend_eco_2/screens/garden/widgets/needs_care_modal.dart';
 
 // ── Figma color tokens ────────────────────────────────────────────────────
 const _kDark = Color(0xFF10454F);
 const _kTextMuted = Color(0xFF807F7F);
 const _kTextDark = Color(0xFF0D2B31);
 
-// Figma: Alert Banner fill = rgba(163,171,120,0.15), stroke = #10454F
-const _kAlertBorder = _kDark;
-
-// Chip filter labels
-const _kFilters = ['Todas', 'Riegos', 'Interior', 'Exterior'];
+// Categorías rápidas para el filtro de "Mi Jardín" — mismas categorías
+// reales del catálogo (reemplaza el filtro anterior "Interior/Exterior" que
+// era una aproximación heurística sobre categorías que no encajan del todo).
+const _kGardenQuickCategories = ['tropical', 'succulent', 'cactus'];
 
 class GardenTab extends StatefulWidget {
   const GardenTab({super.key});
@@ -29,7 +29,8 @@ class GardenTab extends StatefulWidget {
 class _GardenTabState extends State<GardenTab> {
   String _searchQuery = '';
   bool _isGridView = false;
-  int _selectedFilter = 0;
+  bool _isGardenGridView = false;
+  String _selectedGardenCategory = 'all';
 
   // Catalog filters. Category/light store the raw API enum value (or
   // 'all'); difficulty stores the exact label PlantSpecies.difficulty
@@ -1157,70 +1158,120 @@ class _GardenTabState extends State<GardenTab> {
     );
   }
 
+  bool _needsWater(UserPlant p, PlantsProvider plantsProvider) {
+    final species = plantsProvider.speciesCatalog.firstWhere(
+      (s) => s.id == p.speciesId,
+      orElse: () => catalogFallback(p.speciesId),
+    );
+    if (p.lastWateredAt == null) return true;
+    return DateTime.now().difference(p.lastWateredAt!).inDays >= species.waterFrequencyDays;
+  }
+
   Widget _buildMyGardenView(BuildContext context, PlantsProvider plantsProvider, List<UserPlant> plants) {
-    // Apply filters for personal garden
+    // Filtro por categoría real de especie (mismo criterio que el catálogo),
+    // en vez de la aproximación Interior/Exterior anterior.
     final filteredPlants = plants.where((p) {
-      if (_selectedFilter == 0) return true; // Todas
-      if (_selectedFilter == 1) { // Riegos
-        if (p.lastWateredAt == null) return true;
-        return DateTime.now().difference(p.lastWateredAt!).inDays >= 7;
-      }
-      final info = plantsProvider.speciesCatalog.firstWhere((s) => s.id == p.speciesId, orElse: () => catalogFallback(p.speciesId));
-      // "Interior"/"Exterior" aren't real API categories — approximate them
-      // from the real category enum (typical indoor houseplants vs.
-      // outdoor/full-sun species).
-      const indoorCategories = {'tropical', 'fern', 'flowering', 'herb', 'other'};
-      const outdoorCategories = {'cactus', 'succulent', 'tree'};
-      if (_selectedFilter == 2) return indoorCategories.contains(info.category); // Interior
-      if (_selectedFilter == 3) return outdoorCategories.contains(info.category); // Exterior
-      return true;
+      if (_selectedGardenCategory == 'all') return true;
+      final info = plantsProvider.speciesCatalog.firstWhere(
+        (s) => s.id == p.speciesId,
+        orElse: () => catalogFallback(p.speciesId),
+      );
+      return info.category == _selectedGardenCategory;
     }).toList();
 
     // Plants that need watering
-    final plantsNeedingWater = plants.where((p) {
-      if (p.lastWateredAt == null) return true;
-      return DateTime.now().difference(p.lastWateredAt!).inDays >= 7;
-    }).toList();
+    final plantsNeedingWater = plants.where((p) => _needsWater(p, plantsProvider)).toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // ── Filter chips ──
-        _buildFilterChips(),
+        _buildGardenFilterChips(),
 
         // ── Alert Banner ──
         if (plantsNeedingWater.isNotEmpty)
-          _buildAlertBanner(plantsNeedingWater.first.name),
+          _buildAttentionBanner(context, plantsNeedingWater.length),
 
-        // ── Plants list ──
+        // ── Plants list/grid ──
         Expanded(
-          child: ListView(
-            padding: const EdgeInsets.only(
-                left: 16, right: 16, top: 12, bottom: 100),
-            children: [
-              ...filteredPlants.map((plant) => Padding(
-                    padding: const EdgeInsets.only(bottom: 10),
-                    child: _PlantListCard(
-                      plant: plant,
-                      species: plantsProvider.speciesCatalog.firstWhere(
-                        (s) => s.id == plant.speciesId,
-                        orElse: () => catalogFallback(plant.speciesId),
+          child: filteredPlants.isEmpty
+              ? _buildEmptyGardenState(context, plants.length)
+              : _isGardenGridView
+                  ? GridView.builder(
+                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 100),
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 12,
+                        mainAxisSpacing: 12,
+                        childAspectRatio: 0.72,
                       ),
-                      onTap: () => Navigator.pushNamed(
-                        context,
-                        AppRoutes.plantDetail,
-                        arguments: plant,
-                      ),
-                      onWater: () => plantsProvider.waterPlant(plant.id),
+                      itemCount: filteredPlants.length + 1,
+                      itemBuilder: (context, i) {
+                        if (i == filteredPlants.length) {
+                          return _buildAddPlantButton(context, plants.length);
+                        }
+                        final plant = filteredPlants[i];
+                        return _PlantGridCard(
+                          plant: plant,
+                          species: plantsProvider.speciesCatalog.firstWhere(
+                            (s) => s.id == plant.speciesId,
+                            orElse: () => catalogFallback(plant.speciesId),
+                          ),
+                          needsWater: _needsWater(plant, plantsProvider),
+                          onTap: () => Navigator.pushNamed(
+                            context,
+                            AppRoutes.plantDetail,
+                            arguments: plant,
+                          ),
+                        );
+                      },
+                    )
+                  : ListView(
+                      padding: const EdgeInsets.only(
+                          left: 16, right: 16, top: 12, bottom: 100),
+                      children: [
+                        ...filteredPlants.map((plant) => Padding(
+                              padding: const EdgeInsets.only(bottom: 10),
+                              child: _PlantListCard(
+                                plant: plant,
+                                species: plantsProvider.speciesCatalog.firstWhere(
+                                  (s) => s.id == plant.speciesId,
+                                  orElse: () => catalogFallback(plant.speciesId),
+                                ),
+                                onTap: () => Navigator.pushNamed(
+                                  context,
+                                  AppRoutes.plantDetail,
+                                  arguments: plant,
+                                ),
+                                onWater: () => plantsProvider.waterPlant(plant.id),
+                              ),
+                            )),
+                        // Add plant button at the bottom
+                        const SizedBox(height: 8),
+                        _buildAddPlantButton(context, plants.length),
+                      ],
                     ),
-                  )),
-              // Add plant button at the bottom
-              const SizedBox(height: 8),
-              _buildAddPlantButton(context, plants.length),
-            ],
-          ),
         ),
       ],
+    );
+  }
+
+  Widget _buildEmptyGardenState(BuildContext context, int totalPlantCount) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 24, 16, 100),
+      child: Column(
+        children: [
+          Icon(Icons.eco_outlined, size: 40, color: _kTextMuted.withValues(alpha: 0.6)),
+          const SizedBox(height: 12),
+          const Text(
+            'No tienes plantas en esta categoría todavía',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontFamily: 'Inter', fontWeight: FontWeight.w600, color: _kTextMuted),
+          ),
+          const SizedBox(height: 16),
+          _buildAddPlantButton(context, totalPlantCount),
+        ],
+      ),
     );
   }
 
@@ -1234,69 +1285,210 @@ class _GardenTabState extends State<GardenTab> {
     );
   }
 
-  Widget _buildFilterChips() {
-    return SizedBox(
-      height: 48,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        itemCount: _kFilters.length,
-        itemBuilder: (context, i) {
-          final selected = _selectedFilter == i;
-          return Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: GestureDetector(
-              onTap: () => setState(() => _selectedFilter = i),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 16, vertical: 6),
-                decoration: BoxDecoration(
-                  color: selected ? _kDark : Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: selected ? _kDark : const Color(0xFFDDE5E3),
+  Widget _buildGardenFilterChips() {
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: SizedBox(
+        height: 42,
+        child: Row(
+          children: [
+            Expanded(
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                children: [
+                  _buildGardenCategoryChip('Todas', 'all'),
+                  ..._kGardenQuickCategories.map(
+                    (key) => _buildGardenCategoryChip(categoryLabelEs(key), key),
                   ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: GestureDetector(
+                onTap: () => _openGardenCategorySheet(context),
+                child: Container(
+                  height: 38,
+                  width: 38,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: const Color(0xFFE5EAE7), width: 1.2),
+                  ),
+                  child: const Icon(Icons.tune_rounded, color: _kDark, size: 18),
                 ),
-                child: Text(
-                  _kFilters[i],
-                  style: TextStyle(
-                    fontFamily: 'DM Sans',
-                    fontWeight: FontWeight.w600,
-                    fontSize: 12,
-                    color: selected ? Colors.white : _kTextMuted,
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(right: 16),
+              child: GestureDetector(
+                onTap: () => setState(() => _isGardenGridView = !_isGardenGridView),
+                child: Container(
+                  height: 38,
+                  width: 38,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: const Color(0xFFE5EAE7), width: 1.2),
+                  ),
+                  child: Icon(
+                    _isGardenGridView ? Icons.view_list_rounded : Icons.grid_view_rounded,
+                    color: _kDark,
+                    size: 18,
                   ),
                 ),
               ),
             ),
-          );
-        },
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildAlertBanner(String plantName) {
+  Widget _buildGardenCategoryChip(String label, String value) {
+    final selected = _selectedGardenCategory == value;
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: GestureDetector(
+        onTap: () => setState(() => _selectedGardenCategory = value),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            color: selected ? _kDark : Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: selected ? _kDark : const Color(0xFFE5EAE7),
+              width: 1.2,
+            ),
+          ),
+          child: Center(
+            child: Text(
+              label,
+              style: TextStyle(
+                fontFamily: 'DM Sans',
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+                color: selected ? Colors.white : _kTextDark,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _openGardenCategorySheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) {
+        return Container(
+          padding: EdgeInsets.fromLTRB(20, 16, 20, MediaQuery.of(sheetContext).viewInsets.bottom + 24),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 38,
+                  height: 5,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE2E7E4),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Filtrar por categoría',
+                style: TextStyle(
+                  fontFamily: 'DM Sans',
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                  color: _kTextDark,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  _buildGardenCategoryChip('Todas', 'all'),
+                  ..._allCategoryKeys.map(
+                    (key) => _buildGardenCategoryChip(categoryLabelEs(key), key),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+            ],
+          ),
+        );
+      },
+    ).then((_) => setState(() {}));
+  }
+
+  Widget _buildAttentionBanner(BuildContext context, int count) {
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 8, 16, 0),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
-        color: const Color(0xFFA3AB78).withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: _kAlertBorder, width: 1),
+        color: const Color(0xFFEFF5D9),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: const Color(0xFFD3E0B5), width: 1),
       ),
       child: Row(
         children: [
-          const Icon(Icons.warning_amber_rounded,
-              color: _kDark, size: 18),
+          Container(
+            width: 22,
+            height: 22,
+            decoration: const BoxDecoration(color: _kDark, shape: BoxShape.circle),
+            alignment: Alignment.center,
+            child: const Icon(Icons.info_outline_rounded, color: Colors.white, size: 13),
+          ),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
-              '$plantName necesita riego',
+              count == 1
+                  ? '1 planta necesita atención hoy'
+                  : '$count plantas necesitan atención hoy',
               style: const TextStyle(
                 fontFamily: 'DM Sans',
                 fontWeight: FontWeight.w600,
                 fontSize: 12,
                 color: _kTextDark,
+              ),
+            ),
+          ),
+          GestureDetector(
+            onTap: () => showNeedsCareModal(context),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: _kDark, width: 1.2),
+              ),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Ver',
+                    style: TextStyle(
+                      fontFamily: 'DM Sans',
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                      color: _kTextDark,
+                    ),
+                  ),
+                  SizedBox(width: 4),
+                  Icon(Icons.arrow_forward_rounded, size: 13, color: _kTextDark),
+                ],
               ),
             ),
           ),
@@ -1531,25 +1723,36 @@ class _PlantListCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final daysSinceWater = plant.lastWateredAt == null
-        ? 99
-        : DateTime.now().difference(plant.lastWateredAt!).inDays;
-    final needsWater = daysSinceWater >= 7;
+    final neverWatered = plant.lastWateredAt == null;
+    final daysSinceWater =
+        neverWatered ? null : DateTime.now().difference(plant.lastWateredAt!).inDays;
+    final needsWater = neverWatered || daysSinceWater! >= species.waterFrequencyDays;
     final sp = _kSpeciesData[plant.speciesId] ?? _GardenSpecies.fromReal(species);
 
-    // Badge on image: "! Riego" in lime green when needs water, "✓ Riego" in sage green when up-to-date
-    final riegoBadgeBg = needsWater ? const Color(0xFFBDE038) : const Color(0xFF789D8C);
+    // Badge on image: "! Riego" in orange when needs water, "✓ Riego" in sage green when up-to-date
+    final riegoBadgeBg = needsWater ? const Color(0xFFF56B1C) : const Color(0xFF789D8C);
     final riegoBadgeText = needsWater ? '! Riego' : '✓ Riego';
     final riegoBadgeColor = Colors.white;
 
-    // Status pill
+    // Status pill — siempre con ícono de check (estilo Figma), el color y el
+    // texto reflejan el estado real: días exactos sin riego cuando ya toca,
+    // "Al día" cuando no.
     final statusBg = needsWater ? const Color(0xFFFFF4EC) : const Color(0xFFF2F4EB);
     final statusBorderColor = needsWater ? const Color(0xFFFFCCA0) : const Color(0xFF8A9A65);
     final statusTextColor = needsWater ? const Color(0xFFB94E13) : const Color(0xFF10454F);
-    final statusText = needsWater ? 'Necesita riego' : 'Al día';
-    final statusIcon = needsWater ? Icons.warning_amber_rounded : Icons.check_rounded;
+    final overdueBy = daysSinceWater == null ? null : daysSinceWater - species.waterFrequencyDays;
+    final statusText = !needsWater
+        ? 'Al día'
+        : neverWatered
+            ? 'Nunca regada'
+            : overdueBy! <= 0
+                ? 'Riego hoy'
+                : '$overdueBy día${overdueBy == 1 ? '' : 's'} de retraso';
+    const statusIcon = Icons.check_rounded;
 
-    final daysLabel = '${daysSinceWater}d sin riego · c/7d';
+    final daysLabel = neverWatered
+        ? 'Sin riego registrado · c/${species.waterFrequencyDays}d'
+        : '${daysSinceWater}d sin riego · c/${species.waterFrequencyDays}d';
 
     return GestureDetector(
       onTap: onTap,
@@ -1782,6 +1985,113 @@ class _PlantListCard extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+// ── Plant grid card — Mi Jardín en cuadrícula ──────────────────────────────
+class _PlantGridCard extends StatelessWidget {
+  final UserPlant plant;
+  final PlantSpecies species;
+  final bool needsWater;
+  final VoidCallback onTap;
+
+  const _PlantGridCard({
+    required this.plant,
+    required this.species,
+    required this.needsWater,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final visual = visualForCategory(species.category);
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: const Color(0xFFE5EAE7), width: 1.2),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.02),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  Container(
+                    color: visual.background,
+                    alignment: Alignment.center,
+                    padding: const EdgeInsets.all(12),
+                    child: Icon(visual.icon, size: 40, color: visual.color.withValues(alpha: 0.5)),
+                  ),
+                  Positioned(
+                    top: 6,
+                    right: 6,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: needsWater ? const Color(0xFFF56B1C) : const Color(0xFF789D8C),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        needsWater ? '! Riego' : '✓ Riego',
+                        style: const TextStyle(
+                          fontSize: 9,
+                          fontWeight: FontWeight.w800,
+                          color: Colors.white,
+                          fontFamily: 'Inter',
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    plant.nickname,
+                    style: const TextStyle(
+                      fontFamily: 'DM Sans',
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                      color: _kTextDark,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    species.scientificName,
+                    style: const TextStyle(
+                      fontFamily: 'DM Sans',
+                      fontSize: 11,
+                      color: _kTextMuted,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
