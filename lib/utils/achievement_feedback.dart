@@ -9,6 +9,9 @@ void showAchievementUnlockedSnackbars(BuildContext context, List<Achievement> un
   if (unlocked.isEmpty || !context.mounted) return;
   final messenger = ScaffoldMessenger.of(context);
   for (final achievement in unlocked) {
+    final reward = achievement.seedReward > 0
+        ? '+${achievement.xpReward} XP · +${achievement.seedReward} semillas'
+        : '+${achievement.xpReward} XP';
     messenger.showSnackBar(
       SnackBar(
         content: Row(
@@ -17,7 +20,7 @@ void showAchievementUnlockedSnackbars(BuildContext context, List<Achievement> un
             const SizedBox(width: 10),
             Expanded(
               child: Text(
-                '¡Logro desbloqueado! ${achievement.name} (+${achievement.xpReward} XP)',
+                '¡Logro desbloqueado! ${achievement.name} ($reward)',
                 style: const TextStyle(fontWeight: FontWeight.w600),
               ),
             ),

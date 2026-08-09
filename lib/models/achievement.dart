@@ -4,6 +4,7 @@ class Achievement {
   final String conditionType;
   final int conditionValue;
   final int xpReward;
+  final int seedReward;
   final String? description;
 
   Achievement({
@@ -12,6 +13,7 @@ class Achievement {
     required this.conditionType,
     required this.conditionValue,
     required this.xpReward,
+    this.seedReward = 0,
     this.description,
   });
 
@@ -22,6 +24,9 @@ class Achievement {
       conditionType: json['condition_type'] as String,
       conditionValue: json['condition_value'] as int,
       xpReward: json['xp_reward'] as int,
+      // Fallback a 0 mientras el backend no tenga la migración de
+      // seed_reward aplicada en todos los ambientes.
+      seedReward: json['seed_reward'] as int? ?? 0,
       description: json['description'] as String?,
     );
   }
@@ -33,6 +38,7 @@ class Achievement {
       'condition_type': conditionType,
       'condition_value': conditionValue,
       'xp_reward': xpReward,
+      'seed_reward': seedReward,
       'description': description,
     };
   }
@@ -43,6 +49,7 @@ class Achievement {
     String? conditionType,
     int? conditionValue,
     int? xpReward,
+    int? seedReward,
     String? description,
   }) {
     return Achievement(
@@ -51,6 +58,7 @@ class Achievement {
       conditionType: conditionType ?? this.conditionType,
       conditionValue: conditionValue ?? this.conditionValue,
       xpReward: xpReward ?? this.xpReward,
+      seedReward: seedReward ?? this.seedReward,
       description: description ?? this.description,
     );
   }

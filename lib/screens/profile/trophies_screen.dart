@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:frontend_eco_2/models/models.dart';
 import 'package:frontend_eco_2/providers/providers.dart';
 import 'package:frontend_eco_2/widgets/common/custom_app_bar.dart';
+import 'package:frontend_eco_2/utils/achievement_ui.dart';
 
 // ── Figma color tokens ────────────────────────────────────────────────────
 const _kDark = Color(0xFF10454F);
@@ -12,31 +13,8 @@ const _kTextDark = Color(0xFF0D2B31);
 const _kLime = Color(0xFFBDE038);
 const _kCardBorder = Color(0xFFE5E5E5);
 
-// Mismo criterio que missions_tab.dart: solo estas condiciones tienen un
-// contador real hoy; el resto se muestra como logro "sin progreso visible"
-// en vez de fingir datos.
-const _kTrackableConditions = {
-  AchievementConditions.userPlants,
-  AchievementConditions.careLogs,
-  AchievementConditions.onboardingCompleted,
-};
-
-IconData _iconForCondition(String conditionType) {
-  switch (conditionType) {
-    case AchievementConditions.userPlants:
-      return Icons.park_rounded;
-    case AchievementConditions.careLogs:
-      return Icons.water_drop_rounded;
-    case AchievementConditions.onboardingCompleted:
-      return Icons.flag_rounded;
-    case AchievementConditions.plantScans:
-      return Icons.search_rounded;
-    case AchievementConditions.roomsCreated:
-      return Icons.home_rounded;
-    default:
-      return Icons.emoji_events_rounded;
-  }
-}
+const _kTrackableConditions = kTrackableAchievementConditions;
+final _iconForCondition = iconForAchievementCondition;
 
 class TrophiesScreen extends StatefulWidget {
   const TrophiesScreen({super.key});
@@ -125,7 +103,7 @@ class _TrophiesScreenState extends State<TrophiesScreen> {
           childAspectRatio: childAspectRatio,
         ),
         itemBuilder: (context, i) =>
-            _buildTrophyCard(all[i], mp.isAchievementCompleted(all[i].id)),
+            _buildTrophyCard(mp, all[i], mp.isAchievementCompleted(all[i].id)),
       );
     } else if (_selectedTab == 1) {
       // Misiones: logros aún no desbloqueados, con progreso real si es rastreable.
@@ -145,7 +123,7 @@ class _TrophiesScreenState extends State<TrophiesScreen> {
         children: completed
             .map((a) => Padding(
                   padding: const EdgeInsets.only(bottom: 10),
-                  child: _buildCompletedTile(a),
+                  child: _buildCompletedTile(mp, a),
                 ))
             .toList(),
       );
@@ -167,6 +145,7 @@ class _TrophiesScreenState extends State<TrophiesScreen> {
   Widget _buildLevelHero(MissionsProvider mp, UserProvider userProvider, int trophyCount) {
     final level = mp.progress?.level ?? 1;
     final xp = mp.progress?.xp ?? 0;
+    final seeds = mp.progress?.seeds ?? 0;
     final username = userProvider.currentUser?.username ?? 'Jardinera';
 
     return Container(
@@ -211,13 +190,21 @@ class _TrophiesScreenState extends State<TrophiesScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Nivel $level · $xp XP · $trophyCount trofeos',
+                  'Nivel $level · $trophyCount trofeos',
                   style: const TextStyle(
                     fontFamily: 'DM Sans',
                     fontWeight: FontWeight.w500,
                     fontSize: 12,
                     color: _kLime,
                   ),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    _heroStat(Icons.bolt_rounded, '$xp XP'),
+                    const SizedBox(width: 10),
+                    _heroStat(Icons.spa_rounded, '$seeds semillas'),
+                  ],
                 ),
               ],
             ),
@@ -234,6 +221,25 @@ class _TrophiesScreenState extends State<TrophiesScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _heroStat(IconData icon, String label) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 12, color: Colors.white.withValues(alpha: 0.85)),
+        const SizedBox(width: 4),
+        Text(
+          label,
+          style: TextStyle(
+            fontFamily: 'DM Sans',
+            fontWeight: FontWeight.w600,
+            fontSize: 11,
+            color: Colors.white.withValues(alpha: 0.85),
+          ),
+        ),
+      ],
     );
   }
 
@@ -335,62 +341,56 @@ class _TrophiesScreenState extends State<TrophiesScreen> {
   }
 
   // ── Trophy card (grid, "Trofeos" tab) ──────────────────────────────────
-  Widget _buildTrophyCard(Achievement a, bool unlocked) {
+  Widget _buildTrophyCard(MissionsProvider mp, Achievement a, bool unlocked) {
     final circleBg = unlocked ? const Color(0xFFFEF8E7) : const Color(0xFFECECEC);
     final iconColor = unlocked ? const Color(0xFFFABF2E) : const Color(0xFF909090);
     final iconData = unlocked ? _iconForCondition(a.conditionType) : Icons.lock_rounded;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: unlocked ? Colors.white : const Color(0xFFF4F5F4),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: _kCardBorder),
+    return PressableCard(
+      onTap: () => showAchievementDetailSheet(
+        context,
+        achievement: a,
+        unlocked: unlocked,
+        currentProgress: mp.progressFor(a),
+        unlockedAt: mp.unlockedAtFor(a.id),
       ),
-      padding: const EdgeInsets.all(12),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            width: 54,
-            height: 54,
-            decoration: BoxDecoration(shape: BoxShape.circle, color: circleBg),
-            alignment: Alignment.center,
-            child: Icon(iconData, color: iconColor, size: 26),
-          ),
-          const SizedBox(height: 10),
-          Expanded(
-            child: Text(
-              a.name,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontFamily: 'DM Sans',
-                fontSize: 11,
-                fontWeight: FontWeight.w700,
-                color: unlocked ? _kTextDark : const Color(0xFF808080),
-                height: 1.2,
-              ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
+      child: Container(
+        decoration: BoxDecoration(
+          color: unlocked ? Colors.white : const Color(0xFFF4F5F4),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: _kCardBorder),
+        ),
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 54,
+              height: 54,
+              decoration: BoxDecoration(shape: BoxShape.circle, color: circleBg),
+              alignment: Alignment.center,
+              child: Icon(iconData, color: iconColor, size: 26),
             ),
-          ),
-          const SizedBox(height: 8),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: circleBg,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Text(
-              '+${a.xpReward} XP',
-              style: TextStyle(
-                fontFamily: 'DM Sans',
-                fontSize: 9,
-                fontWeight: FontWeight.w700,
-                color: iconColor,
+            const SizedBox(height: 10),
+            Expanded(
+              child: Text(
+                a.name,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontFamily: 'DM Sans',
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  color: unlocked ? _kTextDark : const Color(0xFF808080),
+                  height: 1.2,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
-          ),
-        ],
+            const SizedBox(height: 8),
+            RewardBadges(xp: a.xpReward, seeds: a.seedReward, fontSize: 9, compact: true),
+          ],
+        ),
       ),
     );
   }
@@ -403,120 +403,121 @@ class _TrophiesScreenState extends State<TrophiesScreen> {
         ? 0.0
         : (current / a.conditionValue).clamp(0.0, 1.0);
 
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: _kCardBorder),
+    return PressableCard(
+      onTap: () => showAchievementDetailSheet(
+        context,
+        achievement: a,
+        unlocked: false,
+        currentProgress: current,
       ),
-      child: Row(
-        children: [
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(color: _kLime.withValues(alpha: 0.25), borderRadius: BorderRadius.circular(12)),
-            alignment: Alignment.center,
-            child: Icon(_iconForCondition(a.conditionType), color: _kDark, size: 20),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  a.name,
-                  style: const TextStyle(
-                    fontFamily: 'DM Sans',
-                    fontWeight: FontWeight.w700,
-                    fontSize: 13,
-                    color: _kTextDark,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                if (trackable)
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(3),
-                    child: LinearProgressIndicator(
-                      value: progress,
-                      minHeight: 5,
-                      backgroundColor: const Color(0xFFECECEC),
-                      valueColor: const AlwaysStoppedAnimation<Color>(_kLime),
-                    ),
-                  )
-                else
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: _kCardBorder),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(color: _kLime.withValues(alpha: 0.25), borderRadius: BorderRadius.circular(12)),
+              alignment: Alignment.center,
+              child: Icon(_iconForCondition(a.conditionType), color: _kDark, size: 20),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   Text(
-                    'Próximamente',
-                    style: const TextStyle(fontFamily: 'DM Sans', fontSize: 11, color: _kTextMuted),
+                    a.name,
+                    style: const TextStyle(
+                      fontFamily: 'DM Sans',
+                      fontWeight: FontWeight.w700,
+                      fontSize: 13,
+                      color: _kTextDark,
+                    ),
                   ),
-              ],
+                  const SizedBox(height: 4),
+                  if (trackable)
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(3),
+                      child: LinearProgressIndicator(
+                        value: progress,
+                        minHeight: 5,
+                        backgroundColor: const Color(0xFFECECEC),
+                        valueColor: const AlwaysStoppedAnimation<Color>(_kLime),
+                      ),
+                    )
+                  else
+                    Text(
+                      'Próximamente',
+                      style: const TextStyle(fontFamily: 'DM Sans', fontSize: 11, color: _kTextMuted),
+                    ),
+                ],
+              ),
             ),
-          ),
-          const SizedBox(width: 8),
-          Text(
-            '+${a.xpReward} XP',
-            style: const TextStyle(
-              fontFamily: 'DM Sans',
-              fontWeight: FontWeight.w700,
-              fontSize: 11,
-              color: _kDark,
-            ),
-          ),
-        ],
+            const SizedBox(width: 8),
+            RewardBadges(xp: a.xpReward, seeds: a.seedReward, fontSize: 9, compact: true),
+          ],
+        ),
       ),
     );
   }
 
   // ── Completed tile ("Logros" tab) ──────────────────────────────────────
-  Widget _buildCompletedTile(Achievement a) {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: _kCardBorder),
+  Widget _buildCompletedTile(MissionsProvider mp, Achievement a) {
+    return PressableCard(
+      onTap: () => showAchievementDetailSheet(
+        context,
+        achievement: a,
+        unlocked: true,
+        currentProgress: mp.progressFor(a),
+        unlockedAt: mp.unlockedAtFor(a.id),
       ),
-      child: Row(
-        children: [
-          Container(
-            width: 44,
-            height: 44,
-            decoration: const BoxDecoration(color: Color(0xFFFEF8E7), shape: BoxShape.circle),
-            alignment: Alignment.center,
-            child: const Icon(Icons.emoji_events_rounded, color: Color(0xFFFABF2E), size: 20),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  a.name,
-                  style: const TextStyle(
-                    fontFamily: 'DM Sans',
-                    fontWeight: FontWeight.w700,
-                    fontSize: 13,
-                    color: _kTextDark,
-                  ),
-                ),
-                if (a.description != null)
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: _kCardBorder),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: const BoxDecoration(color: Color(0xFFFEF8E7), shape: BoxShape.circle),
+              alignment: Alignment.center,
+              child: const Icon(Icons.emoji_events_rounded, color: Color(0xFFFABF2E), size: 20),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   Text(
-                    a.description!,
-                    style: const TextStyle(fontFamily: 'DM Sans', fontSize: 11, color: _kTextMuted),
+                    a.name,
+                    style: const TextStyle(
+                      fontFamily: 'DM Sans',
+                      fontWeight: FontWeight.w700,
+                      fontSize: 13,
+                      color: _kTextDark,
+                    ),
                   ),
-              ],
+                  if (a.description != null)
+                    Text(
+                      a.description!,
+                      style: const TextStyle(fontFamily: 'DM Sans', fontSize: 11, color: _kTextMuted),
+                    ),
+                ],
+              ),
             ),
-          ),
-          Text(
-            '+${a.xpReward} XP',
-            style: const TextStyle(
-              fontFamily: 'DM Sans',
-              fontWeight: FontWeight.w700,
-              fontSize: 12,
-              color: _kDark,
-            ),
-          ),
-        ],
+            RewardBadges(xp: a.xpReward, seeds: a.seedReward, fontSize: 9, compact: true),
+          ],
+        ),
       ),
     );
   }

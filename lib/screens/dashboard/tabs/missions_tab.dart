@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:frontend_eco_2/models/models.dart';
 import 'package:frontend_eco_2/providers/providers.dart';
+import 'package:frontend_eco_2/utils/achievement_ui.dart';
 
 // ── Color tokens ─────────────────────────────────────────────────────────
 const _kDark = Color(0xFF10454F);
@@ -10,44 +11,9 @@ const _kTextDark = Color(0xFF0D2B31);
 const _kLime = Color(0xFFBDE038);
 const _kCardBorder = Color(0xFFE5E5E5);
 
-// Condiciones para las que hoy existe un contador real en la app. El resto
-// (plant_scans, rooms_created) no tiene una feature real detrás todavía —
-// se muestran aparte como "próximamente" en vez de fingir progreso.
-const _kTrackableConditions = {
-  AchievementConditions.userPlants,
-  AchievementConditions.careLogs,
-  AchievementConditions.onboardingCompleted,
-};
-
-IconData _iconForCondition(String conditionType) {
-  switch (conditionType) {
-    case AchievementConditions.userPlants:
-      return Icons.park_rounded;
-    case AchievementConditions.careLogs:
-      return Icons.water_drop_rounded;
-    case AchievementConditions.onboardingCompleted:
-      return Icons.flag_rounded;
-    case AchievementConditions.plantScans:
-      return Icons.search_rounded;
-    case AchievementConditions.roomsCreated:
-      return Icons.home_rounded;
-    default:
-      return Icons.emoji_events_rounded;
-  }
-}
-
-String _progressLabel(Achievement a, int current) {
-  switch (a.conditionType) {
-    case AchievementConditions.userPlants:
-      return '$current de ${a.conditionValue} plantas';
-    case AchievementConditions.careLogs:
-      return '$current de ${a.conditionValue} cuidados';
-    case AchievementConditions.onboardingCompleted:
-      return current >= a.conditionValue ? 'Completado' : 'Pendiente';
-    default:
-      return 'Próximamente';
-  }
-}
+const _kTrackableConditions = kTrackableAchievementConditions;
+final _iconForCondition = iconForAchievementCondition;
+final _progressLabel = achievementProgressLabel;
 
 class MissionsTab extends StatefulWidget {
   const MissionsTab({super.key});
@@ -104,7 +70,7 @@ class _MissionsTabState extends State<MissionsTab> {
                       else
                         ...completed.map((a) => Padding(
                               padding: const EdgeInsets.only(bottom: 10),
-                              child: _buildCompletedCard(a),
+                              child: _buildCompletedCard(mp, a),
                             )),
                     ] else ...[
                       if (comingSoon.isEmpty)
@@ -206,6 +172,18 @@ class _MissionsTabState extends State<MissionsTab> {
     final current = mp.progressFor(a);
     final progress = a.conditionValue == 0 ? 1.0 : (current / a.conditionValue).clamp(0.0, 1.0);
 
+    return PressableCard(
+      onTap: () => showAchievementDetailSheet(
+        context,
+        achievement: a,
+        unlocked: false,
+        currentProgress: current,
+      ),
+      child: _activeMissionCardContent(a, current, progress),
+    );
+  }
+
+  Widget _activeMissionCardContent(Achievement a, int current, double progress) {
     return Container(
       decoration: BoxDecoration(
         color: _kDark,
@@ -322,33 +300,7 @@ class _MissionsTabState extends State<MissionsTab> {
             ],
           ),
           const SizedBox(height: 14),
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: _kLime,
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.bolt_rounded, size: 12, color: _kTextDark),
-                    const SizedBox(width: 6),
-                    Text(
-                      '+${a.xpReward} XP',
-                      style: const TextStyle(
-                        fontFamily: 'DM Sans',
-                        fontWeight: FontWeight.w600,
-                        fontSize: 11,
-                        color: _kTextDark,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
+          RewardBadges(xp: a.xpReward, seeds: a.seedReward),
         ],
       ),
     );
@@ -357,6 +309,18 @@ class _MissionsTabState extends State<MissionsTab> {
   // ── Upcoming achievement card (white, bordered) ────────────────────────
   Widget _buildUpcomingCard(MissionsProvider mp, Achievement a, {bool locked = false}) {
     final current = mp.progressFor(a);
+    return PressableCard(
+      onTap: () => showAchievementDetailSheet(
+        context,
+        achievement: a,
+        unlocked: false,
+        currentProgress: current,
+      ),
+      child: _upcomingCardContent(a, current, locked: locked),
+    );
+  }
+
+  Widget _upcomingCardContent(Achievement a, int current, {bool locked = false}) {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -404,9 +368,12 @@ class _MissionsTabState extends State<MissionsTab> {
                     color: _kTextMuted,
                   ),
                 ),
+                const SizedBox(height: 8),
+                RewardBadges(xp: a.xpReward, seeds: a.seedReward, fontSize: 9, compact: true),
               ],
             ),
           ),
+          const SizedBox(width: 4),
           const Icon(Icons.chevron_right_rounded, size: 18, color: _kTextMuted),
         ],
       ),
@@ -414,59 +381,60 @@ class _MissionsTabState extends State<MissionsTab> {
   }
 
   // ── Completed achievement card ─────────────────────────────────────────
-  Widget _buildCompletedCard(Achievement a) {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: _kCardBorder),
+  Widget _buildCompletedCard(MissionsProvider mp, Achievement a) {
+    return PressableCard(
+      onTap: () => showAchievementDetailSheet(
+        context,
+        achievement: a,
+        unlocked: true,
+        currentProgress: mp.progressFor(a),
+        unlockedAt: mp.unlockedAtFor(a.id),
       ),
-      child: Row(
-        children: [
-          Container(
-            width: 48,
-            height: 48,
-            decoration: const BoxDecoration(color: Color(0xFFFEF8E7), shape: BoxShape.circle),
-            alignment: Alignment.center,
-            child: const Icon(Icons.emoji_events_rounded, color: Color(0xFFFABF2E), size: 22),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  a.name,
-                  style: const TextStyle(
-                    fontFamily: 'DM Sans',
-                    fontWeight: FontWeight.w700,
-                    fontSize: 13,
-                    color: _kTextDark,
-                  ),
-                ),
-                if (a.description != null)
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: _kCardBorder),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: const BoxDecoration(color: Color(0xFFFEF8E7), shape: BoxShape.circle),
+              alignment: Alignment.center,
+              child: const Icon(Icons.emoji_events_rounded, color: Color(0xFFFABF2E), size: 22),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   Text(
-                    a.description!,
+                    a.name,
                     style: const TextStyle(
                       fontFamily: 'DM Sans',
-                      fontSize: 11,
-                      color: _kTextMuted,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 13,
+                      color: _kTextDark,
                     ),
                   ),
-              ],
+                  if (a.description != null)
+                    Text(
+                      a.description!,
+                      style: const TextStyle(
+                        fontFamily: 'DM Sans',
+                        fontSize: 11,
+                        color: _kTextMuted,
+                      ),
+                    ),
+                ],
+              ),
             ),
-          ),
-          Text(
-            '+${a.xpReward} XP',
-            style: const TextStyle(
-              fontFamily: 'DM Sans',
-              fontWeight: FontWeight.w700,
-              fontSize: 12,
-              color: _kDark,
-            ),
-          ),
-        ],
+            RewardBadges(xp: a.xpReward, seeds: a.seedReward, fontSize: 9, compact: true),
+          ],
+        ),
       ),
     );
   }

@@ -59,6 +59,14 @@ class MissionsProvider with ChangeNotifier {
   bool isAchievementCompleted(String id) =>
       completedAchievementIds.contains(id);
 
+  /// Fecha en la que se desbloqueó un logro, o null si no está desbloqueado.
+  DateTime? unlockedAtFor(String achievementId) {
+    for (final ua in _unlockedAchievements) {
+      if (ua.achievementId == achievementId) return ua.unlockedAt;
+    }
+    return null;
+  }
+
   /// Progreso actual (0-N) hacia la condición de un logro, para barras de
   /// progreso reales en vez de porcentajes inventados.
   int progressFor(Achievement achievement) {
@@ -221,6 +229,14 @@ class MissionsProvider with ChangeNotifier {
             await _gamificationService.unlockAchievement(achievement.id);
         _unlockedAchievements.add(userAchievement);
         unlocked.add(achievement);
+        // El backend acredita xp_reward/seed_reward atómicamente al
+        // desbloquear; se refleja acá para no depender de un refetch.
+        if (_progress != null) {
+          _progress = _progress!.copyWith(
+            xp: _progress!.xp + achievement.xpReward,
+            seeds: _progress!.seeds + achievement.seedReward,
+          );
+        }
       } on ApiException catch (e) {
         // 409 = ya estaba desbloqueado (ej. otra sesión/dispositivo se
         // adelantó) — no es un error real, solo lo ignoramos.

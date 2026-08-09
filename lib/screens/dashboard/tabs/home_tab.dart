@@ -6,6 +6,7 @@ import 'package:frontend_eco_2/routing/app_routes.dart';
 import 'package:frontend_eco_2/theme/app_colors.dart';
 import 'package:frontend_eco_2/widgets/common/plant_card.dart';
 import 'package:frontend_eco_2/widgets/garden/add_plant_modal.dart';
+import 'package:frontend_eco_2/utils/achievement_ui.dart';
 
 class HomeTab extends StatelessWidget {
   final VoidCallback onViewAll;
@@ -422,12 +423,9 @@ class HomeTab extends StatelessWidget {
     // Sin backend de "misiones" real, se muestra el logro rastreable más
     // cercano a completarse (mismo criterio que Misiones/Trofeos) en vez de
     // un progreso inventado a partir de las semillas.
-    const trackable = {
-      AchievementConditions.userPlants,
-      AchievementConditions.careLogs,
-      AchievementConditions.onboardingCompleted,
-    };
-    final candidates = mp.lockedAchievements.where((a) => trackable.contains(a.conditionType)).toList()
+    final candidates = mp.lockedAchievements
+        .where((a) => kTrackableAchievementConditions.contains(a.conditionType))
+        .toList()
       ..sort((a, b) =>
           (a.conditionValue - mp.progressFor(a)).compareTo(b.conditionValue - mp.progressFor(b)));
 
@@ -461,18 +459,25 @@ class HomeTab extends StatelessWidget {
         achievement.conditionValue == 0 ? 1.0 : (current / achievement.conditionValue).clamp(0.0, 1.0);
     final unitLabel = achievement.conditionType == AchievementConditions.careLogs ? 'cuidados' : 'plantas';
 
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(15),
-        border: Border.all(
-          color: AppColors.primary.withValues(alpha: 0.25),
-          width: 1,
-        ),
+    return PressableCard(
+      onTap: () => showAchievementDetailSheet(
+        context,
+        achievement: achievement,
+        unlocked: false,
+        currentProgress: current,
       ),
-      padding: const EdgeInsets.all(16),
-      child: Column(
+      child: Container(
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(15),
+          border: Border.all(
+            color: AppColors.primary.withValues(alpha: 0.25),
+            width: 1,
+          ),
+        ),
+        padding: const EdgeInsets.all(16),
+        child: Column(
         children: [
           Row(
             children: [
@@ -536,31 +541,12 @@ class HomeTab extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           // Reward badge
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 6,
-                ),
-                decoration: BoxDecoration(
-                  color: AppColors.accentLight,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  '+${achievement.xpReward} XP',
-                  style: const TextStyle(
-                    color: AppColors.primaryDark,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 12,
-                    fontFamily: 'Inter',
-                  ),
-                ),
-              ),
-            ],
+          Align(
+            alignment: Alignment.centerRight,
+            child: RewardBadges(xp: achievement.xpReward, seeds: achievement.seedReward),
           ),
         ],
+        ),
       ),
     );
   }
