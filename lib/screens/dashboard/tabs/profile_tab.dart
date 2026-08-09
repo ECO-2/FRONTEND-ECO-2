@@ -9,8 +9,9 @@ import 'package:frontend_eco_2/widgets/common/settings_option_tile.dart';
 
 class ProfileTab extends StatelessWidget {
   final VoidCallback? onNavigateToGarden;
+  final VoidCallback? onStartTour;
 
-  const ProfileTab({super.key, this.onNavigateToGarden});
+  const ProfileTab({super.key, this.onNavigateToGarden, this.onStartTour});
 
   @override
   Widget build(BuildContext context) {
@@ -276,6 +277,13 @@ class ProfileTab extends StatelessWidget {
             title: 'Próximas funciones',
             subtitle: 'Coming soon IoT (14)',
             onTap: () {},
+          ),
+          const Divider(height: 1, color: Color(0xFFE2E7E4)),
+          SettingsOptionTile(
+            icon: Icons.explore_outlined,
+            title: 'Recorrido de la app',
+            subtitle: 'Vuelve a ver el tutorial guiado',
+            onTap: () => onStartTour?.call(),
           ),
           const Divider(height: 1, color: Color(0xFFE2E7E4)),
           const SizedBox(height: 32),

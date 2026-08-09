@@ -1,14 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:frontend_eco_2/theme/app_colors.dart';
+import 'package:frontend_eco_2/utils/app_tour.dart';
 
 class CustomBottomNavBar extends StatelessWidget {
   final int selectedIndex;
   final ValueChanged<int> onTap;
+  // Solo se pasan desde DashboardScreen, para el recorrido guiado — el resto
+  // de las pantallas que usan esta barra (detalle de planta, tienda, etc.)
+  // la instancian sin keys y se comportan exactamente igual que antes.
+  final GlobalKey? jardinKey;
+  final GlobalKey? escanerKey;
+  final GlobalKey? tiendaKey;
+  final GlobalKey? perfilKey;
 
   const CustomBottomNavBar({
     super.key,
     required this.selectedIndex,
     required this.onTap,
+    this.jardinKey,
+    this.escanerKey,
+    this.tiendaKey,
+    this.perfilKey,
   });
 
   @override
@@ -35,11 +47,17 @@ class CustomBottomNavBar extends StatelessWidget {
           _buildItem(
             index: 0,
             label: 'Tienda',
+            tourKey: tiendaKey,
+            tourTitle: 'Tienda',
+            tourDescription: 'Canjea tus semillas por macetas extra y funciones especiales.',
             iconBuilder: (color, isSelected) => _buildTiendaIcon(color),
           ),
           _buildItem(
             index: 1,
             label: 'Jardín',
+            tourKey: jardinKey,
+            tourTitle: 'Tu Jardín',
+            tourDescription: 'Explora el catálogo de especies o gestiona las plantas que ya tienes.',
             iconBuilder: (color, isSelected) => _buildJardinIcon(color),
           ),
           _buildItem(
@@ -50,11 +68,17 @@ class CustomBottomNavBar extends StatelessWidget {
           _buildItem(
             index: 3,
             label: 'Escáner',
+            tourKey: escanerKey,
+            tourTitle: 'Escáner IA',
+            tourDescription: 'Identifica una planta apuntando la cámara — la IA reconoce la especie.',
             iconBuilder: (color, isSelected) => _buildEscanerIcon(color),
           ),
           _buildItem(
             index: 4,
             label: 'Perfil',
+            tourKey: perfilKey,
+            tourTitle: 'Tu Perfil',
+            tourDescription: 'Revisa tu progreso, ajustes de la cuenta y más.',
             iconBuilder: (color, isSelected) => _buildPerfilIcon(color, isSelected),
           ),
         ],
@@ -66,12 +90,19 @@ class CustomBottomNavBar extends StatelessWidget {
     required int index,
     required String label,
     required Widget Function(Color color, bool isSelected) iconBuilder,
+    GlobalKey? tourKey,
+    String? tourTitle,
+    String? tourDescription,
   }) {
     final isSelected = index == selectedIndex;
     final contentColor = isSelected ? AppColors.primary : const Color(0xFFA0A0A0);
 
     return Expanded(
-      child: GestureDetector(
+      child: wrapWithTourStep(
+        key: tourKey,
+        title: tourTitle ?? '',
+        description: tourDescription ?? '',
+        child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: () => onTap(index),
         child: AnimatedContainer(
@@ -102,6 +133,7 @@ class CustomBottomNavBar extends StatelessWidget {
               ),
             ],
           ),
+        ),
         ),
       ),
     );

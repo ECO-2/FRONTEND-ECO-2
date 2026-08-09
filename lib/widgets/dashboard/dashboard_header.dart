@@ -4,9 +4,15 @@ import 'package:provider/provider.dart';
 import 'package:frontend_eco_2/theme/app_colors.dart';
 import 'package:frontend_eco_2/providers/providers.dart';
 import 'package:frontend_eco_2/routing/app_routes.dart';
+import 'package:frontend_eco_2/utils/app_tour.dart';
 
 class DashboardHeader extends StatelessWidget implements PreferredSizeWidget {
-  const DashboardHeader({super.key});
+  // Solo se pasan desde DashboardScreen, para el recorrido guiado.
+  final GlobalKey? seedsKey;
+  final GlobalKey? trophyKey;
+  final GlobalKey? bellKey;
+
+  const DashboardHeader({super.key, this.seedsKey, this.trophyKey, this.bellKey});
 
   @override
   Widget build(BuildContext context) {
@@ -73,43 +79,48 @@ class DashboardHeader extends StatelessWidget implements PreferredSizeWidget {
                   ),
                   const SizedBox(width: 12),
                   // Seed balance pill
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.accent,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          width: 22,
-                          height: 22,
-                          decoration: const BoxDecoration(
-                            color: AppColors.primary,
-                            shape: BoxShape.circle,
+                  wrapWithTourStep(
+                    key: seedsKey,
+                    title: 'Tus semillas',
+                    description: 'Ganas semillas cuidando tus plantas y cumpliendo misiones. Úsalas en la Tienda.',
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.accent,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 22,
+                            height: 22,
+                            decoration: const BoxDecoration(
+                              color: AppColors.primary,
+                              shape: BoxShape.circle,
+                            ),
+                            alignment: Alignment.center,
+                            child: const Icon(
+                              Icons.spa_rounded,
+                              color: AppColors.accent,
+                              size: 12,
+                            ),
                           ),
-                          alignment: Alignment.center,
-                          child: const Icon(
-                            Icons.spa_rounded,
-                            color: AppColors.accent,
-                            size: 12,
+                          const SizedBox(width: 8),
+                          Text(
+                            '$seeds Semillas',
+                            style: const TextStyle(
+                              fontFamily: 'Inter',
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                              color: AppColors.primary,
+                            ),
                           ),
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          '$seeds Semillas',
-                          style: const TextStyle(
-                            fontFamily: 'Inter',
-                            fontWeight: FontWeight.bold,
-                            fontSize: 13,
-                            color: AppColors.primary,
-                          ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ],
@@ -138,62 +149,72 @@ class DashboardHeader extends StatelessWidget implements PreferredSizeWidget {
                   ),
                   const Spacer(),
                   // Trophy icon with badge
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.of(context).pushNamed(AppRoutes.trophies);
-                    },
-                    child: Stack(
-                      clipBehavior: Clip.none,
-                      children: [
-                        const Icon(
-                          Icons.emoji_events_outlined,
-                          color: AppColors.textPrimary,
-                          size: 28,
-                        ),
-                        if (hasCompletedAchievements)
-                          Positioned(
-                            top: -1,
-                            right: -1,
-                            child: Container(
-                              width: 8,
-                              height: 8,
-                              decoration: const BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.orange,
+                  wrapWithTourStep(
+                    key: trophyKey,
+                    title: 'Logros y misiones',
+                    description: 'Aquí ves tus trofeos, el progreso de tus misiones y cuánto XP llevas.',
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.of(context).pushNamed(AppRoutes.trophies);
+                      },
+                      child: Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          const Icon(
+                            Icons.emoji_events_outlined,
+                            color: AppColors.textPrimary,
+                            size: 28,
+                          ),
+                          if (hasCompletedAchievements)
+                            Positioned(
+                              top: -1,
+                              right: -1,
+                              child: Container(
+                                width: 8,
+                                height: 8,
+                                decoration: const BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Colors.orange,
+                                ),
                               ),
                             ),
-                          ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                   const SizedBox(width: 16),
                   // Bell icon with badge
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.of(context).pushNamed(AppRoutes.notifications);
-                    },
-                    child: Stack(
-                      clipBehavior: Clip.none,
-                      children: [
-                        const Icon(
-                          Icons.notifications_none_rounded,
-                          color: AppColors.textPrimary,
-                          size: 28,
-                        ),
-                        if (unreadNotifications > 0)
-                          Positioned(
-                            top: -1,
-                            right: -1,
-                            child: Container(
-                              width: 8,
-                              height: 8,
-                              decoration: const BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: AppColors.error,
+                  wrapWithTourStep(
+                    key: bellKey,
+                    title: 'Notificaciones',
+                    description: 'Avisos reales: riegos pendientes, logros desbloqueados y plantas nuevas.',
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.of(context).pushNamed(AppRoutes.notifications);
+                      },
+                      child: Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          const Icon(
+                            Icons.notifications_none_rounded,
+                            color: AppColors.textPrimary,
+                            size: 28,
+                          ),
+                          if (unreadNotifications > 0)
+                            Positioned(
+                              top: -1,
+                              right: -1,
+                              child: Container(
+                                width: 8,
+                                height: 8,
+                                decoration: const BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: AppColors.error,
+                                ),
                               ),
                             ),
-                          ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ],

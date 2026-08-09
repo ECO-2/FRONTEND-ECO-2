@@ -54,6 +54,7 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         Provider<CareService>.value(value: careService),
+        Provider<SecureStorage>.value(value: storage),
         ChangeNotifierProvider(
           create: (_) => UserProvider(
             authService: authService,
