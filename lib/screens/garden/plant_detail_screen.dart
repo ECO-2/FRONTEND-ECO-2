@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:showcaseview/showcaseview.dart';
 import 'package:frontend_eco_2/models/models.dart';
 import 'package:frontend_eco_2/providers/providers.dart';
 import 'package:frontend_eco_2/routing/app_routes.dart';
 import 'package:frontend_eco_2/services/services.dart';
+import 'package:frontend_eco_2/utils/app_tour.dart';
 import 'package:frontend_eco_2/utils/plant_visuals.dart';
 import 'package:frontend_eco_2/widgets/common/custom_status_bar.dart';
 import 'package:frontend_eco_2/widgets/common/custom_bottom_nav_bar.dart';
@@ -66,6 +68,48 @@ class PlantDetailScreen extends StatelessWidget {
       return const Scaffold(body: Center(child: Text('Planta no encontrada')));
     }
 
+    return ShowCaseWidget(
+      onFinish: () {
+        Provider.of<SecureStorage>(context, listen: false).markPlantCareTourSeen();
+      },
+      builder: (context) => _PlantDetailBody(plant: plant),
+    );
+  }
+}
+
+class _PlantDetailBody extends StatefulWidget {
+  final UserPlant plant;
+
+  const _PlantDetailBody({required this.plant});
+
+  @override
+  State<_PlantDetailBody> createState() => _PlantDetailBodyState();
+}
+
+class _PlantDetailBodyState extends State<_PlantDetailBody> {
+  final _tourKeys = PlantCareTourKeys();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _maybeStartTour());
+  }
+
+  Future<void> _maybeStartTour() async {
+    if (!mounted) return;
+    final storage = Provider.of<SecureStorage>(context, listen: false);
+    final seen = await storage.hasSeenPlantCareTour();
+    if (seen || !mounted) return;
+    ShowCaseWidget.of(context).startShowCase(_tourKeys.orderedSteps);
+  }
+
+  void _restartTour() {
+    ShowCaseWidget.of(context).startShowCase(_tourKeys.orderedSteps);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final plant = widget.plant;
     final sp = _resolveSpeciesData(context, plant.speciesId);
 
     final statusBarHeight = MediaQuery.of(context).padding.top;
@@ -221,41 +265,55 @@ class PlantDetailScreen extends StatelessWidget {
                         const SizedBox(height: 20),
 
                         // ── Care Status Card ──
-                        CareStatusCard(plant: plant, sp: sp),
+                        wrapWithTourStep(
+                          key: _tourKeys.statusCard,
+                          title: 'Estado de riego',
+                          description:
+                              'Aquí ves si ya toca regarla, cuántos días lleva sin riego y cuántos '
+                              'días faltan (o cuántos de retraso lleva) según la frecuencia de la especie.',
+                          child: CareStatusCard(plant: plant, sp: sp),
+                        ),
                         const SizedBox(height: 20),
 
                         // ── Care Guide (orientación: dónde ubicarla y cómo cuidarla) ──
-                        CareGuideCard(sp: sp),
+                        CareGuideCard(sp: sp, scheduleKey: _tourKeys.schedule),
                         const SizedBox(height: 24),
 
                         // ── Action Buttons ──
                         Row(
                           children: [
                             Expanded(
-                              child: ElevatedButton.icon(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFF0D2B31),
-                                  foregroundColor: Colors.white,
-                                  elevation: 0,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(16),
+                              child: wrapWithTourStep(
+                                key: _tourKeys.registerButton,
+                                title: 'Registra cada cuidado',
+                                description:
+                                    'Cada vez que la riegues, fertilices, podes o trasplantes, regístralo '
+                                    'aquí — así el estado de riego y tu historial quedan al día de verdad.',
+                                child: ElevatedButton.icon(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(0xFF0D2B31),
+                                    foregroundColor: Colors.white,
+                                    elevation: 0,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 16,
+                                    ),
                                   ),
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 16,
+                                  onPressed: () => _showCareSheet(context, plant),
+                                  icon: const Icon(
+                                    Icons.water_drop_rounded,
+                                    size: 18,
+                                    color: Color.fromARGB(255, 236, 233, 21),
                                   ),
-                                ),
-                                onPressed: () => _showCareSheet(context, plant),
-                                icon: const Icon(
-                                  Icons.water_drop_rounded,
-                                  size: 18,
-                                  color: Color.fromARGB(255, 236, 233, 21),
-                                ),
-                                label: const Text(
-                                  'Registrar cuidado',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 14,
-                                    fontFamily: 'Inter',
+                                  label: const Text(
+                                    'Registrar cuidado',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14,
+                                      fontFamily: 'Inter',
+                                    ),
                                   ),
                                 ),
                               ),
@@ -402,7 +460,13 @@ class PlantDetailScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 12),
 
-                        SpeciesCareGrid(sp: sp),
+                        wrapWithTourStep(
+                          key: _tourKeys.speciesGrid,
+                          title: 'Ficha técnica de la especie',
+                          description:
+                              'Riego, luz, temperatura y humedad ideales para esta especie en particular.',
+                          child: SpeciesCareGrid(sp: sp),
+                        ),
                         const SizedBox(height: 24),
 
                         // ── Section: Mi nota personal ──
@@ -488,6 +552,15 @@ class PlantDetailScreen extends StatelessWidget {
                         color: Color(0xFF0D2B31),
                       ),
                     ),
+                  ),
+                  IconButton(
+                    icon: const Icon(
+                      Icons.help_outline_rounded,
+                      color: Color(0xFF0D2B31),
+                      size: 24,
+                    ),
+                    tooltip: 'Cómo cuidar esta planta',
+                    onPressed: _restartTour,
                   ),
                   IconButton(
                     icon: const Icon(

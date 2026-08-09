@@ -5,6 +5,7 @@ class SecureStorage {
   static const _accessTokenKey = 'access_token';
   static const _refreshTokenKey = 'refresh_token';
   static const _appTourSeenKey = 'app_tour_seen';
+  static const _plantCareTourSeenKey = 'plant_care_tour_seen';
 
   final FlutterSecureStorage _storage = const FlutterSecureStorage(
     aOptions: AndroidOptions(encryptedSharedPreferences: true),
@@ -41,4 +42,13 @@ class SecureStorage {
   }
 
   Future<void> markAppTourSeen() => _storage.write(key: _appTourSeenKey, value: 'true');
+
+  /// Recorrido de "cómo cuidar esta planta" (PlantDetailScreen) — también
+  /// se muestra automáticamente una sola vez, independiente del anterior.
+  Future<bool> hasSeenPlantCareTour() async {
+    return (await _storage.read(key: _plantCareTourSeenKey)) == 'true';
+  }
+
+  Future<void> markPlantCareTourSeen() =>
+      _storage.write(key: _plantCareTourSeenKey, value: 'true');
 }

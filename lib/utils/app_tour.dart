@@ -26,6 +26,23 @@ class AppTourKeys {
       ];
 }
 
+/// Claves para el recorrido de "cómo cuidar ESTA planta", dentro de
+/// PlantDetailScreen — distinto del recorrido general de la app: este
+/// explica cuándo regarla, fertilizarla, podarla y trasplantarla.
+///
+/// GlobalKeys nuevas por instancia (no estáticas como [AppTourKeys]) porque
+/// cada pantalla de detalle de planta es una ruta nueva independiente, así
+/// que no hay riesgo de colisión entre pantallas distintas abiertas en
+/// momentos distintos.
+class PlantCareTourKeys {
+  final statusCard = GlobalKey();
+  final schedule = GlobalKey();
+  final registerButton = GlobalKey();
+  final speciesGrid = GlobalKey();
+
+  List<GlobalKey> get orderedSteps => [statusCard, schedule, registerButton, speciesGrid];
+}
+
 /// Envuelve [child] en un [Showcase] con el estilo visual consistente del
 /// resto de la app, solo si se provee una key (para que los widgets que
 /// usan esto —CustomBottomNavBar, DashboardHeader— sigan funcionando sin
