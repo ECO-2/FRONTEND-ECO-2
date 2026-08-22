@@ -123,7 +123,14 @@ class _DashboardBodyState extends State<_DashboardBody> {
       ),
       bottomNavigationBar: CustomBottomNavBar(
         selectedIndex: widget.currentIndex,
-        onTap: widget.onTabChange,
+        onTap: (index) {
+          if (index == 3) {
+            // Ir directamente a la pantalla de la cámara
+            Navigator.pushNamed(context, AppRoutes.scan);
+          } else {
+            widget.onTabChange(index);
+          }
+        },
         jardinKey: AppTourKeys.navJardin,
         escanerKey: AppTourKeys.navEscaner,
         tiendaKey: AppTourKeys.navTienda,

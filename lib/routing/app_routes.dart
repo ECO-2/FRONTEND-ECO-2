@@ -18,6 +18,7 @@ import 'package:frontend_eco_2/screens/dashboard/tabs/missions_tab.dart';
 import 'package:frontend_eco_2/screens/garden/plant_detail_screen.dart';
 import 'package:frontend_eco_2/screens/garden/care_history_screen.dart';
 import 'package:frontend_eco_2/screens/garden/species_detail_screen.dart';
+import 'package:frontend_eco_2/screens/scanner_screen.dart';
 
 class AppRoutes {
   static const String welcome = '/';
@@ -85,7 +86,7 @@ class AppRoutes {
           settings: routeSettings,
         );
       case scan:
-        return MaterialPageRoute(builder: (_) => _placeholderScreen('Escáner IA'));
+        return MaterialPageRoute(builder: (_) => const ScannerScreen());
       case recordCare:
         return MaterialPageRoute(builder: (_) => _placeholderScreen('Registrar Cuidado'));
       case profile:

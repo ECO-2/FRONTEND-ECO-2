@@ -44,9 +44,8 @@ class _ScannerTabState extends State<ScannerTab> {
   bool _scanning = false;
 
   void _triggerScan() async {
-    setState(() => _scanning = true);
-    await Future.delayed(const Duration(seconds: 2));
-    if (mounted) setState(() {_scanning = false; _showResult = true;});
+    // Navigate to the new full-screen ScannerScreen
+    Navigator.pushNamed(context, AppRoutes.scan);
   }
 
   void _resetScan() => setState(() => _showResult = false);
