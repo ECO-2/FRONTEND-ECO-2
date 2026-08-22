@@ -1,19 +1,91 @@
 import 'package:flutter/material.dart';
 import 'package:camerawesome/camerawesome_plugin.dart';
+import 'package:provider/provider.dart';
+import 'package:showcaseview/showcaseview.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:frontend_eco_2/theme/app_colors.dart';
+import 'package:frontend_eco_2/utils/app_tour.dart';
+import 'package:frontend_eco_2/routing/app_routes.dart';
+import 'package:frontend_eco_2/providers/plants_provider.dart';
+import 'package:frontend_eco_2/models/models.dart';
 import 'dart:math';
 
-class ScannerScreen extends StatefulWidget {
+enum ScannerState { idle, scanning, success, offline }
+
+class ScannerScreen extends StatelessWidget {
   const ScannerScreen({super.key});
 
   @override
-  State<ScannerScreen> createState() => _ScannerScreenState();
+  Widget build(BuildContext context) {
+    // Wrapper for ShowCase
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: ShowCaseWidget(
+        builder: (context) => const ScannerScreenContent(),
+      ),
+    );
+  }
 }
 
-class _ScannerScreenState extends State<ScannerScreen>
+class ScannerScreenContent extends StatefulWidget {
+  const ScannerScreenContent({super.key});
+
+  @override
+  State<ScannerScreenContent> createState() => _ScannerScreenContentState();
+}
+
+class _ScannerScreenContentState extends State<ScannerScreenContent>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _scanAnimation;
+  
+  ScannerState _state = ScannerState.idle;
+
+  // Tour keys
+  final GlobalKey _backKey = GlobalKey();
+  final GlobalKey _flashKey = GlobalKey();
+  final GlobalKey _helpKey = GlobalKey();
+  final GlobalKey _galleryKey = GlobalKey();
+  final GlobalKey _historyKey = GlobalKey();
+  final GlobalKey _shutterKey = GlobalKey();
+
+  // Mocks para especies
+  final mainMockSpecies = PlantSpecies(
+    id: 'monstera',
+    commonName: 'Monstera deliciosa',
+    scientificName: 'Monstera deliciosa',
+    category: 'Aracea',
+    waterFrequencyDays: 7,
+    minTemperature: 18,
+    maxTemperature: 27,
+    lightRequirement: 'Luz indirecta brillante',
+    createdAt: DateTime.now(),
+  );
+  
+  final option1Species = PlantSpecies(
+    id: 'filodendro',
+    commonName: 'Filodendro',
+    scientificName: 'Philodendron',
+    category: 'Aracea',
+    waterFrequencyDays: 7,
+    minTemperature: 18,
+    maxTemperature: 27,
+    lightRequirement: 'Luz indirecta media',
+    createdAt: DateTime.now(),
+  );
+
+  final option2Species = PlantSpecies(
+    id: 'sorgo',
+    commonName: 'Sorgo',
+    scientificName: 'Sorghum bicolor',
+    category: 'Poaceae',
+    waterFrequencyDays: 5,
+    minTemperature: 15,
+    maxTemperature: 30,
+    lightRequirement: 'Sol directo',
+    createdAt: DateTime.now(),
+  );
 
   @override
   void initState() {
@@ -34,41 +106,270 @@ class _ScannerScreenState extends State<ScannerScreen>
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: CameraAwesomeBuilder.custom(
-        saveConfig: SaveConfig.photo(),
-        builder: (cameraState, preview) {
-          return Stack(
-            fit: StackFit.expand,
+  void _startTour(BuildContext context) {
+    ShowCaseWidget.of(context).startShowCase([
+      _backKey,
+      _flashKey,
+      _historyKey,
+      _galleryKey,
+      _shutterKey,
+    ]);
+  }
+
+  Future<void> _pickImageFromGallery() async {
+    if (_state == ScannerState.scanning) return;
+    
+    // Solicitar permiso de fotos
+    await Permission.photos.request();
+    
+    final ImagePicker picker = ImagePicker();
+    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+    
+    if (image != null) {
+      _startScan();
+    }
+  }
+
+  Future<void> _startScan() async {
+    setState(() {
+      _state = ScannerState.scanning;
+    });
+
+    await Future.delayed(const Duration(seconds: 3));
+    if (!mounted) return;
+
+    final isOffline = Random().nextDouble() < 0.2;
+
+    if (isOffline) {
+      setState(() {
+        _state = ScannerState.offline;
+      });
+      _showOfflineSnackbar();
+      Future.delayed(const Duration(seconds: 4), () {
+        if (mounted && _state == ScannerState.offline) {
+          setState(() => _state = ScannerState.idle);
+        }
+      });
+    } else {
+      setState(() {
+        _state = ScannerState.success;
+      });
+    }
+  }
+
+  void _showOfflineSnackbar() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Sin conexión a Internet. La foto se ha guardado para escanear más tarde.'),
+        backgroundColor: AppColors.orange,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
+  void _onAddToGarden(PlantSpecies species) {
+    final plantsProvider = Provider.of<PlantsProvider>(context, listen: false);
+    final bool alreadyExists = plantsProvider.userPlants.any((p) => p.speciesId == species.id);
+
+    if (alreadyExists) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: const Text('Planta ya registrada', style: TextStyle(color: AppColors.primaryDark, fontWeight: FontWeight.bold)),
+          content: const Text(
+            'Ya tienes esta planta registrada en tu jardín. Te sugerimos ponerle un apodo (diferenciador) para no confundirla.',
+            style: TextStyle(color: Colors.black87),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Entendido', style: TextStyle(color: AppColors.accent, fontWeight: FontWeight.bold)),
+            ),
+          ],
+        ),
+      );
+    } else {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: const Text('¿Desea añadir esta planta a su jardín?', style: TextStyle(color: AppColors.primaryDark, fontWeight: FontWeight.bold)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Scanner Overlay
-              SafeArea(
-                child: Column(
-                  children: [
-                    _buildTopControls(context, cameraState),
-                    Expanded(
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          _buildScannerFrame(),
-                          _buildAnalyzingChip(),
-                        ],
-                      ),
+              const Text('Se añadirá a tu colección de plantas.', style: TextStyle(color: Colors.black87)),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Macetas restantes: 3', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      Navigator.pushNamed(context, AppRoutes.store);
+                    },
+                    style: TextButton.styleFrom(
+                      padding: EdgeInsets.zero,
+                      minimumSize: Size.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
-                    _buildPlantDetailsCard(),
-                    const SizedBox(height: 20),
-                    _buildBottomControls(cameraState),
-                    const SizedBox(height: 20),
+                    child: const Text('Canjear más', style: TextStyle(fontSize: 12, color: AppColors.primary, decoration: TextDecoration.underline)),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancelar', style: TextStyle(color: Colors.grey)),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                Navigator.pop(context);
+                final success = await plantsProvider.addPlantFromSpecies(species);
+                if (success && mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Planta añadida con éxito')));
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.accent,
+                foregroundColor: AppColors.primaryDark,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              child: const Text('Aceptar', style: TextStyle(fontWeight: FontWeight.bold)),
+            ),
+          ],
+        ),
+      );
+    }
+  }
+
+  void _onViewDetails(PlantSpecies species) {
+    Navigator.pushNamed(context, AppRoutes.speciesDetail, arguments: species);
+  }
+
+  void _showHistoryModal() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) {
+        return Container(
+          height: MediaQuery.of(context).size.height * 0.6,
+          decoration: const BoxDecoration(
+            color: Colors.white, // FIX: Ensured background is white
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Historial de Escaneos',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.primaryDark,
+                ),
+              ),
+              const SizedBox(height: 20),
+              Expanded(
+                child: ListView(
+                  children: [
+                    _buildHistoryItem('Monstera Deliciosa', 'Hace 2 horas', '98% de coincidencia', () {
+                      Navigator.pop(context);
+                      setState(() => _state = ScannerState.success);
+                    }),
+                    _buildHistoryItem('Poto (Epipremnum aureum)', 'Ayer', '94% de coincidencia', () {
+                      Navigator.pop(context);
+                      setState(() => _state = ScannerState.success);
+                    }),
+                    _buildHistoryItem('Aloe Vera', 'Hace 3 días', '89% de coincidencia', () {
+                      Navigator.pop(context);
+                      setState(() => _state = ScannerState.success);
+                    }),
                   ],
                 ),
               ),
             ],
-          );
-        },
+          ),
+        );
+      }
+    );
+  }
+
+  Widget _buildHistoryItem(String title, String time, String subtitle, VoidCallback onTap) {
+    return Card(
+      elevation: 0,
+      color: Colors.grey[100], // FIX: Changed to light grey to contrast dark text
+      margin: const EdgeInsets.only(bottom: 12),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: Colors.grey.withValues(alpha: 0.2)),
       ),
+      child: ListTile(
+        onTap: onTap,
+        leading: Container(
+          width: 44,
+          height: 44,
+          decoration: BoxDecoration(
+            color: AppColors.primary.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: const Icon(Icons.eco, color: AppColors.primary),
+        ),
+        title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primaryDark)),
+        subtitle: Text(subtitle, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+        trailing: Text(time, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return CameraAwesomeBuilder.custom(
+      saveConfig: SaveConfig.photo(),
+      // Configuración de flash para asegurar que solo dispare en captura
+      sensorConfig: SensorConfig.single(
+        flashMode: FlashMode.auto,
+        sensor: Sensor.position(SensorPosition.back),
+        zoom: 0.0,
+      ),
+      builder: (cameraState, preview) {
+        return Stack(
+          fit: StackFit.expand,
+          children: [
+            SafeArea(
+              child: Column(
+                children: [
+                  _buildTopControls(context, cameraState),
+                  const SizedBox(height: 10),
+                  AwesomeZoomSelector(state: cameraState), // Añadido control de zoom
+                  Expanded(
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        _buildScannerFrame(),
+                        _buildAnalyzingChip(),
+                      ],
+                    ),
+                  ),
+                  if (_state == ScannerState.success)
+                    _buildPlantDetailsCard(),
+                  const SizedBox(height: 20),
+                  _buildBottomControls(context, cameraState),
+                  const SizedBox(height: 20),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -79,21 +380,30 @@ class _ScannerScreenState extends State<ScannerScreen>
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           _buildControlButton(
+            key: _backKey,
+            tourTitle: 'Volver',
+            tourDesc: 'Regresa al panel principal.',
             icon: Icons.arrow_back_ios_new,
             onTap: () => Navigator.pop(context),
           ),
           Row(
             children: [
               _buildControlButton(
-                icon: Icons.flash_on,
+                key: _flashKey,
+                tourTitle: 'Flash',
+                tourDesc: 'El flash se activará de forma automática solo al realizar la captura.',
+                icon: Icons.flash_auto,
                 onTap: () {
                   cameraState.sensorConfig.switchCameraFlash();
                 },
               ),
               const SizedBox(width: 15),
               _buildControlButton(
+                key: _helpKey,
+                tourTitle: 'Ayuda',
+                tourDesc: 'Muestra esta guía.',
                 icon: Icons.help_outline,
-                onTap: () {},
+                onTap: () => _startTour(context),
               ),
             ],
           )
@@ -102,54 +412,88 @@ class _ScannerScreenState extends State<ScannerScreen>
     );
   }
 
-  Widget _buildControlButton({required IconData icon, required VoidCallback onTap}) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 44,
-        height: 44,
-        decoration: BoxDecoration(
-          color: AppColors.primaryDark.withOpacity(0.5),
-          shape: BoxShape.circle,
+  Widget _buildControlButton({
+    required GlobalKey key, 
+    required String tourTitle, 
+    required String tourDesc, 
+    required IconData icon, 
+    required VoidCallback onTap
+  }) {
+    return wrapWithTourStep(
+      key: key,
+      title: tourTitle,
+      description: tourDesc,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          width: 44,
+          height: 44,
+          decoration: BoxDecoration(
+            color: AppColors.primaryDark.withValues(alpha: 0.5),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(icon, color: Colors.white, size: 20),
         ),
-        child: Icon(icon, color: Colors.white, size: 20),
       ),
     );
   }
 
   Widget _buildAnalyzingChip() {
+    final bool isScanning = _state == ScannerState.scanning;
     return Positioned(
       top: MediaQuery.of(context).size.height * 0.15,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: AppColors.primaryDark.withOpacity(0.8),
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.auto_awesome, color: AppColors.accent, size: 14),
-            const SizedBox(width: 8),
-            const Text(
-              'Analizando...',
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w600,
-                fontSize: 12,
+      child: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 300),
+        child: isScanning 
+            ? Container(
+                key: const ValueKey('scanning'),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  color: AppColors.primaryDark.withValues(alpha: 0.8),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.auto_awesome, color: AppColors.accent, size: 14),
+                    const SizedBox(width: 8),
+                    const Text(
+                      'Analizando...',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 12,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      width: 6,
+                      height: 6,
+                      decoration: const BoxDecoration(
+                        color: AppColors.accent,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            : Container(
+                key: const ValueKey('idle'),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.5),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+                ),
+                child: const Text(
+                  'Apunta a una planta',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 12,
+                  ),
+                ),
               ),
-            ),
-            const SizedBox(width: 8),
-            Container(
-              width: 6,
-              height: 6,
-              decoration: const BoxDecoration(
-                color: AppColors.accent,
-                shape: BoxShape.circle,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -160,35 +504,34 @@ class _ScannerScreenState extends State<ScannerScreen>
       height: 250,
       child: Stack(
         children: [
-          // Corners
           _buildCorner(Alignment.topLeft),
           _buildCorner(Alignment.topRight),
           _buildCorner(Alignment.bottomLeft),
           _buildCorner(Alignment.bottomRight),
-          // Animated Line
-          AnimatedBuilder(
-            animation: _scanAnimation,
-            builder: (context, child) {
-              return Positioned(
-                top: _scanAnimation.value * 250,
-                left: 0,
-                right: 0,
-                child: Container(
-                  height: 2,
-                  decoration: BoxDecoration(
-                    color: AppColors.accent,
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.accent.withOpacity(0.6),
-                        blurRadius: 8,
-                        spreadRadius: 2,
-                      ),
-                    ],
+          if (_state == ScannerState.scanning)
+            AnimatedBuilder(
+              animation: _scanAnimation,
+              builder: (context, child) {
+                return Positioned(
+                  top: _scanAnimation.value * 250,
+                  left: 0,
+                  right: 0,
+                  child: Container(
+                    height: 2,
+                    decoration: BoxDecoration(
+                      color: AppColors.accent,
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.accent.withValues(alpha: 0.6),
+                          blurRadius: 8,
+                          spreadRadius: 2,
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              );
-            },
-          ),
+                );
+              },
+            ),
         ],
       ),
     );
@@ -231,7 +574,6 @@ class _ScannerScreenState extends State<ScannerScreen>
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Plant Image
               Container(
                 width: 60,
                 height: 60,
@@ -241,22 +583,24 @@ class _ScannerScreenState extends State<ScannerScreen>
                 ),
                 child: const Center(
                   child: Icon(Icons.eco, color: AppColors.primary, size: 30),
-                ), // Replace with actual image
+                ),
               ),
               const SizedBox(width: 16),
-              // Plant Info
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       children: [
-                        const Text(
-                          'Monstera deliciosa',
-                          style: TextStyle(
-                            color: AppColors.primary,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                        Expanded(
+                          child: Text(
+                            mainMockSpecies.commonName,
+                            style: const TextStyle(
+                              color: AppColors.primary,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                         const SizedBox(width: 8),
@@ -279,22 +623,27 @@ class _ScannerScreenState extends State<ScannerScreen>
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Costilla de Adán - Aracea',
+                      '${mainMockSpecies.scientificName} - ${mainMockSpecies.category}',
                       style: TextStyle(
                         color: Colors.grey[500],
                         fontSize: 12,
                       ),
+                      overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 8),
                     Row(
                       children: [
                         _buildTag('Tropical'),
                         const SizedBox(width: 8),
-                        _buildTag('Fácil'),
+                        _buildTag(mainMockSpecies.difficulty),
                       ],
                     ),
                   ],
                 ),
+              ),
+              GestureDetector(
+                onTap: () => setState(() => _state = ScannerState.idle),
+                child: const Icon(Icons.close, color: Colors.grey, size: 20),
               ),
             ],
           ),
@@ -303,7 +652,7 @@ class _ScannerScreenState extends State<ScannerScreen>
             children: [
               Expanded(
                 child: OutlinedButton(
-                  onPressed: () {},
+                  onPressed: () => _onViewDetails(mainMockSpecies),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.primary,
                     side: const BorderSide(color: AppColors.primary),
@@ -318,7 +667,7 @@ class _ScannerScreenState extends State<ScannerScreen>
               const SizedBox(width: 12),
               Expanded(
                 child: ElevatedButton.icon(
-                  onPressed: () {},
+                  onPressed: () => _onAddToGarden(mainMockSpecies),
                   icon: const Icon(Icons.add, size: 18),
                   label: const Text('A mi jardín', style: TextStyle(fontWeight: FontWeight.w600)),
                   style: ElevatedButton.styleFrom(
@@ -345,9 +694,9 @@ class _ScannerScreenState extends State<ScannerScreen>
           const SizedBox(height: 12),
           Row(
             children: [
-              Expanded(child: _buildOtherPossibility('Filodendro', '24%')),
+              Expanded(child: _buildOtherPossibility(option1Species, '24%')),
               const SizedBox(width: 12),
-              Expanded(child: _buildOtherPossibility('Sorgo', '8%')),
+              Expanded(child: _buildOtherPossibility(option2Species, '8%')),
             ],
           ),
         ],
@@ -359,7 +708,7 @@ class _ScannerScreenState extends State<ScannerScreen>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: const Color(0xFFE8E9E3), // match image tag color approximately
+        color: const Color(0xFFE8E9E3),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Text(
@@ -373,40 +722,79 @@ class _ScannerScreenState extends State<ScannerScreen>
     );
   }
 
-  Widget _buildOtherPossibility(String name, String percentage) {
+  Widget _buildOtherPossibility(PlantSpecies species, String percentage) {
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         color: const Color(0xFFF4F5F4),
         borderRadius: BorderRadius.circular(12),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 32,
-            height: 32,
-            decoration: BoxDecoration(
-              color: const Color(0xFFD6DEC9), // Placeholder color
-              borderRadius: BorderRadius.circular(8),
-            ),
-          ),
-          const SizedBox(width: 8),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          Row(
             children: [
-              Text(
-                name,
-                style: const TextStyle(
-                  color: AppColors.primary,
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
+              Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFD6DEC9),
+                  borderRadius: BorderRadius.circular(8),
                 ),
               ),
-              Text(
-                percentage,
-                style: TextStyle(
-                  color: Colors.grey[500],
-                  fontSize: 10,
+              const SizedBox(width: 8),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      species.commonName,
+                      style: const TextStyle(
+                        color: AppColors.primary,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Text(
+                      percentage,
+                      style: TextStyle(
+                        color: Colors.grey[500],
+                        fontSize: 10,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: () => _onViewDetails(species),
+                  style: OutlinedButton.styleFrom(
+                    padding: EdgeInsets.zero,
+                    minimumSize: const Size(0, 24),
+                    side: const BorderSide(color: AppColors.primary),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  ),
+                  child: const Text('Ver', style: TextStyle(fontSize: 10, color: AppColors.primary)),
+                ),
+              ),
+              const SizedBox(width: 4),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () => _onAddToGarden(species),
+                  style: ElevatedButton.styleFrom(
+                    padding: EdgeInsets.zero,
+                    minimumSize: const Size(0, 24),
+                    backgroundColor: AppColors.accent,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  ),
+                  child: const Text('Añadir', style: TextStyle(fontSize: 10, color: AppColors.primaryDark)),
                 ),
               ),
             ],
@@ -416,63 +804,85 @@ class _ScannerScreenState extends State<ScannerScreen>
     );
   }
 
-  Widget _buildBottomControls(CameraState cameraState) {
+  Widget _buildBottomControls(BuildContext context, CameraState cameraState) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 30.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // Gallery Button
-          Container(
-            width: 50,
-            height: 50,
-            decoration: BoxDecoration(
-              color: AppColors.primaryDark.withOpacity(0.5),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              Icons.photo_library_outlined,
-              color: Colors.white,
-              size: 24,
+          wrapWithTourStep(
+            key: _galleryKey,
+            title: 'Galería',
+            description: 'Sube una foto de tu galería para analizar.',
+            child: GestureDetector(
+              onTap: _pickImageFromGallery,
+              child: Container(
+                width: 50,
+                height: 50,
+                decoration: BoxDecoration(
+                  color: AppColors.primaryDark.withValues(alpha: 0.5),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.photo_library_outlined,
+                  color: Colors.white,
+                  size: 24,
+                ),
+              ),
             ),
           ),
-          // Shutter Button
-          GestureDetector(
-            onTap: () {
-              cameraState.when(
-                onPhotoMode: (photoState) => photoState.takePhoto(),
-              );
-            },
-            child: Container(
-              width: 70,
-              height: 70,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(color: Colors.white.withOpacity(0.5), width: 4),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(4.0),
-                child: Container(
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
+          wrapWithTourStep(
+            key: _shutterKey,
+            title: 'Obturador',
+            description: 'Presiona aquí para escanear una planta y continuar.',
+            child: GestureDetector(
+              onTap: () {
+                if (_state == ScannerState.scanning) return;
+                cameraState.when(
+                  onPhotoMode: (photoState) {
+                    photoState.takePhoto();
+                    _startScan();
+                  },
+                );
+              },
+              child: Container(
+                width: 70,
+                height: 70,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white.withValues(alpha: 0.5), width: 4),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(4.0),
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                    ),
                   ),
                 ),
               ),
             ),
           ),
-          // Favorite/Star Button
-          Container(
-            width: 50,
-            height: 50,
-            decoration: BoxDecoration(
-              color: AppColors.accent,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: const Icon(
-              Icons.star,
-              color: AppColors.primary,
-              size: 28,
+          wrapWithTourStep(
+            key: _historyKey,
+            title: 'Historial',
+            description: 'Consulta tus escaneos anteriores.',
+            child: GestureDetector(
+              onTap: _showHistoryModal,
+              child: Container(
+                width: 50,
+                height: 50,
+                decoration: BoxDecoration(
+                  color: AppColors.accent,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: const Icon(
+                  Icons.star,
+                  color: AppColors.primary,
+                  size: 28,
+                ),
+              ),
             ),
           ),
         ],
