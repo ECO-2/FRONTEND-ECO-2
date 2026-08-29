@@ -11,6 +11,7 @@ class PlantSpecies {
   final int? airPurificationScore;
   final int? minTemperature;
   final int? maxTemperature;
+  final String? imageUrl;
   final DateTime createdAt;
 
   PlantSpecies({
@@ -24,6 +25,7 @@ class PlantSpecies {
     this.airPurificationScore,
     this.minTemperature,
     this.maxTemperature,
+    this.imageUrl,
     required this.createdAt,
   });
 
@@ -39,6 +41,7 @@ class PlantSpecies {
       airPurificationScore: json['air_purification_score'] as int?,
       minTemperature: json['min_temperature'] as int?,
       maxTemperature: json['max_temperature'] as int?,
+      imageUrl: json['image_url'] as String?,
       createdAt: DateTime.parse(json['created_at'] as String),
     );
   }
@@ -55,6 +58,7 @@ class PlantSpecies {
       'air_purification_score': airPurificationScore,
       'min_temperature': minTemperature,
       'max_temperature': maxTemperature,
+      'image_url': imageUrl,
       'created_at': createdAt.toIso8601String(),
     };
   }
@@ -70,6 +74,7 @@ class PlantSpecies {
     int? airPurificationScore,
     int? minTemperature,
     int? maxTemperature,
+    String? imageUrl,
     DateTime? createdAt,
   }) {
     return PlantSpecies(
@@ -83,6 +88,7 @@ class PlantSpecies {
       airPurificationScore: airPurificationScore ?? this.airPurificationScore,
       minTemperature: minTemperature ?? this.minTemperature,
       maxTemperature: maxTemperature ?? this.maxTemperature,
+      imageUrl: imageUrl ?? this.imageUrl,
       createdAt: createdAt ?? this.createdAt,
     );
   }
@@ -113,8 +119,8 @@ class PlantSpecies {
     final purifierNote = score >= 7
         ? ' Es una excelente purificadora de aire.'
         : score >= 4
-            ? ' Ayuda a mejorar la calidad del aire de tu hogar.'
-            : '';
+        ? ' Ayuda a mejorar la calidad del aire de tu hogar.'
+        : '';
     return 'Especie $cat que prefiere luz $light y humedad $humidity. '
         'Riega aproximadamente cada $waterFrequencyDays días, dejando secar el sustrato entre riegos, '
         'y se adapta bien a temperaturas entre ${minTemperature ?? 15}°C y ${maxTemperature ?? 30}°C.$purifierNote';
@@ -125,11 +131,11 @@ class PlantSpecies {
   String get humidityLevel => humidityLabelEs(humidityPreference);
 
   List<String> get detailTags => [
-        categoryLabelEs(category),
-        'Luz ${lightLabelEs(lightRequirement)}',
-        'Humedad ${humidityLabelEs(humidityPreference)}',
-        if ((airPurificationScore ?? 0) >= 7) 'Aire purificador',
-      ];
+    categoryLabelEs(category),
+    'Luz ${lightLabelEs(lightRequirement)}',
+    'Humedad ${humidityLabelEs(humidityPreference)}',
+    if ((airPurificationScore ?? 0) >= 7) 'Aire purificador',
+  ];
 
   int get difficultySegments {
     if (waterFrequencyDays >= 20) return 1; // Muy fácil

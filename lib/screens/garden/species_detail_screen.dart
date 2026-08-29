@@ -115,13 +115,15 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
                           ),
                           child: SizedBox(
                             height: 240,
-                            child: assetImage != null
-                                ? Image.asset(assetImage, fit: BoxFit.contain)
-                                : Icon(
-                                    visual.icon,
-                                    size: 140,
-                                    color: visual.color.withValues(alpha: 0.35),
-                                  ),
+                            child: species.imageUrl != null
+                                ? Image.network(species.imageUrl!, fit: BoxFit.cover)
+                                : assetImage != null
+                                    ? Image.asset(assetImage, fit: BoxFit.contain)
+                                    : Icon(
+                                        visual.icon,
+                                        size: 140,
+                                        color: visual.color.withValues(alpha: 0.35),
+                                      ),
                           ),
                         ),
                         Positioned(

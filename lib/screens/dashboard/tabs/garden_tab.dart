@@ -514,13 +514,15 @@ class _GardenTabState extends State<GardenTab> {
                               color: _getSpeciesBg(species.id, category: species.category),
                               alignment: Alignment.center,
                               padding: const EdgeInsets.all(12),
-                              child: species.id == 's1'
-                                  ? Image.asset('assets/images/monstera.png', fit: BoxFit.contain)
-                                  : Icon(
-                                      visual.icon,
-                                      size: 48,
-                                      color: visual.color.withValues(alpha: 0.4),
-                                    ),
+                              child: species.imageUrl != null
+                                  ? Image.network(species.imageUrl!, fit: BoxFit.cover)
+                                  : species.id == 's1'
+                                      ? Image.asset('assets/images/monstera.png', fit: BoxFit.contain)
+                                      : Icon(
+                                          visual.icon,
+                                          size: 48,
+                                          color: visual.color.withValues(alpha: 0.4),
+                                        ),
                             ),
                             // Floating purification badge (real air_purification_score)
                             Positioned(
@@ -913,13 +915,15 @@ class _GardenTabState extends State<GardenTab> {
                 width: 110,
                 color: _getSpeciesBg(species.id, category: species.category),
                 padding: const EdgeInsets.all(12),
-                child: isMonstera
-                    ? Image.asset('assets/images/monstera.png', fit: BoxFit.contain)
-                    : Icon(
-                        visual.icon,
-                        size: 40,
-                        color: visual.color.withValues(alpha: 0.4),
-                      ),
+                child: species.imageUrl != null
+                    ? Image.network(species.imageUrl!, fit: BoxFit.cover)
+                    : isMonstera
+                        ? Image.asset('assets/images/monstera.png', fit: BoxFit.contain)
+                        : Icon(
+                            visual.icon,
+                            size: 40,
+                            color: visual.color.withValues(alpha: 0.4),
+                          ),
               ),
               // Details container (right)
               Expanded(
@@ -1050,13 +1054,15 @@ class _GardenTabState extends State<GardenTab> {
                 color: _getSpeciesBg(species.id, category: species.category),
                 alignment: Alignment.center,
                 padding: const EdgeInsets.all(12),
-                child: isMonstera
-                    ? Image.asset('assets/images/monstera.png', fit: BoxFit.contain)
-                    : Icon(
-                        visual.icon,
-                        size: 40,
-                        color: visual.color.withValues(alpha: 0.4),
-                      ),
+                child: species.imageUrl != null
+                    ? Image.network(species.imageUrl!, fit: BoxFit.cover)
+                    : isMonstera
+                        ? Image.asset('assets/images/monstera.png', fit: BoxFit.contain)
+                        : Icon(
+                            visual.icon,
+                            size: 40,
+                            color: visual.color.withValues(alpha: 0.4),
+                          ),
               ),
             ),
             Padding(
