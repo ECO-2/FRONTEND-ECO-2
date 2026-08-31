@@ -7,6 +7,7 @@ class SpeciesData {
   final Color bg;
   final List<String> tags;
   final String? assetImage;
+  final String? imageUrl;
   final String waterFreq;
   final int waterFreqDays;
   final String light;
@@ -26,6 +27,7 @@ class SpeciesData {
     required this.bg,
     required this.tags,
     this.assetImage,
+    this.imageUrl,
     required this.waterFreq,
     required this.waterFreqDays,
     required this.light,
@@ -52,6 +54,7 @@ class SpeciesData {
       scientific: species.scientificName,
       bg: visual.background,
       tags: species.tags,
+      imageUrl: species.imageUrl,
       waterFreq: 'c/${species.waterFrequencyDays}d',
       waterFreqDays: species.waterFrequencyDays,
       light: lightLabelEs(species.lightRequirement),

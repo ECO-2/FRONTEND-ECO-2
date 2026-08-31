@@ -6,6 +6,7 @@ import 'package:frontend_eco_2/theme/app_colors.dart';
 import 'package:frontend_eco_2/widgets/common/custom_button.dart';
 import 'package:frontend_eco_2/widgets/common/custom_text_field.dart';
 import 'package:frontend_eco_2/widgets/common/custom_status_bar.dart';
+import 'package:frontend_eco_2/widgets/common/app_toast.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -62,13 +63,7 @@ class _LoginScreenState extends State<LoginScreen> {
           );
         }
       } else if (mounted && userProvider.errorMessage != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(userProvider.errorMessage!),
-            backgroundColor: Colors.red.shade700,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        showAppToast(context, userProvider.errorMessage!, type: ToastType.error);
       }
     }
   }
@@ -180,10 +175,9 @@ class _LoginScreenState extends State<LoginScreen> {
                         alignment: Alignment.centerRight,
                         child: TextButton(
                           onPressed: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Simulación: Recuperación de contraseña enviada.'),
-                              ),
+                            showAppToast(
+                              context,
+                              'Simulación: Recuperación de contraseña enviada.',
                             );
                           },
                           style: TextButton.styleFrom(

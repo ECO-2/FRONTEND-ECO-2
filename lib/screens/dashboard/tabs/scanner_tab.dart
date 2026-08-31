@@ -5,6 +5,7 @@ import 'package:frontend_eco_2/providers/providers.dart';
 import 'package:frontend_eco_2/routing/app_routes.dart';
 import 'package:frontend_eco_2/theme/app_colors.dart';
 import 'package:frontend_eco_2/widgets/common/custom_button.dart';
+import 'package:frontend_eco_2/widgets/common/app_toast.dart';
 
 // ── Mock identification result ────────────────────────────────────────────
 class _ScanResult {
@@ -533,13 +534,10 @@ class _ResultView extends StatelessWidget {
                   onPressed: () {
                     Provider.of<PlantsProvider>(context, listen: false)
                         .addPlant(result.commonName, result.speciesId, result.commonName);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                            '${result.commonName} añadida a tu jardín 🌿'),
-                        backgroundColor: AppColors.primary,
-                        duration: const Duration(seconds: 2),
-                      ),
+                    showAppToast(
+                      context,
+                      '${result.commonName} añadida a tu jardín 🌿',
+                      type: ToastType.success,
                     );
                     onReset();
                   },

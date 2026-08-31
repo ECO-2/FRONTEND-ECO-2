@@ -1,4 +1,7 @@
+import 'dart:ui';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:showcaseview/showcaseview.dart';
 import 'package:frontend_eco_2/models/models.dart';
@@ -7,8 +10,11 @@ import 'package:frontend_eco_2/routing/app_routes.dart';
 import 'package:frontend_eco_2/services/services.dart';
 import 'package:frontend_eco_2/utils/app_tour.dart';
 import 'package:frontend_eco_2/utils/plant_visuals.dart';
+import 'package:frontend_eco_2/utils/cloudinary_transform.dart';
+import 'package:frontend_eco_2/utils/top_clamping_scroll_physics.dart';
 import 'package:frontend_eco_2/widgets/common/custom_status_bar.dart';
 import 'package:frontend_eco_2/widgets/common/custom_bottom_nav_bar.dart';
+import 'package:frontend_eco_2/widgets/common/app_toast.dart';
 
 // Import components from widgets/
 import 'widgets/species_data.dart';
@@ -109,8 +115,16 @@ class _PlantDetailBodyState extends State<_PlantDetailBody> {
 
   @override
   Widget build(BuildContext context) {
-    final plant = widget.plant;
+    final plantsProvider = Provider.of<PlantsProvider>(context);
+    // Toma la versión más reciente (apodo recién editado, etc.) si sigue en
+    // la colección; si no la encuentra (ej. se acaba de eliminar) usa la que
+    // llegó por argumento para no romper la pantalla.
+    final plant = plantsProvider.userPlants.firstWhere(
+      (p) => p.id == widget.plant.id,
+      orElse: () => widget.plant,
+    );
     final sp = _resolveSpeciesData(context, plant.speciesId);
+    final customPhoto = plantsProvider.customPhotoFor(plant.id);
 
     final statusBarHeight = MediaQuery.of(context).padding.top;
     const appBarHeight = 64.0;
@@ -128,17 +142,76 @@ class _PlantDetailBodyState extends State<_PlantDetailBody> {
             left: 0,
             right: 0,
             child: Center(
-              child: Container(
-                width: imageWidth,
-                height: imageHeight,
-                color: sp.bg,
-                child: sp.assetImage != null
-                    ? Image.asset(sp.assetImage!, fit: BoxFit.contain)
-                    : Icon(
-                        sp.placeholderIcon,
-                        size: 80,
-                        color: sp.placeholderIconColor.withValues(alpha: 0.6),
+              child: Stack(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(20),
+                    child: Container(
+                      width: imageWidth,
+                      height: imageHeight,
+                      // Sin foto: fondo de color de la especie, para que el ícono
+                      // resalte. Con foto (propia o real): sin fondo —
+                      // transparente — y BoxFit.contain, para que se vea
+                      // completa, sin recortarla ni deformarla.
+                      color: (customPhoto != null || sp.imageUrl != null) ? Colors.transparent : sp.bg,
+                      padding: (customPhoto != null || sp.imageUrl != null)
+                          ? const EdgeInsets.all(12)
+                          : EdgeInsets.zero,
+                      child: customPhoto != null
+                          ? Image.file(customPhoto, fit: BoxFit.contain, width: double.infinity)
+                          : sp.imageUrl != null
+                              ? CachedNetworkImage(
+                                  imageUrl: withTransparentBackground(sp.imageUrl!),
+                                  fit: BoxFit.contain,
+                                  width: double.infinity,
+                                  placeholder: (_, _) => const Center(
+                                    child: CircularProgressIndicator(strokeWidth: 2),
+                                  ),
+                                  errorWidget: (_, _, _) => Icon(
+                                    sp.placeholderIcon,
+                                    size: 80,
+                                    color: sp.placeholderIconColor.withValues(alpha: 0.6),
+                                  ),
+                                )
+                              : sp.assetImage != null
+                                  ? Image.asset(sp.assetImage!, fit: BoxFit.contain)
+                                  : Icon(
+                                      sp.placeholderIcon,
+                                      size: 80,
+                                      color: sp.placeholderIconColor.withValues(alpha: 0.6),
+                                    ),
+                    ),
+                  ),
+                  // Botón para poner/cambiar la foto de esta planta —
+                  // se guarda solo en este dispositivo.
+                  Positioned(
+                    right: 12,
+                    bottom: 12,
+                    child: GestureDetector(
+                      onTap: () => _choosePhoto(context, plant.id, hasCustomPhoto: customPhoto != null),
+                      child: Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.15),
+                              blurRadius: 6,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: const Icon(
+                          Icons.camera_alt_rounded,
+                          size: 18,
+                          color: Color(0xFF0D2B31),
+                        ),
                       ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -146,7 +219,7 @@ class _PlantDetailBodyState extends State<_PlantDetailBody> {
           // ── CAPA 2: Contenido desplazable (sobre la imagen) ──
           Positioned.fill(
             child: SingleChildScrollView(
-              physics: const _TopClampingScrollPhysics(),
+              physics: const TopClampingScrollPhysics(),
               child: Column(
                 children: [
                   // Espacio transparente para mostrar la imagen fija del fondo al principio
@@ -175,14 +248,34 @@ class _PlantDetailBodyState extends State<_PlantDetailBody> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    plant.nickname,
-                                    style: const TextStyle(
-                                      fontFamily: 'DM Sans',
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 26,
-                                      color: Color(0xFF0D2B31),
-                                    ),
+                                  Row(
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    children: [
+                                      Flexible(
+                                        child: Text(
+                                          plant.nickname,
+                                          style: const TextStyle(
+                                            fontFamily: 'DM Sans',
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 26,
+                                            color: Color(0xFF0D2B31),
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 6),
+                                      GestureDetector(
+                                        onTap: () => _editNickname(context, plant),
+                                        child: const Padding(
+                                          padding: EdgeInsets.only(top: 4),
+                                          child: Icon(
+                                            Icons.edit_rounded,
+                                            size: 18,
+                                            color: Color(0xFF807F7F),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                   const SizedBox(height: 2),
                                   Text(
@@ -516,61 +609,69 @@ class _PlantDetailBodyState extends State<_PlantDetailBody> {
           const Positioned(top: 0, left: 0, right: 0, child: CustomStatusBar()),
 
           // ── CAPA 4: Custom AppBar (al frente y fija) ──
+          // Traslúcido con desenfoque: deja ver un poco de lo que hay
+          // detrás (imagen o contenido al hacer scroll) en vez de un
+          // bloque blanco sólido fijo.
           Positioned(
             top: statusBarHeight,
             left: 0,
             right: 0,
-            child: Container(
-              color: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              child: Row(
-                children: [
-                  GestureDetector(
-                    onTap: () => Navigator.pop(context),
-                    child: Container(
-                      width: 40,
-                      height: 40,
-                      decoration: const BoxDecoration(
-                        color: Color(0xFFF3F5F4),
-                        shape: BoxShape.circle,
+            child: ClipRect(
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+                child: Container(
+                  color: Colors.white.withValues(alpha: 0.55),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  child: Row(
+                    children: [
+                      GestureDetector(
+                        onTap: () => Navigator.pop(context),
+                        child: Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF3F5F4).withValues(alpha: 0.85),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.arrow_back_ios_new_rounded,
+                            size: 16,
+                            color: Color(0xFF0D2B31),
+                          ),
+                        ),
                       ),
-                      child: const Icon(
-                        Icons.arrow_back_ios_new_rounded,
-                        size: 16,
-                        color: Color(0xFF0D2B31),
+                      const SizedBox(width: 12),
+                      const Expanded(
+                        child: Text(
+                          'Mi Jardín',
+                          style: TextStyle(
+                            fontFamily: 'DM Sans',
+                            fontWeight: FontWeight.bold,
+                            fontSize: 24,
+                            color: Color(0xFF0D2B31),
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  const Expanded(
-                    child: Text(
-                      'Mi Jardín',
-                      style: TextStyle(
-                        fontFamily: 'DM Sans',
-                        fontWeight: FontWeight.bold,
-                        fontSize: 24,
-                        color: Color(0xFF0D2B31),
+                      IconButton(
+                        icon: const Icon(
+                          Icons.help_outline_rounded,
+                          color: Color(0xFF0D2B31),
+                          size: 24,
+                        ),
+                        tooltip: 'Cómo cuidar esta planta',
+                        onPressed: _restartTour,
                       ),
-                    ),
+                      IconButton(
+                        icon: const Icon(
+                          Icons.more_horiz_rounded,
+                          color: Color(0xFF0D2B31),
+                          size: 26,
+                        ),
+                        onPressed: () {},
+                      ),
+                    ],
                   ),
-                  IconButton(
-                    icon: const Icon(
-                      Icons.help_outline_rounded,
-                      color: Color(0xFF0D2B31),
-                      size: 24,
-                    ),
-                    tooltip: 'Cómo cuidar esta planta',
-                    onPressed: _restartTour,
-                  ),
-                  IconButton(
-                    icon: const Icon(
-                      Icons.more_horiz_rounded,
-                      color: Color(0xFF0D2B31),
-                      size: 26,
-                    ),
-                    onPressed: () {},
-                  ),
-                ],
+                ),
               ),
             ),
           ),
@@ -592,6 +693,117 @@ class _PlantDetailBodyState extends State<_PlantDetailBody> {
         },
       ),
     );
+  }
+
+  // ── Editar apodo ─────────────────────────────────────────────────────
+  Future<void> _editNickname(BuildContext context, UserPlant plant) async {
+    final controller = TextEditingController(text: plant.nickname);
+    final plantsProvider = Provider.of<PlantsProvider>(context, listen: false);
+
+    final newNickname = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Editar apodo'),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          maxLength: 40,
+          decoration: const InputDecoration(hintText: 'Apodo de la planta'),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(dialogContext, controller.text),
+            child: const Text('Guardar'),
+          ),
+        ],
+      ),
+    );
+
+    if (newNickname == null || newNickname.trim() == plant.nickname || !context.mounted) return;
+
+    final ok = await plantsProvider.updateNickname(plant.id, newNickname);
+    if (!context.mounted) return;
+    showAppToast(
+      context,
+      ok ? 'Apodo actualizado.' : (plantsProvider.errorMessage ?? 'No se pudo actualizar el apodo.'),
+      type: ok ? ToastType.success : ToastType.error,
+    );
+  }
+
+  // ── Elegir foto de la planta (se guarda solo en este dispositivo) ──────
+  Future<void> _choosePhoto(BuildContext context, String plantId, {required bool hasCustomPhoto}) async {
+    final plantsProvider = Provider.of<PlantsProvider>(context, listen: false);
+
+    final choice = await showModalBottomSheet<String>(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (sheetContext) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 8),
+            ListTile(
+              leading: const Icon(Icons.photo_camera_rounded, color: Color(0xFF0D2B31)),
+              title: const Text('Tomar foto'),
+              onTap: () => Navigator.pop(sheetContext, 'camera'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library_rounded, color: Color(0xFF0D2B31)),
+              title: const Text('Elegir de la galería'),
+              onTap: () => Navigator.pop(sheetContext, 'gallery'),
+            ),
+            if (hasCustomPhoto)
+              ListTile(
+                leading: const Icon(Icons.delete_outline_rounded, color: Colors.red),
+                title: const Text('Quitar foto', style: TextStyle(color: Colors.red)),
+                onTap: () => Navigator.pop(sheetContext, 'remove'),
+              ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+
+    if (choice == null) return;
+
+    if (choice == 'remove') {
+      await plantsProvider.removeCustomPhoto(plantId);
+      if (context.mounted) {
+        showAppToast(context, 'Foto eliminada.', type: ToastType.success);
+      }
+      return;
+    }
+
+    try {
+      final picker = ImagePicker();
+      final picked = await picker.pickImage(
+        source: choice == 'camera' ? ImageSource.camera : ImageSource.gallery,
+        imageQuality: 85,
+        maxWidth: 1600,
+      );
+      if (picked == null) return; // El usuario canceló, no es un error.
+
+      await plantsProvider.setCustomPhoto(plantId, picked.path);
+      if (context.mounted) {
+        showAppToast(context, 'Foto actualizada.', type: ToastType.success);
+      }
+    } catch (_) {
+      // Permiso de cámara/galería denegado, u otro fallo del selector.
+      if (context.mounted) {
+        showAppToast(
+          context,
+          'No se pudo acceder a la cámara o galería. Revisa los permisos de la app.',
+          type: ToastType.error,
+        );
+      }
+    }
   }
 
   void _showCareSheet(BuildContext context, UserPlant plant) {
@@ -623,26 +835,5 @@ class _PlantDetailBodyState extends State<_PlantDetailBody> {
       'Dic',
     ];
     return '${dt.day} ${months[dt.month - 1]} ${dt.year}';
-  }
-}
-
-class _TopClampingScrollPhysics extends ScrollPhysics {
-  const _TopClampingScrollPhysics({super.parent});
-
-  @override
-  _TopClampingScrollPhysics applyTo(ScrollPhysics? ancestor) {
-    return _TopClampingScrollPhysics(parent: buildParent(ancestor));
-  }
-
-  @override
-  double applyBoundaryConditions(ScrollMetrics position, double value) {
-    if (value < position.pixels && position.pixels <= 0.0) {
-      return value -
-          position.pixels; // Block scroll below 0.0 (dragging down at top)
-    }
-    if (value < 0.0 && 0.0 < position.pixels) {
-      return value; // Clamp exactly at 0.0
-    }
-    return super.applyBoundaryConditions(position, value);
   }
 }

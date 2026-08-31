@@ -1,10 +1,15 @@
+import 'dart:ui';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:frontend_eco_2/models/models.dart';
 import 'package:frontend_eco_2/providers/providers.dart';
-import 'package:frontend_eco_2/theme/app_colors.dart';
 import 'package:frontend_eco_2/utils/achievement_feedback.dart';
 import 'package:frontend_eco_2/utils/plant_visuals.dart';
+import 'package:frontend_eco_2/utils/cloudinary_transform.dart';
+import 'package:frontend_eco_2/utils/top_clamping_scroll_physics.dart';
+import 'package:frontend_eco_2/widgets/common/app_toast.dart';
+import 'package:frontend_eco_2/widgets/common/custom_status_bar.dart';
 
 // Legacy mock species (s1-s5) still ship a real illustration asset; every
 // other (real, catalog-backed) species falls back to a category visual.
@@ -46,62 +51,26 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
     final co2GramsPerDay = 1.0 + purificationScore * 0.4;
     final carMetersEquivalent = 10 + purificationScore * 8;
 
+    final statusBarHeight = MediaQuery.of(context).padding.top;
+    const appBarHeight = 56.0;
+    // Alto real del bloque de imagen: padding vertical (10+10) del recuadro
+    // + alto del SizedBox de la imagen (240) + padding inferior del
+    // contenedor (24). Se usa para reservar el mismo espacio en el scroll.
+    const imageBlockHeight = 284.0;
+
     return Scaffold(
       backgroundColor: bgColor,
       body: Column(
         children: [
-          Container(
-            height: MediaQuery.of(context).padding.top,
-            color: const Color(0xFF10454F),
-          ),
-          Container(
-            color: Colors.white,
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                IconButton(
-                  icon: const Icon(
-                    Icons.arrow_back_ios_new_rounded,
-                    size: 20,
-                    color: Color(0xFF10454F),
-                  ),
-                  onPressed: () => Navigator.pop(context),
-                ),
-                Row(
-                  children: [
-                    IconButton(
-                      icon: Icon(
-                        _isFavorited
-                            ? Icons.favorite_rounded
-                            : Icons.favorite_border_rounded,
-                        size: 22,
-                        color: const Color(0xFFE64A19),
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _isFavorited = !_isFavorited;
-                        });
-                      },
-                    ),
-                    IconButton(
-                      icon: const Icon(
-                        Icons.share_outlined,
-                        size: 22,
-                        color: Color(0xFF10454F),
-                      ),
-                      onPressed: () {},
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
           Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  Container(
+            child: Stack(
+              children: [
+                // ── CAPA 1: imagen fija de fondo ──
+                Positioned(
+                  top: statusBarHeight + appBarHeight,
+                  left: 0,
+                  right: 0,
+                  child: Container(
                     width: double.infinity,
                     color: Colors.white,
                     padding: const EdgeInsets.only(bottom: 24),
@@ -116,7 +85,22 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
                           child: SizedBox(
                             height: 240,
                             child: species.imageUrl != null
-                                ? Image.network(species.imageUrl!, fit: BoxFit.cover)
+                                ? CachedNetworkImage(
+                                    imageUrl: withTransparentBackground(species.imageUrl!),
+                                    fit: BoxFit.contain,
+                                    placeholder: (_, _) => const Center(
+                                      child: SizedBox(
+                                        width: 28,
+                                        height: 28,
+                                        child: CircularProgressIndicator(strokeWidth: 2),
+                                      ),
+                                    ),
+                                    errorWidget: (_, _, _) => Icon(
+                                      visual.icon,
+                                      size: 140,
+                                      color: visual.color.withValues(alpha: 0.35),
+                                    ),
+                                  )
                                 : assetImage != null
                                     ? Image.asset(assetImage, fit: BoxFit.contain)
                                     : Icon(
@@ -160,7 +144,15 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
                       ],
                     ),
                   ),
-                  Container(
+                ),
+                // ── CAPA 2: contenido desplazable (sobre la imagen) ──
+                Positioned.fill(
+                  child: SingleChildScrollView(
+                    physics: const TopClampingScrollPhysics(),
+                    child: Column(
+                      children: [
+                        SizedBox(height: statusBarHeight + appBarHeight + imageBlockHeight),
+                        Container(
                     width: double.infinity,
                     decoration: const BoxDecoration(
                       color: Colors.white,
@@ -657,8 +649,73 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
                       ],
                     ),
                   ),
-                ],
-              ),
+                      ],
+                    ),
+                  ),
+                ),
+                // ── CAPA 3: Custom Status Bar (al frente) ──
+                const Positioned(top: 0, left: 0, right: 0, child: CustomStatusBar()),
+                // ── CAPA 4: AppBar traslúcido con desenfoque (al frente y fija) ──
+                Positioned(
+                  top: statusBarHeight,
+                  left: 0,
+                  right: 0,
+                  child: ClipRect(
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+                      child: Container(
+                        color: Colors.white.withValues(alpha: 0.55),
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        child: Row(
+                          children: [
+                            IconButton(
+                              icon: const Icon(
+                                Icons.arrow_back_ios_new_rounded,
+                                size: 20,
+                                color: Color(0xFF10454F),
+                              ),
+                              onPressed: () => Navigator.pop(context),
+                            ),
+                            const Expanded(
+                              child: Text(
+                                'Jardín',
+                                style: TextStyle(
+                                  fontFamily: 'DM Sans',
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 20,
+                                  color: Color(0xFF0D2B31),
+                                ),
+                              ),
+                            ),
+                            IconButton(
+                              icon: Icon(
+                                _isFavorited
+                                    ? Icons.favorite_rounded
+                                    : Icons.favorite_border_rounded,
+                                size: 22,
+                                color: const Color(0xFFE64A19),
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _isFavorited = !_isFavorited;
+                                });
+                              },
+                            ),
+                            IconButton(
+                              icon: const Icon(
+                                Icons.share_outlined,
+                                size: 22,
+                                color: Color(0xFF10454F),
+                              ),
+                              onPressed: () {},
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
           Container(
@@ -744,13 +801,10 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
     if (!context.mounted) return;
 
     if (!success) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(plantsProvider.errorMessage ?? 'No se pudo agregar la planta.'),
-          backgroundColor: AppColors.error,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        ),
+      showAppToast(
+        context,
+        plantsProvider.errorMessage ?? 'No se pudo agregar la planta.',
+        type: ToastType.error,
       );
       return;
     }
@@ -759,16 +813,10 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
     final unlocked = await missionsProvider.onPlantAdded(plantsProvider.userPlants.length);
     if (!context.mounted) return;
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          '¡${species.commonName} añadida a tu jardín! 🌿',
-          style: const TextStyle(fontWeight: FontWeight.w600),
-        ),
-        backgroundColor: const Color(0xFF10454F),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      ),
+    showAppToast(
+      context,
+      '¡${species.commonName} añadida a tu jardín! 🌿',
+      type: ToastType.success,
     );
     showAchievementUnlockedSnackbars(context, unlocked);
     Navigator.pop(context);

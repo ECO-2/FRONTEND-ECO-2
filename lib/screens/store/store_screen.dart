@@ -5,6 +5,7 @@ import 'package:frontend_eco_2/providers/providers.dart';
 import 'package:frontend_eco_2/theme/app_colors.dart';
 import 'package:frontend_eco_2/widgets/common/custom_bottom_nav_bar.dart';
 import 'package:frontend_eco_2/widgets/common/custom_status_bar.dart';
+import 'package:frontend_eco_2/widgets/common/app_toast.dart';
 
 const _kStoreFilters = ['Más Vendidos', 'O2+', 'Avatares', 'Macetas'];
 
@@ -473,13 +474,10 @@ class _StoreScreenState extends State<StoreScreen> {
               Navigator.of(ctx).pop();
               final success = await missionsProvider.spendSeeds(item.cost);
               if (!context.mounted) return;
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    success ? '¡Compra exitosa!: ${item.title} 🎉' : 'No se pudo completar la compra.',
-                  ),
-                  backgroundColor: success ? AppColors.primary : AppColors.error,
-                ),
+              showAppToast(
+                context,
+                success ? '¡Compra exitosa!: ${item.title} 🎉' : 'No se pudo completar la compra.',
+                type: success ? ToastType.success : ToastType.error,
               );
             },
             child: const Text(

@@ -6,6 +6,7 @@ import 'package:frontend_eco_2/theme/app_colors.dart';
 import 'package:frontend_eco_2/widgets/common/custom_button.dart';
 import 'package:frontend_eco_2/widgets/common/custom_text_field.dart';
 import 'package:frontend_eco_2/widgets/common/custom_status_bar.dart';
+import 'package:frontend_eco_2/widgets/common/app_toast.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -34,11 +35,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   void _submit() async {
     if (_formKey.currentState!.validate()) {
       if (_passwordController.text != _confirmPasswordController.text) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Las contraseñas no coinciden.'),
-          ),
-        );
+        showAppToast(context, 'Las contraseñas no coinciden.', type: ToastType.error);
         return;
       }
 
@@ -56,13 +53,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           (route) => false,
         );
       } else if (mounted && userProvider.errorMessage != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(userProvider.errorMessage!),
-            backgroundColor: Colors.red.shade700,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        showAppToast(context, userProvider.errorMessage!, type: ToastType.error);
       }
     }
   }

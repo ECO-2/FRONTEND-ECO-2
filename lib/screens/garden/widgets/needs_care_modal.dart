@@ -5,6 +5,7 @@ import 'package:frontend_eco_2/providers/providers.dart';
 import 'package:frontend_eco_2/theme/app_colors.dart';
 import 'package:frontend_eco_2/utils/achievement_feedback.dart';
 import 'package:frontend_eco_2/utils/plant_visuals.dart';
+import 'package:frontend_eco_2/widgets/common/app_toast.dart';
 import 'care_sheet_content.dart';
 import 'species_data.dart';
 
@@ -185,13 +186,10 @@ class _NeedsCareSheetState extends State<_NeedsCareSheet> {
     if (unlocked == null) {
       if (!mounted) return;
       setState(() => _watering.remove(plant.id));
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(missionsProvider.errorMessage ?? 'No se pudo registrar el riego.'),
-          backgroundColor: AppColors.error,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        ),
+      showAppToast(
+        context,
+        missionsProvider.errorMessage ?? 'No se pudo registrar el riego.',
+        type: ToastType.error,
       );
       return;
     }
@@ -204,15 +202,7 @@ class _NeedsCareSheetState extends State<_NeedsCareSheet> {
       _justWatered.add(plant.id);
     });
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('${plant.nickname} regada 💧'),
-        backgroundColor: AppColors.primary,
-        behavior: SnackBarBehavior.floating,
-        duration: const Duration(seconds: 2),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      ),
-    );
+    showAppToast(context, '${plant.nickname} regada 💧', type: ToastType.success);
     showAchievementUnlockedSnackbars(context, unlocked);
   }
 

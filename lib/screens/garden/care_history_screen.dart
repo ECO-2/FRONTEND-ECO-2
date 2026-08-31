@@ -4,6 +4,7 @@ import 'package:frontend_eco_2/models/models.dart';
 import 'package:frontend_eco_2/services/services.dart';
 import 'package:frontend_eco_2/utils/care_task_labels.dart';
 import 'package:frontend_eco_2/widgets/common/custom_app_bar.dart';
+import 'package:frontend_eco_2/widgets/common/app_toast.dart';
 
 const _kFilterTaskTypes = {
   'Riegos': 'watering',
@@ -360,12 +361,7 @@ class _CareHistoryScreenState extends State<CareHistoryScreen> {
   }
 
   void _showComingSoon(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Esta función estará disponible próximamente.'),
-        duration: Duration(seconds: 2),
-      ),
-    );
+    showAppToast(context, 'Esta función estará disponible próximamente.');
   }
 
   String _formatDay(DateTime dt) {

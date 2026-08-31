@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:camerawesome/camerawesome_plugin.dart';
 import 'package:provider/provider.dart';
@@ -9,9 +11,10 @@ import 'package:frontend_eco_2/utils/app_tour.dart';
 import 'package:frontend_eco_2/routing/app_routes.dart';
 import 'package:frontend_eco_2/providers/plants_provider.dart';
 import 'package:frontend_eco_2/models/models.dart';
-import 'dart:math';
+import 'package:frontend_eco_2/services/services.dart';
+import 'package:frontend_eco_2/widgets/common/app_toast.dart';
 
-enum ScannerState { idle, scanning, success, offline }
+enum ScannerState { idle, scanning, success, notFound, notConfigured, offline }
 
 class ScannerScreen extends StatelessWidget {
   const ScannerScreen({super.key});
@@ -50,42 +53,14 @@ class _ScannerScreenContentState extends State<ScannerScreenContent>
   final GlobalKey _historyKey = GlobalKey();
   final GlobalKey _shutterKey = GlobalKey();
 
-  // Mocks para especies
-  final mainMockSpecies = PlantSpecies(
-    id: 'monstera',
-    commonName: 'Monstera deliciosa',
-    scientificName: 'Monstera deliciosa',
-    category: 'Aracea',
-    waterFrequencyDays: 7,
-    minTemperature: 18,
-    maxTemperature: 27,
-    lightRequirement: 'Luz indirecta brillante',
-    createdAt: DateTime.now(),
-  );
-  
-  final option1Species = PlantSpecies(
-    id: 'filodendro',
-    commonName: 'Filodendro',
-    scientificName: 'Philodendron',
-    category: 'Aracea',
-    waterFrequencyDays: 7,
-    minTemperature: 18,
-    maxTemperature: 27,
-    lightRequirement: 'Luz indirecta media',
-    createdAt: DateTime.now(),
-  );
-
-  final option2Species = PlantSpecies(
-    id: 'sorgo',
-    commonName: 'Sorgo',
-    scientificName: 'Sorghum bicolor',
-    category: 'Poaceae',
-    waterFrequencyDays: 5,
-    minTemperature: 15,
-    maxTemperature: 30,
-    lightRequirement: 'Sol directo',
-    createdAt: DateTime.now(),
-  );
+  // ── Resultado real de la última identificación ──────────────────────────
+  PlantSpecies? _resultSpecies;
+  int? _resultConfidencePct;
+  // Plant.id reconoció algo, pero esa especie no está en nuestro catálogo
+  // — nombre real devuelto por la API, no inventado.
+  String? _unmatchedCommonName;
+  String? _unmatchedScientificName;
+  List<IdentificationAlternate> _alternates = [];
 
   @override
   void initState() {
@@ -118,52 +93,77 @@ class _ScannerScreenContentState extends State<ScannerScreenContent>
 
   Future<void> _pickImageFromGallery() async {
     if (_state == ScannerState.scanning) return;
-    
+
     // Solicitar permiso de fotos
     await Permission.photos.request();
-    
+
     final ImagePicker picker = ImagePicker();
     final XFile? image = await picker.pickImage(source: ImageSource.gallery);
-    
+
     if (image != null) {
-      _startScan();
+      _startScan(image.path);
     }
   }
 
-  Future<void> _startScan() async {
+  /// Identifica la foto en [photoPath] contra la API real de Plant.id
+  /// (POST /identifications/fallback). Sin mocks ni resultados simulados —
+  /// si algo falla (sin conexión, IA no configurada aún, etc.) se lo
+  /// decimos al usuario tal cual es.
+  Future<void> _startScan(String photoPath) async {
     setState(() {
       _state = ScannerState.scanning;
+      _resultSpecies = null;
+      _unmatchedCommonName = null;
+      _unmatchedScientificName = null;
+      _alternates = [];
     });
 
-    await Future.delayed(const Duration(seconds: 3));
-    if (!mounted) return;
+    try {
+      final bytes = await File(photoPath).readAsBytes();
+      final base64Image = base64Encode(bytes);
 
-    final isOffline = Random().nextDouble() < 0.2;
+      final identificationService =
+          Provider.of<IdentificationService>(context, listen: false);
+      final result = await identificationService.identifyFromPhoto(base64Image);
+      if (!mounted) return;
 
-    if (isOffline) {
-      setState(() {
-        _state = ScannerState.offline;
-      });
+      if (!result.configured) {
+        setState(() => _state = ScannerState.notConfigured);
+        return;
+      }
+
+      if (result.species != null) {
+        setState(() {
+          _resultSpecies = result.species;
+          _resultConfidencePct = ((result.confidenceScore ?? 0) * 100).round();
+          _alternates = result.alternates;
+          _state = ScannerState.success;
+        });
+      } else {
+        setState(() {
+          _unmatchedCommonName = result.unmatchedCommonName;
+          _unmatchedScientificName = result.unmatchedScientificName;
+          _alternates = result.alternates;
+          _state = ScannerState.notFound;
+        });
+      }
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _state = ScannerState.offline);
       _showOfflineSnackbar();
       Future.delayed(const Duration(seconds: 4), () {
         if (mounted && _state == ScannerState.offline) {
           setState(() => _state = ScannerState.idle);
         }
       });
-    } else {
-      setState(() {
-        _state = ScannerState.success;
-      });
     }
   }
 
   void _showOfflineSnackbar() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Sin conexión a Internet. La foto se ha guardado para escanear más tarde.'),
-        backgroundColor: AppColors.orange,
-        behavior: SnackBarBehavior.floating,
-      ),
+    showAppToast(
+      context,
+      'No se pudo conectar para identificar la planta. Verifica tu conexión e inténtalo de nuevo.',
+      type: ToastType.error,
     );
   }
 
@@ -233,7 +233,7 @@ class _ScannerScreenContentState extends State<ScannerScreenContent>
                 Navigator.pop(context);
                 final success = await plantsProvider.addPlantFromSpecies(species);
                 if (success && mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Planta añadida con éxito')));
+                  showAppToast(context, 'Planta añadida con éxito', type: ToastType.success);
                 }
               },
               style: ElevatedButton.styleFrom(
@@ -254,15 +254,16 @@ class _ScannerScreenContentState extends State<ScannerScreenContent>
   }
 
   void _showHistoryModal() {
+    final identificationService = Provider.of<IdentificationService>(context, listen: false);
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
-      builder: (context) {
+      builder: (modalContext) {
         return Container(
-          height: MediaQuery.of(context).size.height * 0.6,
+          height: MediaQuery.of(modalContext).size.height * 0.6,
           decoration: const BoxDecoration(
-            color: Colors.white, // FIX: Ensured background is white
+            color: Colors.white,
             borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
           ),
           padding: const EdgeInsets.all(20),
@@ -279,21 +280,63 @@ class _ScannerScreenContentState extends State<ScannerScreenContent>
               ),
               const SizedBox(height: 20),
               Expanded(
-                child: ListView(
-                  children: [
-                    _buildHistoryItem('Monstera Deliciosa', 'Hace 2 horas', '98% de coincidencia', () {
-                      Navigator.pop(context);
-                      setState(() => _state = ScannerState.success);
-                    }),
-                    _buildHistoryItem('Poto (Epipremnum aureum)', 'Ayer', '94% de coincidencia', () {
-                      Navigator.pop(context);
-                      setState(() => _state = ScannerState.success);
-                    }),
-                    _buildHistoryItem('Aloe Vera', 'Hace 3 días', '89% de coincidencia', () {
-                      Navigator.pop(context);
-                      setState(() => _state = ScannerState.success);
-                    }),
-                  ],
+                child: FutureBuilder<List<PlantIdentification>>(
+                  future: identificationService.getHistory(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(
+                        child: SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(strokeWidth: 2.5),
+                        ),
+                      );
+                    }
+                    if (snapshot.hasError) {
+                      return const Center(
+                        child: Text(
+                          'No se pudo cargar el historial.',
+                          style: TextStyle(color: Colors.grey),
+                        ),
+                      );
+                    }
+                    final history = snapshot.data ?? [];
+                    if (history.isEmpty) {
+                      return const Center(
+                        child: Text(
+                          'Todavía no has escaneado ninguna planta.',
+                          style: TextStyle(color: Colors.grey),
+                        ),
+                      );
+                    }
+                    return ListView.builder(
+                      itemCount: history.length,
+                      itemBuilder: (context, i) {
+                        final item = history[i];
+                        final species = item.species;
+                        final pct = item.confidenceScore != null
+                            ? '${(item.confidenceScore! * 100).round()}% de coincidencia'
+                            : 'Sin coincidencia';
+                        return _buildHistoryItem(
+                          species?.commonName ?? 'No identificada',
+                          _relativeTime(item.createdAt),
+                          pct,
+                          species == null
+                              ? null
+                              : () {
+                                  Navigator.pop(modalContext);
+                                  setState(() {
+                                    _resultSpecies = species;
+                                    _resultConfidencePct =
+                                        ((item.confidenceScore ?? 0) * 100).round();
+                                    _alternates = [];
+                                    _state = ScannerState.success;
+                                  });
+                                },
+                        );
+                      },
+                    );
+                  },
                 ),
               ),
             ],
@@ -303,7 +346,15 @@ class _ScannerScreenContentState extends State<ScannerScreenContent>
     );
   }
 
-  Widget _buildHistoryItem(String title, String time, String subtitle, VoidCallback onTap) {
+  String _relativeTime(DateTime dt) {
+    final diff = DateTime.now().difference(dt);
+    if (diff.inMinutes < 60) return 'Hace ${diff.inMinutes}m';
+    if (diff.inHours < 24) return 'Hace ${diff.inHours}h';
+    if (diff.inDays < 7) return 'Hace ${diff.inDays}d';
+    return '${dt.day}/${dt.month}/${dt.year}';
+  }
+
+  Widget _buildHistoryItem(String title, String time, String subtitle, VoidCallback? onTap) {
     return Card(
       elevation: 0,
       color: Colors.grey[100], // FIX: Changed to light grey to contrast dark text
@@ -361,6 +412,10 @@ class _ScannerScreenContentState extends State<ScannerScreenContent>
                   ),
                   if (_state == ScannerState.success)
                     _buildPlantDetailsCard(),
+                  if (_state == ScannerState.notFound)
+                    _buildNotFoundCard(),
+                  if (_state == ScannerState.notConfigured)
+                    _buildNotConfiguredCard(),
                   const SizedBox(height: 20),
                   _buildBottomControls(context, cameraState),
                   const SizedBox(height: 20),
@@ -561,6 +616,7 @@ class _ScannerScreenContentState extends State<ScannerScreenContent>
   }
 
   Widget _buildPlantDetailsCard() {
+    final species = _resultSpecies!;
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),
       padding: const EdgeInsets.all(20),
@@ -594,7 +650,7 @@ class _ScannerScreenContentState extends State<ScannerScreenContent>
                       children: [
                         Expanded(
                           child: Text(
-                            mainMockSpecies.commonName,
+                            species.commonName,
                             style: const TextStyle(
                               color: AppColors.primary,
                               fontSize: 16,
@@ -610,9 +666,9 @@ class _ScannerScreenContentState extends State<ScannerScreenContent>
                             color: AppColors.accent,
                             borderRadius: BorderRadius.circular(6),
                           ),
-                          child: const Text(
-                            '98%',
-                            style: TextStyle(
+                          child: Text(
+                            '${_resultConfidencePct ?? 0}%',
+                            style: const TextStyle(
                               color: AppColors.primary,
                               fontSize: 10,
                               fontWeight: FontWeight.bold,
@@ -623,7 +679,9 @@ class _ScannerScreenContentState extends State<ScannerScreenContent>
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '${mainMockSpecies.scientificName} - ${mainMockSpecies.category}',
+                      species.category != null
+                          ? '${species.scientificName} - ${species.category}'
+                          : species.scientificName,
                       style: TextStyle(
                         color: Colors.grey[500],
                         fontSize: 12,
@@ -633,9 +691,9 @@ class _ScannerScreenContentState extends State<ScannerScreenContent>
                     const SizedBox(height: 8),
                     Row(
                       children: [
-                        _buildTag('Tropical'),
+                        _buildTag(species.category ?? 'Planta'),
                         const SizedBox(width: 8),
-                        _buildTag(mainMockSpecies.difficulty),
+                        _buildTag(species.difficulty),
                       ],
                     ),
                   ],
@@ -652,7 +710,7 @@ class _ScannerScreenContentState extends State<ScannerScreenContent>
             children: [
               Expanded(
                 child: OutlinedButton(
-                  onPressed: () => _onViewDetails(mainMockSpecies),
+                  onPressed: () => _onViewDetails(species),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.primary,
                     side: const BorderSide(color: AppColors.primary),
@@ -667,7 +725,7 @@ class _ScannerScreenContentState extends State<ScannerScreenContent>
               const SizedBox(width: 12),
               Expanded(
                 child: ElevatedButton.icon(
-                  onPressed: () => _onAddToGarden(mainMockSpecies),
+                  onPressed: () => _onAddToGarden(species),
                   icon: const Icon(Icons.add, size: 18),
                   label: const Text('A mi jardín', style: TextStyle(fontWeight: FontWeight.w600)),
                   style: ElevatedButton.styleFrom(
@@ -683,21 +741,133 @@ class _ScannerScreenContentState extends State<ScannerScreenContent>
               ),
             ],
           ),
-          const SizedBox(height: 20),
-          Text(
-            'Otras posibilidades',
-            style: TextStyle(
-              color: Colors.grey[500],
-              fontSize: 12,
+          if (_alternates.isNotEmpty) ...[
+            const SizedBox(height: 20),
+            Text(
+              'Otras posibilidades',
+              style: TextStyle(
+                color: Colors.grey[500],
+                fontSize: 12,
+              ),
             ),
-          ),
-          const SizedBox(height: 12),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                for (int i = 0; i < _alternates.length && i < 2; i++) ...[
+                  if (i > 0) const SizedBox(width: 12),
+                  Expanded(
+                    child: _buildOtherPossibility(
+                      _alternates[i].species,
+                      '${(_alternates[i].confidenceScore * 100).round()}%',
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  /// Plant.id reconoció algo con confianza aceptable, pero esa especie
+  /// todavía no está en nuestro catálogo — se lo decimos tal cual, con el
+  /// nombre real que devolvió la API, en vez de forzar un resultado falso.
+  Widget _buildNotFoundCard() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
           Row(
             children: [
-              Expanded(child: _buildOtherPossibility(option1Species, '24%')),
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: Colors.grey[100],
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Center(
+                  child: Icon(Icons.help_outline_rounded, color: AppColors.primary, size: 24),
+                ),
+              ),
               const SizedBox(width: 12),
-              Expanded(child: _buildOtherPossibility(option2Species, '8%')),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      _unmatchedCommonName ?? 'No identificada con certeza',
+                      style: const TextStyle(
+                        color: AppColors.primary,
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    if (_unmatchedScientificName != null)
+                      Text(
+                        _unmatchedScientificName!,
+                        style: TextStyle(color: Colors.grey[500], fontSize: 12),
+                      ),
+                  ],
+                ),
+              ),
+              GestureDetector(
+                onTap: () => setState(() => _state = ScannerState.idle),
+                child: const Icon(Icons.close, color: Colors.grey, size: 20),
+              ),
             ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            _unmatchedCommonName != null
+                ? 'La reconocimos, pero todavía no está en el catálogo de ECO2 — no podemos añadirla a tu jardín todavía.'
+                : 'No pudimos reconocerla con suficiente confianza. Prueba con más luz o de más cerca.',
+            style: TextStyle(color: Colors.grey[600], fontSize: 13, height: 1.4),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// El backend aún no tiene PLANT_ID_API_KEY configurada.
+  Widget _buildNotConfiguredCard() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: Colors.grey[100],
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Center(
+              child: Icon(Icons.auto_awesome_outlined, color: AppColors.primary, size: 22),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              'La identificación por IA todavía no está disponible en esta versión.',
+              style: TextStyle(color: Colors.grey[700], fontSize: 13, height: 1.4),
+            ),
+          ),
+          GestureDetector(
+            onTap: () => setState(() => _state = ScannerState.idle),
+            child: const Icon(Icons.close, color: Colors.grey, size: 20),
           ),
         ],
       ),
@@ -839,9 +1009,14 @@ class _ScannerScreenContentState extends State<ScannerScreenContent>
               onTap: () {
                 if (_state == ScannerState.scanning) return;
                 cameraState.when(
-                  onPhotoMode: (photoState) {
-                    photoState.takePhoto();
-                    _startScan();
+                  onPhotoMode: (photoState) async {
+                    final captureRequest = await photoState.takePhoto();
+                    final path = captureRequest.path;
+                    if (path == null) {
+                      _showOfflineSnackbar();
+                      return;
+                    }
+                    _startScan(path);
                   },
                 );
               },

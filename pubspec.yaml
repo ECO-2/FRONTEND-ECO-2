@@ -48,6 +48,8 @@ dependencies:
   camerawesome: ^2.5.0
   image_picker: ^1.2.3
   permission_handler: 11.3.1
+  path_provider: ^2.1.5
+  cached_network_image: ^3.4.1
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -4,6 +4,7 @@ import 'package:frontend_eco_2/providers/providers.dart';
 import 'package:frontend_eco_2/theme/app_colors.dart';
 import 'package:frontend_eco_2/widgets/common/custom_text_field.dart';
 import 'package:frontend_eco_2/widgets/common/custom_app_bar.dart';
+import 'package:frontend_eco_2/widgets/common/app_toast.dart';
 
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});
@@ -94,12 +95,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   userProvider.setUser(updatedUser);
                 }
                 
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('¡Perfil guardado con éxito! 💾'),
-                    backgroundColor: AppColors.primary,
-                  ),
-                );
+                showAppToast(context, '¡Perfil guardado con éxito! 💾', type: ToastType.success);
                 Navigator.of(context).pop();
               },
               child: const Text(
@@ -146,11 +142,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                               right: 0,
                               child: InkWell(
                                 onTap: () {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text('Función para cambiar foto próximamente 📸'),
-                                    ),
-                                  );
+                                  showAppToast(context, 'Función para cambiar foto próximamente 📸');
                                 },
                                 child: Container(
                                   width: 36,
@@ -173,11 +165,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         const SizedBox(height: 12),
                         TextButton(
                           onPressed: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Función para cambiar foto próximamente 📸'),
-                              ),
-                            );
+                            showAppToast(context, 'Función para cambiar foto próximamente 📸');
                           },
                           child: const Text(
                             'Cambiar foto de perfil',

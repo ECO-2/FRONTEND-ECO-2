@@ -72,6 +72,7 @@ class HomeTab extends StatelessWidget {
                         createdAt: DateTime.now(),
                       ),
                     ),
+                    customPhoto: plantsProvider.customPhotoFor(plant.id),
                     onTap: () => Navigator.pushNamed(
                       context,
                       AppRoutes.plantDetail,

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:frontend_eco_2/models/models.dart';
 import 'package:frontend_eco_2/providers/providers.dart';
 import 'package:frontend_eco_2/routing/app_routes.dart';
+import 'package:frontend_eco_2/widgets/common/app_toast.dart';
 
 const _kDark = Color(0xFF10454F);
 const _kBg = Color(0xFFF8FAF9);
@@ -122,13 +123,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                             child: TextButton(
                               onPressed: () {
                                 notifProvider.markAllAsRead();
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text(
-                                      'Todas las notificaciones marcadas como leídas.',
-                                    ),
-                                    duration: Duration(seconds: 1),
-                                  ),
+                                showAppToast(
+                                  context,
+                                  'Todas las notificaciones marcadas como leídas.',
+                                  duration: const Duration(seconds: 1, milliseconds: 400),
                                 );
                               },
                               child: const Text(

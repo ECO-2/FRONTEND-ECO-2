@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:frontend_eco_2/theme/app_colors.dart';
 import 'package:frontend_eco_2/providers/providers.dart';
+import 'package:frontend_eco_2/widgets/common/app_toast.dart';
 
 class SeedRewardItem {
   final String id;
@@ -182,11 +183,10 @@ class SeedStoreList extends StatelessWidget {
               final success = await missionsProvider.spendSeeds(reward.cost);
               if (success) {
                 if (!context.mounted) return;
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('¡Canje exitoso!: ${reward.title} 🎁'),
-                    backgroundColor: AppColors.primary,
-                  ),
+                showAppToast(
+                  context,
+                  '¡Canje exitoso!: ${reward.title} 🎁',
+                  type: ToastType.success,
                 );
               }
             },

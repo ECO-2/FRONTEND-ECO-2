@@ -19,4 +19,5 @@ export 'environment_snapshot.dart';
 export 'environmental_score.dart';
 export 'snapshot_score.dart';
 export 'plant_identification.dart';
+export 'identification_result.dart';
 export 'notification.dart';

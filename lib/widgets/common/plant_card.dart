@@ -1,7 +1,10 @@
+import 'dart:io';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend_eco_2/models/models.dart';
 import 'package:frontend_eco_2/theme/app_colors.dart';
 import 'package:frontend_eco_2/utils/plant_visuals.dart';
+import 'package:frontend_eco_2/utils/cloudinary_transform.dart';
 import 'tag_chips_row.dart';
 
 // ── Species metadata ──────────────────────────────────────────────────────────
@@ -10,6 +13,7 @@ class PlantSpeciesInfo {
   final List<String> tags;
   final Color imageBackgroundColor;
   final String? assetImage;
+  final String? imageUrl;
   final IconData placeholderIcon;
   final Color placeholderIconColor;
 
@@ -18,19 +22,20 @@ class PlantSpeciesInfo {
     required this.tags,
     this.imageBackgroundColor = const Color(0xFFEAF3EC),
     this.assetImage,
+    this.imageUrl,
     this.placeholderIcon = Icons.local_florist_rounded,
     this.placeholderIconColor = const Color(0xFF10454F),
   });
 
-  // Real catalog species (real UUID from the backend) get a category-based
-  // icon/color instead of the single generic placeholder every species
-  // used to share — there are no real per-species photos in the database.
+  // Real catalog species (real UUID from el backend) tienen su propia foto
+  // real (imageUrl); solo caen al ícono por categoría si no la tienen.
   factory PlantSpeciesInfo.fromReal(PlantSpecies species) {
     final visual = visualForCategory(species.category);
     return PlantSpeciesInfo(
       scientificName: species.scientificName,
       tags: species.tags,
       imageBackgroundColor: visual.background,
+      imageUrl: species.imageUrl,
       placeholderIcon: visual.icon,
       placeholderIconColor: visual.color,
     );
@@ -73,12 +78,14 @@ PlantSpeciesInfo _infoFor(String speciesId, PlantSpecies species) =>
 class PlantCard extends StatelessWidget {
   final UserPlant plant;
   final PlantSpecies species;
+  final File? customPhoto;
   final VoidCallback onTap;
 
   const PlantCard({
     super.key,
     required this.plant,
     required this.species,
+    this.customPhoto,
     required this.onTap,
   });
 
@@ -119,27 +126,52 @@ class PlantCard extends StatelessWidget {
                 children: [
                   Container(
                     decoration: BoxDecoration(
-                      color: info.imageBackgroundColor,
+                      // Sin foto: fondo de color de la categoría, para que el
+                      // ícono resalte. Con foto (propia o real): sin fondo —
+                      // transparente — y BoxFit.contain, para que se vea
+                      // completa, sin recortarla ni deformarla.
+                      color: (customPhoto != null || info.imageUrl != null)
+                          ? Colors.transparent
+                          : info.imageBackgroundColor,
                       borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
                     ),
                     alignment: Alignment.center,
                     child: Padding(
                       padding: const EdgeInsets.all(12),
-                      child: info.assetImage != null
-                          ? Image.asset(
-                              info.assetImage!,
-                              fit: BoxFit.contain,
-                              errorBuilder: (_, _, _) => Icon(
-                                info.placeholderIcon,
-                                size: 48,
-                                color: info.placeholderIconColor.withValues(alpha: 0.55),
-                              ),
-                            )
-                          : Icon(
-                              info.placeholderIcon,
-                              size: 48,
-                              color: info.placeholderIconColor.withValues(alpha: 0.55),
-                            ),
+                      child: customPhoto != null
+                          ? Image.file(customPhoto!, fit: BoxFit.contain)
+                          : info.imageUrl != null
+                              ? CachedNetworkImage(
+                                  imageUrl: withTransparentBackground(info.imageUrl!),
+                                  fit: BoxFit.contain,
+                                  placeholder: (_, _) => const Center(
+                                    child: SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(strokeWidth: 2),
+                                    ),
+                                  ),
+                                  errorWidget: (_, _, _) => Icon(
+                                    info.placeholderIcon,
+                                    size: 48,
+                                    color: info.placeholderIconColor.withValues(alpha: 0.55),
+                                  ),
+                                )
+                              : info.assetImage != null
+                                  ? Image.asset(
+                                      info.assetImage!,
+                                      fit: BoxFit.contain,
+                                      errorBuilder: (_, _, _) => Icon(
+                                        info.placeholderIcon,
+                                        size: 48,
+                                        color: info.placeholderIconColor.withValues(alpha: 0.55),
+                                      ),
+                                    )
+                                  : Icon(
+                                      info.placeholderIcon,
+                                      size: 48,
+                                      color: info.placeholderIconColor.withValues(alpha: 0.55),
+                                    ),
                     ),
                   ),
                   // Badge — top right

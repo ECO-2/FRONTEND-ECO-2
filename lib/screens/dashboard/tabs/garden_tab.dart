@@ -1,3 +1,5 @@
+import 'dart:io';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:frontend_eco_2/models/models.dart';
@@ -6,9 +8,11 @@ import 'package:frontend_eco_2/routing/app_routes.dart';
 import 'package:frontend_eco_2/theme/app_colors.dart';
 import 'package:frontend_eco_2/utils/achievement_feedback.dart';
 import 'package:frontend_eco_2/utils/plant_visuals.dart';
+import 'package:frontend_eco_2/utils/cloudinary_transform.dart';
 import 'package:frontend_eco_2/widgets/garden/add_plant_modal.dart';
 import 'package:frontend_eco_2/screens/garden/widgets/needs_care_modal.dart';
 import 'package:frontend_eco_2/widgets/common/tag_chips_row.dart';
+import 'package:frontend_eco_2/widgets/common/app_toast.dart';
 
 // ── Figma color tokens ────────────────────────────────────────────────────
 const _kDark = Color(0xFF10454F);
@@ -79,13 +83,10 @@ class _GardenTabState extends State<GardenTab> {
     if (!context.mounted) return;
 
     if (!success) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(plantsProvider.errorMessage ?? 'No se pudo agregar la planta.'),
-          backgroundColor: AppColors.error,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        ),
+      showAppToast(
+        context,
+        plantsProvider.errorMessage ?? 'No se pudo agregar la planta.',
+        type: ToastType.error,
       );
       return;
     }
@@ -94,14 +95,7 @@ class _GardenTabState extends State<GardenTab> {
     final unlocked = await missionsProvider.onPlantAdded(plantsProvider.userPlants.length);
     if (!context.mounted) return;
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('¡${species.commonName} añadida a tu jardín! 🌿'),
-        backgroundColor: AppColors.primary,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      ),
-    );
+    showAppToast(context, '¡${species.commonName} añadida a tu jardín! 🌿', type: ToastType.success);
     showAchievementUnlockedSnackbars(context, unlocked);
   }
 
@@ -511,17 +505,46 @@ class _GardenTabState extends State<GardenTab> {
                           fit: StackFit.expand,
                           children: [
                             Container(
-                              color: _getSpeciesBg(species.id, category: species.category),
+                              // Sin foto: fondo de color de la categoría, para que el ícono
+                              // resalte. Con foto real: sin fondo — totalmente
+                              // transparente — y BoxFit.contain, para que se vea
+                              // completa y sin recortes ni deformación.
+                              color: species.imageUrl != null
+                                  ? Colors.transparent
+                                  : _getSpeciesBg(species.id, category: species.category),
                               alignment: Alignment.center,
-                              padding: const EdgeInsets.all(12),
                               child: species.imageUrl != null
-                                  ? Image.network(species.imageUrl!, fit: BoxFit.cover)
-                                  : species.id == 's1'
-                                      ? Image.asset('assets/images/monstera.png', fit: BoxFit.contain)
-                                      : Icon(
+                                  ? Padding(
+                                      padding: const EdgeInsets.all(8),
+                                      child: CachedNetworkImage(
+                                        imageUrl: withTransparentBackground(species.imageUrl!),
+                                        fit: BoxFit.contain,
+                                        placeholder: (_, _) => const Center(
+                                          child: SizedBox(
+                                            width: 22,
+                                            height: 22,
+                                            child: CircularProgressIndicator(strokeWidth: 2),
+                                          ),
+                                        ),
+                                        errorWidget: (_, _, _) => Icon(
                                           visual.icon,
                                           size: 48,
                                           color: visual.color.withValues(alpha: 0.4),
+                                        ),
+                                      ),
+                                    )
+                                  : species.id == 's1'
+                                      ? Padding(
+                                          padding: const EdgeInsets.all(12),
+                                          child: Image.asset('assets/images/monstera.png', fit: BoxFit.contain),
+                                        )
+                                      : Padding(
+                                          padding: const EdgeInsets.all(12),
+                                          child: Icon(
+                                            visual.icon,
+                                            size: 48,
+                                            color: visual.color.withValues(alpha: 0.4),
+                                          ),
                                         ),
                             ),
                             // Floating purification badge (real air_purification_score)
@@ -913,16 +936,41 @@ class _GardenTabState extends State<GardenTab> {
               // Image container (left)
               Container(
                 width: 110,
-                color: _getSpeciesBg(species.id, category: species.category),
-                padding: const EdgeInsets.all(12),
+                color: species.imageUrl != null
+                    ? Colors.transparent
+                    : _getSpeciesBg(species.id, category: species.category),
                 child: species.imageUrl != null
-                    ? Image.network(species.imageUrl!, fit: BoxFit.cover)
-                    : isMonstera
-                        ? Image.asset('assets/images/monstera.png', fit: BoxFit.contain)
-                        : Icon(
+                    ? Padding(
+                        padding: const EdgeInsets.all(8),
+                        child: CachedNetworkImage(
+                          imageUrl: withTransparentBackground(species.imageUrl!),
+                          fit: BoxFit.contain,
+                          placeholder: (_, _) => const Center(
+                            child: SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                          ),
+                          errorWidget: (_, _, _) => Icon(
                             visual.icon,
                             size: 40,
                             color: visual.color.withValues(alpha: 0.4),
+                          ),
+                        ),
+                      )
+                    : isMonstera
+                        ? Padding(
+                            padding: const EdgeInsets.all(12),
+                            child: Image.asset('assets/images/monstera.png', fit: BoxFit.contain),
+                          )
+                        : Padding(
+                            padding: const EdgeInsets.all(12),
+                            child: Icon(
+                              visual.icon,
+                              size: 40,
+                              color: visual.color.withValues(alpha: 0.4),
+                            ),
                           ),
               ),
               // Details container (right)
@@ -1051,17 +1099,42 @@ class _GardenTabState extends State<GardenTab> {
           children: [
             Expanded(
               child: Container(
-                color: _getSpeciesBg(species.id, category: species.category),
+                color: species.imageUrl != null
+                    ? Colors.transparent
+                    : _getSpeciesBg(species.id, category: species.category),
                 alignment: Alignment.center,
-                padding: const EdgeInsets.all(12),
                 child: species.imageUrl != null
-                    ? Image.network(species.imageUrl!, fit: BoxFit.cover)
-                    : isMonstera
-                        ? Image.asset('assets/images/monstera.png', fit: BoxFit.contain)
-                        : Icon(
+                    ? Padding(
+                        padding: const EdgeInsets.all(8),
+                        child: CachedNetworkImage(
+                          imageUrl: withTransparentBackground(species.imageUrl!),
+                          fit: BoxFit.contain,
+                          placeholder: (_, _) => const Center(
+                            child: SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                          ),
+                          errorWidget: (_, _, _) => Icon(
                             visual.icon,
                             size: 40,
                             color: visual.color.withValues(alpha: 0.4),
+                          ),
+                        ),
+                      )
+                    : isMonstera
+                        ? Padding(
+                            padding: const EdgeInsets.all(12),
+                            child: Image.asset('assets/images/monstera.png', fit: BoxFit.contain),
+                          )
+                        : Padding(
+                            padding: const EdgeInsets.all(12),
+                            child: Icon(
+                              visual.icon,
+                              size: 40,
+                              color: visual.color.withValues(alpha: 0.4),
+                            ),
                           ),
               ),
             ),
@@ -1196,12 +1269,14 @@ class _GardenTabState extends State<GardenTab> {
                             (s) => s.id == plant.speciesId,
                             orElse: () => catalogFallback(plant.speciesId),
                           ),
+                          customPhoto: plantsProvider.customPhotoFor(plant.id),
                           needsWater: _needsWater(plant, plantsProvider),
                           onTap: () => Navigator.pushNamed(
                             context,
                             AppRoutes.plantDetail,
                             arguments: plant,
                           ),
+                          onDelete: () => plantsProvider.deletePlant(plant.id),
                         );
                       },
                     )
@@ -1217,12 +1292,14 @@ class _GardenTabState extends State<GardenTab> {
                                   (s) => s.id == plant.speciesId,
                                   orElse: () => catalogFallback(plant.speciesId),
                                 ),
+                                customPhoto: plantsProvider.customPhotoFor(plant.id),
                                 onTap: () => Navigator.pushNamed(
                                   context,
                                   AppRoutes.plantDetail,
                                   arguments: plant,
                                 ),
                                 onWater: () => plantsProvider.waterPlant(plant.id),
+                                onDelete: () => plantsProvider.deletePlant(plant.id),
                               ),
                             )),
                         // Add plant button at the bottom
@@ -1660,6 +1737,7 @@ class _GardenSpecies {
   final List<String> tags;
   final Color imageBg;
   final String? assetImage;
+  final String? imageUrl;
   final IconData placeholderIcon;
   final Color placeholderIconColor;
   const _GardenSpecies({
@@ -1667,22 +1745,89 @@ class _GardenSpecies {
     required this.tags,
     required this.imageBg,
     this.assetImage,
+    this.imageUrl,
     this.placeholderIcon = Icons.local_florist_rounded,
     this.placeholderIconColor = AppColors.primary,
   });
 
   // Real catalog species (real UUID from the backend) don't have a legacy
-  // illustration, so they get a category-based icon/color instead of the
-  // single generic placeholder every species used to share.
+  // illustration, but they do have a real photo (imageUrl) — use that, and
+  // fall back to a category-based icon/color only if it's missing.
   factory _GardenSpecies.fromReal(PlantSpecies species) {
     final visual = visualForCategory(species.category);
     return _GardenSpecies(
       scientificName: species.scientificName,
       tags: species.tags,
       imageBg: visual.background,
+      imageUrl: species.imageUrl,
       placeholderIcon: visual.icon,
       placeholderIconColor: visual.color,
     );
+  }
+}
+
+// ── Swipe-to-delete — compartido entre la tarjeta de lista y de cuadrícula ──
+
+Widget _buildDeleteBackground({double borderRadius = 20}) {
+  return Container(
+    alignment: Alignment.centerLeft,
+    padding: const EdgeInsets.symmetric(horizontal: 24),
+    decoration: BoxDecoration(
+      color: const Color(0xFFD32F2F),
+      borderRadius: BorderRadius.circular(borderRadius),
+    ),
+    child: const Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(Icons.delete_outline_rounded, color: Colors.white, size: 22),
+        SizedBox(width: 8),
+        Text(
+          'Eliminar',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontFamily: 'Inter',
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+/// Solo confirma la intención de borrar — nunca hace la llamada de red
+/// aquí. Si el borrado se disparara desde confirmDismiss y la operación de
+/// red tardara, el widget quedaría en un estado intermedio raro; en vez de
+/// eso, la eliminación real ocurre en onDismissed, una vez que la animación
+/// de swipe ya terminó.
+Future<bool> _confirmDelete(BuildContext context, String nickname) async {
+  final confirmed = await showDialog<bool>(
+    context: context,
+    builder: (dialogContext) => AlertDialog(
+      title: const Text('¿Eliminar planta?'),
+      content: Text('Se eliminará "$nickname" de tu jardín. Esta acción no se puede deshacer.'),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(dialogContext, false),
+          child: const Text('Cancelar'),
+        ),
+        TextButton(
+          onPressed: () => Navigator.pop(dialogContext, true),
+          child: const Text('Eliminar', style: TextStyle(color: Colors.red)),
+        ),
+      ],
+    ),
+  );
+  return confirmed ?? false;
+}
+
+/// Ejecuta el borrado ya confirmado (después de que la animación de swipe
+/// terminó). PlantsProvider.deletePlant ya quita la planta de la lista
+/// local antes de llamar a la API, así que si falla la restaura y avisa
+/// con un toast — sin dejar el Dismissible en un estado inconsistente.
+Future<void> _runDelete(BuildContext context, Future<bool> Function() onDelete) async {
+  final success = await onDelete();
+  if (!success && context.mounted) {
+    showAppToast(context, 'No se pudo eliminar la planta.', type: ToastType.error);
   }
 }
 
@@ -1690,14 +1835,18 @@ class _GardenSpecies {
 class _PlantListCard extends StatelessWidget {
   final UserPlant plant;
   final PlantSpecies species;
+  final File? customPhoto;
   final VoidCallback onTap;
   final VoidCallback onWater;
+  final Future<bool> Function() onDelete;
 
   const _PlantListCard({
     required this.plant,
     required this.species,
+    this.customPhoto,
     required this.onTap,
     required this.onWater,
+    required this.onDelete,
   });
 
   @override
@@ -1733,9 +1882,25 @@ class _PlantListCard extends StatelessWidget {
         ? 'Sin riego registrado · c/${species.waterFrequencyDays}d'
         : '${daysSinceWater}d sin riego · c/${species.waterFrequencyDays}d';
 
-    return GestureDetector(
+    return MediaQuery(
+      // Bloquea el escalado de fuente del sistema solo para esta tarjeta —
+      // con "Texto grande" activado en accesibilidad, el texto podría crecer
+      // más de lo que el alto fijo de la tarjeta admite y volver a desbordar.
+      data: MediaQuery.of(context).copyWith(textScaler: const TextScaler.linear(1.0)),
+      child: Dismissible(
+      key: ValueKey('plant-list-${plant.id}'),
+      direction: DismissDirection.startToEnd,
+      background: _buildDeleteBackground(),
+      confirmDismiss: (_) => _confirmDelete(context, plant.nickname),
+      onDismissed: (_) => _runDelete(context, onDelete),
+      child: GestureDetector(
       onTap: onTap,
       child: Container(
+        // Alto fijo — antes se calculaba con IntrinsicHeight según el
+        // contenido de texto, así que las tarjetas quedaban de altura
+        // dispareja. Con un alto fijo todas quedan parejas, y la imagen
+        // (que se estira a lo alto de la tarjeta) puede ser más grande.
+        height: 176,
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: Colors.white,
@@ -1752,16 +1917,17 @@ class _PlantListCard extends StatelessWidget {
             ),
           ],
         ),
-        child: IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
               // ── LEFT CONTAINER: Image box ─────────────────────────
               Container(
-                width: 110,
-                constraints: const BoxConstraints(minHeight: 130),
+                width: 152,
                 decoration: BoxDecoration(
-                  color: sp.imageBg,
+                  // Sin foto propia: fondo de color de la especie. Con foto
+                  // (propia o real): sin fondo — transparente — para que
+                  // quede uniforme y el contain no deje ver color detrás.
+                  color: (customPhoto != null || sp.imageUrl != null) ? Colors.transparent : sp.imageBg,
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
                     color: const Color(0xFF5E7A82),
@@ -1771,28 +1937,58 @@ class _PlantListCard extends StatelessWidget {
                 child: Stack(
                   clipBehavior: Clip.none,
                   children: [
-                    // Image
+                    // Image — foto propia del usuario > foto real de la especie >
+                    // ilustración local heredada > ícono. BoxFit.contain para que
+                    // la foto se vea completa siempre, sin recortarla ni deformarla.
                     Positioned.fill(
-                      child: Padding(
-                        padding: const EdgeInsets.all(12),
-                        child: sp.assetImage != null
-                            ? ClipRRect(
-                                borderRadius: BorderRadius.circular(8),
-                                child: Image.asset(
-                                  sp.assetImage!,
-                                  fit: BoxFit.contain,
-                                  errorBuilder: (_, _, _) => Icon(
-                                    sp.placeholderIcon,
-                                    size: 48,
-                                    color: sp.placeholderIconColor.withValues(alpha: 0.5),
-                                  ),
-                                ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(14.5),
+                        child: customPhoto != null
+                            ? Padding(
+                                padding: const EdgeInsets.all(8),
+                                child: Image.file(customPhoto!, fit: BoxFit.contain),
                               )
-                            : Icon(
-                                sp.placeholderIcon,
-                                size: 48,
-                                color: sp.placeholderIconColor.withValues(alpha: 0.5),
-                              ),
+                            : sp.assetImage != null
+                                ? Padding(
+                                    padding: const EdgeInsets.all(12),
+                                    child: Image.asset(
+                                      sp.assetImage!,
+                                      fit: BoxFit.contain,
+                                      errorBuilder: (_, _, _) => Icon(
+                                        sp.placeholderIcon,
+                                        size: 48,
+                                        color: sp.placeholderIconColor.withValues(alpha: 0.5),
+                                      ),
+                                    ),
+                                  )
+                                : sp.imageUrl != null
+                                    ? Padding(
+                                        padding: const EdgeInsets.all(8),
+                                        child: CachedNetworkImage(
+                                          imageUrl: withTransparentBackground(sp.imageUrl!),
+                                          fit: BoxFit.contain,
+                                          placeholder: (_, _) => const Center(
+                                            child: SizedBox(
+                                              width: 20,
+                                              height: 20,
+                                              child: CircularProgressIndicator(strokeWidth: 2),
+                                            ),
+                                          ),
+                                          errorWidget: (_, _, _) => Icon(
+                                            sp.placeholderIcon,
+                                            size: 48,
+                                            color: sp.placeholderIconColor.withValues(alpha: 0.5),
+                                          ),
+                                        ),
+                                      )
+                                    : Padding(
+                                        padding: const EdgeInsets.all(12),
+                                        child: Icon(
+                                          sp.placeholderIcon,
+                                          size: 48,
+                                          color: sp.placeholderIconColor.withValues(alpha: 0.5),
+                                        ),
+                                      ),
                       ),
                     ),
                     // "! Riego" Badge — top-right
@@ -1843,7 +2039,9 @@ class _PlantListCard extends StatelessWidget {
                               fontSize: 18,
                               color: _kTextDark,
                             ),
-                            maxLines: 2,
+                            // Una sola línea — con 2 el alto del texto podía
+                            // superar el alto fijo de la tarjeta (overflow).
+                            maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
@@ -1934,9 +2132,10 @@ class _PlantListCard extends StatelessWidget {
                   ],
                 ),
               ),
-            ],
-          ),
+          ],
         ),
+      ),
+      ),
       ),
     );
   }
@@ -1947,21 +2146,36 @@ class _PlantListCard extends StatelessWidget {
 class _PlantGridCard extends StatelessWidget {
   final UserPlant plant;
   final PlantSpecies species;
+  final File? customPhoto;
   final bool needsWater;
   final VoidCallback onTap;
+  final Future<bool> Function() onDelete;
 
   const _PlantGridCard({
     required this.plant,
     required this.species,
+    this.customPhoto,
     required this.needsWater,
     required this.onTap,
+    required this.onDelete,
   });
 
   @override
   Widget build(BuildContext context) {
     final visual = visualForCategory(species.category);
 
-    return GestureDetector(
+    return MediaQuery(
+      // Misma protección que en la tarjeta de lista: la celda de la
+      // cuadrícula ya es de tamaño fijo (GridView), así que un texto más
+      // grande por accesibilidad no debe poder desbordarla.
+      data: MediaQuery.of(context).copyWith(textScaler: const TextScaler.linear(1.0)),
+      child: Dismissible(
+      key: ValueKey('plant-grid-${plant.id}'),
+      direction: DismissDirection.startToEnd,
+      background: _buildDeleteBackground(borderRadius: 20),
+      confirmDismiss: (_) => _confirmDelete(context, plant.nickname),
+      onDismissed: (_) => _runDelete(context, onDelete),
+      child: GestureDetector(
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
@@ -1985,10 +2199,39 @@ class _PlantGridCard extends StatelessWidget {
                 fit: StackFit.expand,
                 children: [
                   Container(
-                    color: visual.background,
+                    color: (customPhoto != null || species.imageUrl != null)
+                        ? Colors.transparent
+                        : visual.background,
                     alignment: Alignment.center,
-                    padding: const EdgeInsets.all(12),
-                    child: Icon(visual.icon, size: 40, color: visual.color.withValues(alpha: 0.5)),
+                    child: customPhoto != null
+                        ? Padding(
+                            padding: const EdgeInsets.all(8),
+                            child: Image.file(customPhoto!, fit: BoxFit.contain),
+                          )
+                        : species.imageUrl != null
+                            ? Padding(
+                                padding: const EdgeInsets.all(8),
+                                child: CachedNetworkImage(
+                                  imageUrl: withTransparentBackground(species.imageUrl!),
+                                  fit: BoxFit.contain,
+                                  placeholder: (_, _) => const Center(
+                                    child: SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(strokeWidth: 2),
+                                    ),
+                                  ),
+                                  errorWidget: (_, _, _) => Icon(
+                                    visual.icon,
+                                    size: 40,
+                                    color: visual.color.withValues(alpha: 0.5),
+                                  ),
+                                ),
+                              )
+                            : Padding(
+                                padding: const EdgeInsets.all(12),
+                                child: Icon(visual.icon, size: 40, color: visual.color.withValues(alpha: 0.5)),
+                              ),
                   ),
                   Positioned(
                     top: 6,
@@ -2045,6 +2288,8 @@ class _PlantGridCard extends StatelessWidget {
             ),
           ],
         ),
+      ),
+      ),
       ),
     );
   }

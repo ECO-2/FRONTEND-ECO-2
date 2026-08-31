@@ -5,3 +5,5 @@ export 'user_service.dart';
 export 'plants_service.dart';
 export 'care_service.dart';
 export 'gamification_service.dart';
+export 'plant_photo_storage.dart';
+export 'identification_service.dart';

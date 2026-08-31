@@ -20,6 +20,7 @@ void main() async {
   final plantsService = PlantsService(apiClient);
   final gamificationService = GamificationService(apiClient);
   final careService = CareService(apiClient);
+  final identificationService = IdentificationService(apiClient);
 
   runApp(MyApp(
     storage: storage,
@@ -28,6 +29,7 @@ void main() async {
     plantsService: plantsService,
     gamificationService: gamificationService,
     careService: careService,
+    identificationService: identificationService,
   ));
 }
 
@@ -38,6 +40,7 @@ class MyApp extends StatelessWidget {
   final PlantsService plantsService;
   final GamificationService gamificationService;
   final CareService careService;
+  final IdentificationService identificationService;
 
   const MyApp({
     super.key,
@@ -47,6 +50,7 @@ class MyApp extends StatelessWidget {
     required this.plantsService,
     required this.gamificationService,
     required this.careService,
+    required this.identificationService,
   });
 
   @override
@@ -54,6 +58,7 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         Provider<CareService>.value(value: careService),
+        Provider<IdentificationService>.value(value: identificationService),
         Provider<SecureStorage>.value(value: storage),
         ChangeNotifierProvider(
           create: (_) => UserProvider(
@@ -62,7 +67,6 @@ class MyApp extends StatelessWidget {
             storage: storage,
           ),
         ),
-        ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(
           create: (_) => PlantsProvider(plantsService: plantsService),
         ),
@@ -74,43 +78,36 @@ class MyApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(create: (_) => NotificationsProvider()),
       ],
+      // ECO2 no ofrece modo oscuro: la app siempre usa el tema claro,
+      // sin importar el ajuste de tema del sistema del teléfono.
       child: _AppLoader(
-        child: Consumer<ThemeProvider>(
-          builder: (context, themeProvider, _) {
-            return MaterialApp(
-              navigatorKey: navigatorKey,
-              title: 'ECO2',
-              themeMode: themeProvider.themeMode,
-              debugShowCheckedModeBanner: false,
-              localizationsDelegates: const [
-                GlobalMaterialLocalizations.delegate,
-                GlobalWidgetsLocalizations.delegate,
-                GlobalCupertinoLocalizations.delegate,
-              ],
-              supportedLocales: const [
-                Locale('es', ''),
-                Locale('en', ''),
-              ],
-              theme: ThemeData(
-                useMaterial3: true,
-                brightness: Brightness.light,
-                colorSchemeSeed: AppColors.primary,
-                scaffoldBackgroundColor: AppColors.background,
-                appBarTheme: const AppBarTheme(
-                  backgroundColor: AppColors.background,
-                  elevation: 0,
-                  foregroundColor: AppColors.textPrimary,
-                ),
-              ),
-              darkTheme: ThemeData(
-                useMaterial3: true,
-                brightness: Brightness.dark,
-                colorSchemeSeed: AppColors.accent,
-              ),
-              initialRoute: AppRoutes.welcome,
-              onGenerateRoute: AppRoutes.onGenerateRoute,
-            );
-          },
+        child: MaterialApp(
+          navigatorKey: navigatorKey,
+          title: 'ECO2',
+          themeMode: ThemeMode.light,
+          debugShowCheckedModeBanner: false,
+          localizationsDelegates: const [
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: const [
+            Locale('es', ''),
+            Locale('en', ''),
+          ],
+          theme: ThemeData(
+            useMaterial3: true,
+            brightness: Brightness.light,
+            colorSchemeSeed: AppColors.primary,
+            scaffoldBackgroundColor: AppColors.background,
+            appBarTheme: const AppBarTheme(
+              backgroundColor: AppColors.background,
+              elevation: 0,
+              foregroundColor: AppColors.textPrimary,
+            ),
+          ),
+          initialRoute: AppRoutes.welcome,
+          onGenerateRoute: AppRoutes.onGenerateRoute,
         ),
       ),
     );

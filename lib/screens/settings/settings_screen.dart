@@ -5,6 +5,7 @@ import 'package:frontend_eco_2/theme/app_colors.dart';
 import 'package:frontend_eco_2/routing/app_routes.dart';
 import 'package:frontend_eco_2/widgets/common/custom_app_bar.dart';
 import 'package:frontend_eco_2/widgets/common/settings_option_tile.dart';
+import 'package:frontend_eco_2/widgets/common/app_toast.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -18,19 +19,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _pushNotifications = true;
   bool _wateringReminders = true;
   bool _achievementsMissions = false;
-  late bool _darkMode;
-
-  @override
-  void initState() {
-    super.initState();
-    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
-    _darkMode = themeProvider.isDarkMode;
-  }
 
   @override
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context);
-    final themeProvider = Provider.of<ThemeProvider>(context);
     final user = userProvider.currentUser;
 
     return Scaffold(
@@ -113,9 +105,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         subtitle: 'Última: hace 3 meses',
                         useIconContainer: true,
                         onTap: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Función para cambiar contraseña próximamente 🔒')),
-                          );
+                          showAppToast(context, 'Función para cambiar contraseña próximamente 🔒');
                         },
                       ),
                       const Divider(height: 1, indent: 68, endIndent: 16, color: Color(0xFFE2E7E4)),
@@ -254,28 +244,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           ],
                         ),
                         onTap: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Configuración de idioma próximamente 🌐')),
-                          );
+                          showAppToast(context, 'Configuración de idioma próximamente 🌐');
                         },
-                      ),
-                      const Divider(height: 1, indent: 68, endIndent: 16, color: Color(0xFFE2E7E4)),
-                      SettingsOptionTile(
-                        icon: Icons.dark_mode_outlined,
-                        title: 'Modo oscuro',
-                        useIconContainer: true,
-                        showArrow: false,
-                        iconColor: const Color(0xFF5C6BC0),
-                        iconBgColor: const Color(0xFFEFF0FA),
-                        trailing: _buildSwitch(
-                          value: _darkMode,
-                          onChanged: (val) {
-                            setState(() {
-                              _darkMode = val;
-                            });
-                            themeProvider.toggleTheme(val);
-                          },
-                        ),
                       ),
                       const Divider(height: 1, indent: 68, endIndent: 16, color: Color(0xFFE2E7E4)),
                       SettingsOptionTile(
@@ -301,9 +271,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           ],
                         ),
                         onTap: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Configuración de tema próximamente 🎨')),
-                          );
+                          showAppToast(context, 'Configuración de tema próximamente 🎨');
                         },
                       ),
                     ],
@@ -329,9 +297,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         iconColor: const Color(0xFF26A69A),
                         iconBgColor: const Color(0xFFE0F2F1),
                         onTap: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Ajustes de privacidad próximamente 🛡️')),
-                          );
+                          showAppToast(context, 'Ajustes de privacidad próximamente 🛡️');
                         },
                       ),
                       const Divider(height: 1, indent: 68, endIndent: 16, color: Color(0xFFE2E7E4)),
@@ -342,9 +308,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         iconColor: const Color(0xFF8D6E63),
                         iconBgColor: const Color(0xFFF5F0ED),
                         onTap: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Exportando datos... 💾')),
-                          );
+                          showAppToast(context, 'Exportando datos... 💾');
                         },
                       ),
                     ],
@@ -369,9 +333,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         iconColor: const Color(0xFF78909C),
                         iconBgColor: const Color(0xFFECEFF1),
                         onTap: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Soporte técnico próximamente ✉️')),
-                          );
+                          showAppToast(context, 'Soporte técnico próximamente ✉️');
                         },
                       ),
                       const Divider(height: 1, indent: 68, endIndent: 16, color: Color(0xFFE2E7E4)),
@@ -421,9 +383,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         iconBgColor: const Color(0xFFFFEBEE),
                         titleColor: const Color(0xFFE53935),
                         onTap: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Eliminar cuenta no disponible en esta demo 🛑')),
-                          );
+                          showAppToast(context, 'Eliminar cuenta no disponible en esta demo 🛑', type: ToastType.error);
                         },
                       ),
                     ],

@@ -41,50 +41,73 @@ class CustomBottomNavBar extends StatelessWidget {
           ),
         ],
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
+      child: Stack(
         children: [
-          _buildItem(
-            index: 0,
-            label: 'Tienda',
-            tourKey: tiendaKey,
-            tourTitle: 'Tienda',
-            tourDescription: 'Canjea tus semillas por macetas extra y funciones especiales.',
-            iconBuilder: (color, isSelected) => _buildTiendaIcon(color),
+          // ── Indicador que se desliza al cambiar de pestaña, en vez de
+          // aparecer/desaparecer en el sitio — se ve más "a propósito".
+          AnimatedAlign(
+            duration: const Duration(milliseconds: 320),
+            curve: Curves.easeOutCubic,
+            alignment: Alignment(-1 + (2 * selectedIndex) / (_kItemCount - 1), 0),
+            child: FractionallySizedBox(
+              widthFactor: 1 / _kItemCount,
+              child: Container(
+                margin: const EdgeInsets.all(2),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(24),
+                ),
+              ),
+            ),
           ),
-          _buildItem(
-            index: 1,
-            label: 'Jardín',
-            tourKey: jardinKey,
-            tourTitle: 'Tu Jardín',
-            tourDescription: 'Explora el catálogo de especies o gestiona las plantas que ya tienes.',
-            iconBuilder: (color, isSelected) => _buildJardinIcon(color),
-          ),
-          _buildItem(
-            index: 2,
-            label: 'Dashboard',
-            iconBuilder: (color, isSelected) => _buildDashboardIcon(color, isSelected),
-          ),
-          _buildItem(
-            index: 3,
-            label: 'Escáner',
-            tourKey: escanerKey,
-            tourTitle: 'Escáner IA',
-            tourDescription: 'Identifica una planta apuntando la cámara — la IA reconoce la especie.',
-            iconBuilder: (color, isSelected) => _buildEscanerIcon(color),
-          ),
-          _buildItem(
-            index: 4,
-            label: 'Perfil',
-            tourKey: perfilKey,
-            tourTitle: 'Tu Perfil',
-            tourDescription: 'Revisa tu progreso, ajustes de la cuenta y más.',
-            iconBuilder: (color, isSelected) => _buildPerfilIcon(color, isSelected),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _buildItem(
+                index: 0,
+                label: 'Tienda',
+                tourKey: tiendaKey,
+                tourTitle: 'Tienda',
+                tourDescription: 'Canjea tus semillas por macetas extra y funciones especiales.',
+                iconBuilder: (color, isSelected) => _buildTiendaIcon(color),
+              ),
+              _buildItem(
+                index: 1,
+                label: 'Jardín',
+                tourKey: jardinKey,
+                tourTitle: 'Tu Jardín',
+                tourDescription: 'Explora el catálogo de especies o gestiona las plantas que ya tienes.',
+                iconBuilder: (color, isSelected) => _buildJardinIcon(color),
+              ),
+              _buildItem(
+                index: 2,
+                label: 'Dashboard',
+                iconBuilder: (color, isSelected) => _buildDashboardIcon(color, isSelected),
+              ),
+              _buildItem(
+                index: 3,
+                label: 'Escáner',
+                tourKey: escanerKey,
+                tourTitle: 'Escáner IA',
+                tourDescription: 'Identifica una planta apuntando la cámara — la IA reconoce la especie.',
+                iconBuilder: (color, isSelected) => _buildEscanerIcon(color),
+              ),
+              _buildItem(
+                index: 4,
+                label: 'Perfil',
+                tourKey: perfilKey,
+                tourTitle: 'Tu Perfil',
+                tourDescription: 'Revisa tu progreso, ajustes de la cuenta y más.',
+                iconBuilder: (color, isSelected) => _buildPerfilIcon(color, isSelected),
+              ),
+            ],
           ),
         ],
       ),
     );
   }
+
+  static const int _kItemCount = 5;
 
   Widget _buildItem({
     required int index,
@@ -103,37 +126,38 @@ class CustomBottomNavBar extends StatelessWidget {
         title: tourTitle ?? '',
         description: tourDescription ?? '',
         child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: () => onTap(index),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 250),
-          curve: Curves.easeInOut,
-          margin: const EdgeInsets.all(2),
-          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
-          decoration: BoxDecoration(
-            color: isSelected ? Colors.white : Colors.transparent,
-            borderRadius: BorderRadius.circular(24),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              iconBuilder(contentColor, isSelected),
-              const SizedBox(height: 4),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 10,
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                  color: contentColor,
-                  letterSpacing: -0.1,
+          behavior: HitTestBehavior.opaque,
+          onTap: () => onTap(index),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                AnimatedScale(
+                  duration: const Duration(milliseconds: 320),
+                  curve: Curves.easeOutCubic,
+                  scale: isSelected ? 1.08 : 1.0,
+                  child: iconBuilder(contentColor, isSelected),
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
+                const SizedBox(height: 4),
+                AnimatedDefaultTextStyle(
+                  duration: const Duration(milliseconds: 250),
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                    color: contentColor,
+                    letterSpacing: -0.1,
+                  ),
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
         ),
       ),
     );

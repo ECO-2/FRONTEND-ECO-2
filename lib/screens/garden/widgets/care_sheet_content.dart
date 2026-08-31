@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:frontend_eco_2/models/models.dart';
 import 'package:frontend_eco_2/providers/providers.dart';
-import 'package:frontend_eco_2/theme/app_colors.dart';
 import 'package:frontend_eco_2/utils/achievement_feedback.dart';
+import 'package:frontend_eco_2/widgets/common/app_toast.dart';
 import 'species_data.dart';
 
 // Etiqueta visible en español -> task_type real que espera el backend
@@ -371,13 +371,10 @@ class _CareSheetContentState extends State<CareSheetContent> {
     if (unlocked == null) {
       if (!mounted) return;
       setState(() => _isSubmitting = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(missionsProvider.errorMessage ?? 'No se pudo registrar el cuidado.'),
-          backgroundColor: AppColors.error,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        ),
+      showAppToast(
+        context,
+        missionsProvider.errorMessage ?? 'No se pudo registrar el cuidado.',
+        type: ToastType.error,
       );
       return;
     }
@@ -390,13 +387,7 @@ class _CareSheetContentState extends State<CareSheetContent> {
 
     if (!mounted) return;
     Navigator.pop(context);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Cuidado registrado: $_selectedType 🌿'),
-        backgroundColor: const Color(0xFF0D2B31),
-        duration: const Duration(seconds: 2),
-      ),
-    );
+    showAppToast(context, 'Cuidado registrado: $_selectedType 🌿', type: ToastType.success);
     showAchievementUnlockedSnackbars(context, unlocked);
   }
 

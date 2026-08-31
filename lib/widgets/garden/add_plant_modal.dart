@@ -5,6 +5,7 @@ import 'package:frontend_eco_2/providers/providers.dart';
 import 'package:frontend_eco_2/theme/app_colors.dart';
 import 'package:frontend_eco_2/utils/achievement_feedback.dart';
 import 'package:frontend_eco_2/utils/plant_visuals.dart';
+import 'package:frontend_eco_2/widgets/common/app_toast.dart';
 
 class AddPlantModal extends StatefulWidget {
   const AddPlantModal({super.key});
@@ -77,24 +78,18 @@ class _AddPlantModalState extends State<AddPlantModal> {
       if (!mounted) return;
 
       Navigator.of(context).pop();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('¡$nickname añadida a tu jardín! 🌿'),
-          backgroundColor: AppColors.primary,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        ),
+      showAppToast(
+        context,
+        '¡$nickname añadida a tu jardín! 🌿',
+        type: ToastType.success,
       );
       showAchievementUnlockedSnackbars(context, unlocked);
     } else {
       setState(() => _isSubmitting = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(plantsProvider.errorMessage ?? 'No se pudo agregar la planta.'),
-          backgroundColor: AppColors.error,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        ),
+      showAppToast(
+        context,
+        plantsProvider.errorMessage ?? 'No se pudo agregar la planta.',
+        type: ToastType.error,
       );
     }
   }

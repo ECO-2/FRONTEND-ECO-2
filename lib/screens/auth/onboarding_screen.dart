@@ -7,6 +7,7 @@ import 'package:frontend_eco_2/theme/app_colors.dart';
 import 'package:frontend_eco_2/utils/achievement_feedback.dart';
 import 'package:frontend_eco_2/widgets/common/custom_button.dart';
 import 'package:frontend_eco_2/widgets/common/custom_text_field.dart';
+import 'package:frontend_eco_2/widgets/common/app_toast.dart';
 
 /// Pantalla de onboarding: el usuario completa su perfil después del registro.
 /// Llama a PATCH /user/onboarding con username, género y fecha de nacimiento.
@@ -140,13 +141,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         (route) => false,
       );
     } else if (userProvider.errorMessage != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(userProvider.errorMessage!),
-          backgroundColor: Colors.red.shade700,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      showAppToast(context, userProvider.errorMessage!, type: ToastType.error);
     }
   }
 
