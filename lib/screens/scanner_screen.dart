@@ -98,7 +98,11 @@ class _ScannerScreenContentState extends State<ScannerScreenContent>
     await Permission.photos.request();
 
     final ImagePicker picker = ImagePicker();
-    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+    final XFile? image = await picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 85,
+      maxWidth: 1600,
+    );
 
     if (image != null) {
       _startScan(image.path);
