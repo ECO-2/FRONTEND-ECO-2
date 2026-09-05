@@ -5,11 +5,18 @@ import 'package:frontend_eco_2/providers/providers.dart';
 import 'package:frontend_eco_2/services/services.dart';
 import 'package:frontend_eco_2/routing/app_routes.dart';
 import 'package:frontend_eco_2/theme/app_colors.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 
   // Inicializar servicios compartidos
   final storage = SecureStorage();
@@ -21,6 +28,7 @@ void main() async {
   final gamificationService = GamificationService(apiClient);
   final careService = CareService(apiClient);
   final identificationService = IdentificationService(apiClient);
+  final notificationService = NotificationService(apiClient);
 
   runApp(MyApp(
     storage: storage,
@@ -30,6 +38,7 @@ void main() async {
     gamificationService: gamificationService,
     careService: careService,
     identificationService: identificationService,
+    notificationService: notificationService,
   ));
 }
 
@@ -41,6 +50,7 @@ class MyApp extends StatelessWidget {
   final GamificationService gamificationService;
   final CareService careService;
   final IdentificationService identificationService;
+  final NotificationService notificationService;   
 
   const MyApp({
     super.key,
@@ -51,6 +61,7 @@ class MyApp extends StatelessWidget {
     required this.gamificationService,
     required this.careService,
     required this.identificationService,
+    required this.notificationService,
   });
 
   @override
@@ -60,6 +71,7 @@ class MyApp extends StatelessWidget {
         Provider<CareService>.value(value: careService),
         Provider<IdentificationService>.value(value: identificationService),
         Provider<SecureStorage>.value(value: storage),
+        Provider<NotificationService>.value(value: notificationService),
         ChangeNotifierProvider(
           create: (_) => UserProvider(
             authService: authService,

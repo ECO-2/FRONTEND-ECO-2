@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "526896864045",
+    "project_id": "eco-2-app",
+    "storage_bucket": "eco-2-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:526896864045:android:470bdbeeb8ceefd18c91a4",
+        "android_client_info": {
+          "package_name": "com.example.frontend_eco_2"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "526896864045-uu29nteb33d1qt61epducidudbaaigfo.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBNxR19kPl3hHDgNXedeIKtnqfr_uh5rTk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "526896864045-uu29nteb33d1qt61epducidudbaaigfo.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -7,6 +7,7 @@ import 'package:frontend_eco_2/widgets/common/custom_button.dart';
 import 'package:frontend_eco_2/widgets/common/custom_text_field.dart';
 import 'package:frontend_eco_2/widgets/common/custom_status_bar.dart';
 import 'package:frontend_eco_2/widgets/common/app_toast.dart';
+import 'package:frontend_eco_2/services/services.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -37,6 +38,13 @@ class _LoginScreenState extends State<LoginScreen> {
       );
 
       if (success && mounted) {
+        // Registrar el device token para push notifications — se hace en
+        // background (no bloquea la navegación) y falla silenciosamente
+        // si el usuario no da permiso o algo sale mal.
+        final notificationService =
+            Provider.of<NotificationService>(context, listen: false);
+        notificationService.registerDeviceToken();
+
         final user = userProvider.currentUser;
 
         if (user != null && user.onboardingCompleted) {
