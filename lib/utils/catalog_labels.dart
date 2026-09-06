@@ -77,3 +77,34 @@ List<String> speciesTags(
       lightWithPrefix(context, lightRequirement),
       wateringFrequencyLabel(context, waterFrequencyDays),
     ];
+
+/// Clave estable de dificultad a partir de la frecuencia de riego.
+/// Se usa para filtrar: comparar contra la etiqueta visible rompería el
+/// filtro en cuanto la app cambia de idioma.
+String difficultyKey(int waterFrequencyDays) {
+  if (waterFrequencyDays >= 20) return 'very_easy';
+  if (waterFrequencyDays >= 10) return 'easy';
+  return 'medium';
+}
+
+/// Etiqueta visible de una opción del filtro de dificultad.
+String difficultyOptionLabel(BuildContext context, String key) {
+  final l = AppLocalizations.of(context)!;
+  switch (key) {
+    case 'very_easy': return l.difficultyVeryEasy;
+    case 'easy': return l.difficultyEasy;
+    case 'medium': return l.difficultyMedium;
+    default: return l.difficultyAll;
+  }
+}
+
+/// Pista de ubicación según la luz que necesita la especie.
+String lightHint(BuildContext context, String? light) {
+  final l = AppLocalizations.of(context)!;
+  switch (light?.toLowerCase()) {
+    case 'low': return l.lightHintLow;
+    case 'high': return l.lightHintHigh;
+    case 'indirect': return l.lightHintIndirect;
+    default: return l.lightHintDefault;
+  }
+}

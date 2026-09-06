@@ -96,7 +96,7 @@ class _AddPlantModalState extends State<AddPlantModal> {
       Navigator.of(context).pop();
       showAppToast(
         context,
-        '¡$nickname añadida a tu jardín! 🌿',
+        AppLocalizations.of(context)!.plantAddedToGarden(nickname),
         type: ToastType.success,
       );
       showAchievementUnlockedSnackbars(context, unlocked);
@@ -104,7 +104,7 @@ class _AddPlantModalState extends State<AddPlantModal> {
       setState(() => _isSubmitting = false);
       showAppToast(
         context,
-        plantsProvider.errorMessage ?? 'No se pudo agregar la planta.',
+        plantsProvider.errorMessage ?? AppLocalizations.of(context)!.couldNotAddPlant,
         type: ToastType.error,
       );
     }
@@ -160,10 +160,10 @@ class _AddPlantModalState extends State<AddPlantModal> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Expanded(
+                  Expanded(
                     child: Text(
-                      'Añadir nueva planta',
-                      style: TextStyle(
+                      AppLocalizations.of(context)!.addNewPlant,
+                      style: const TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
                         color: AppColors.primaryDark,
@@ -199,9 +199,9 @@ class _AddPlantModalState extends State<AddPlantModal> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Nombre de tu planta',
-                    style: TextStyle(
+                  Text(
+                    AppLocalizations.of(context)!.yourPlantName,
+                    style: const TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 13,
                       color: AppColors.textPrimary,

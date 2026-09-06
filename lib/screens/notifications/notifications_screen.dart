@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:frontend_eco_2/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:frontend_eco_2/models/models.dart';
@@ -304,7 +305,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                   ],
                   const SizedBox(height: 4),
                   Text(
-                    _formatTimeAgo(notification.sentAt),
+                    _formatTimeAgo(context, notification.sentAt),
                     style: const TextStyle(
                       fontFamily: 'DM Sans',
                       fontSize: 11,
@@ -335,13 +336,16 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     }
   }
 
-  String _formatTimeAgo(DateTime date) {
+  String _formatTimeAgo(BuildContext context, DateTime date) {
+    final l = AppLocalizations.of(context)!;
     final diff = DateTime.now().difference(date);
-    if (diff.inMinutes < 60) return 'Hace ${diff.inMinutes}m';
-    if (diff.inHours < 24) return 'Hace ${diff.inHours}h';
-    if (diff.inDays == 1) return 'Ayer';
-    const days = ['', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
-    return days[date.weekday];
+    if (diff.inMinutes < 60) return '${diff.inMinutes}m';
+    if (diff.inHours < 24) return '${diff.inHours}h';
+    if (diff.inDays == 1) return l.yesterday;
+    // El nombre del día lo da intl según el locale activo, en vez de una
+    // lista fija en español que habría que mantener por idioma.
+    final locale = Localizations.localeOf(context).languageCode;
+    return DateFormat.E(locale).format(date);
   }
 }
 

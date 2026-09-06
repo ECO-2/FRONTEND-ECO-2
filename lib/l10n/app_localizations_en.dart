@@ -688,4 +688,144 @@ class AppLocalizationsEn extends AppLocalizations {
   String accumulatedGrams(String grams) {
     return 'Accumulated: $grams g';
   }
+
+  @override
+  String get category => 'Category';
+
+  @override
+  String get gallery => 'Gallery';
+
+  @override
+  String get chooseFromGallery => 'Choose from gallery';
+
+  @override
+  String get cameraPermissionError =>
+      'Couldn\'t access the camera or gallery. Check the app permissions.';
+
+  @override
+  String get flashAutoHint =>
+      'The flash turns on automatically only when taking the photo.';
+
+  @override
+  String get showThisGuide => 'Show this guide.';
+
+  @override
+  String get upcomingAchievements => 'Upcoming achievements';
+
+  @override
+  String get closest => '• CLOSEST';
+
+  @override
+  String get paymentMethod => 'Payment method';
+
+  @override
+  String get quickPay => 'Quick pay';
+
+  @override
+  String get oneYearPlus => '1 year of ECO2 Plus';
+
+  @override
+  String get whatToDoNow => 'What to do now';
+
+  @override
+  String get uploadFromGallery => 'Upload from Gallery';
+
+  @override
+  String get dayMon => 'Mon';
+
+  @override
+  String get dayTue => 'Tue';
+
+  @override
+  String get dayWed => 'Wed';
+
+  @override
+  String get dayThu => 'Thu';
+
+  @override
+  String get dayFri => 'Fri';
+
+  @override
+  String get daySat => 'Sat';
+
+  @override
+  String get daySun => 'Sun';
+
+  @override
+  String careEveryNDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Every $count days',
+      one: 'Every day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String timeAgoDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days ago',
+      one: '1 day ago',
+      zero: 'Today',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String achievementUnlockedNamed(String name) {
+    return 'Achievement unlocked: $name';
+  }
+
+  @override
+  String purchaseSuccess(String item) {
+    return 'Purchase successful: $item';
+  }
+
+  @override
+  String plantAddedToGarden(String name) {
+    return '$name added to your garden! 🌿';
+  }
+
+  @override
+  String get couldNotAddPlant => 'Couldn\'t add the plant.';
+
+  @override
+  String get addNewPlant => 'Add a new plant';
+
+  @override
+  String get yourPlantName => 'Your plant\'s name';
+
+  @override
+  String potsFreeHint(int count) {
+    return '[$count of 10 free pots]';
+  }
+
+  @override
+  String gramsPerDayShort(String grams) {
+    return '$grams g/day';
+  }
+
+  @override
+  String get difficultyAll => 'All';
+
+  @override
+  String get lightHintLow => 'Low-light corners';
+
+  @override
+  String get lightHintHigh => 'Near a window';
+
+  @override
+  String get lightHintIndirect => 'No direct sun';
+
+  @override
+  String get lightHintDefault => 'Filtered light';
+
+  @override
+  String get filterByCategory => 'Filter by category';
+
+  @override
+  String get speciesNotFound => 'Species not found';
 }

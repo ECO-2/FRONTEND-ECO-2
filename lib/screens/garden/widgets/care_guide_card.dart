@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend_eco_2/l10n/app_localizations.dart';
 import 'package:frontend_eco_2/utils/app_tour.dart';
 import 'package:frontend_eco_2/utils/care_task_labels.dart';
 import 'species_data.dart';
@@ -62,14 +63,14 @@ class CareGuideCard extends StatelessWidget {
             description:
                 'La frecuencia de riego es real, según la especie. Fertilización, poda y trasplante '
                 'son buenas prácticas generales — la app aún no calcula una frecuencia exacta para esas.',
-            child: _buildSchedule(),
+            child: _buildSchedule(context),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildSchedule() {
+  Widget _buildSchedule(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -82,8 +83,8 @@ class CareGuideCard extends StatelessWidget {
             fontFamily: 'Inter',
           ),
         ),
-        const SizedBox(height: 8),
-        _scheduleRow('watering', 'Cada ${sp.waterFreqDays} días'),
+        SizedBox(height: 8),
+        _scheduleRow('watering', AppLocalizations.of(context)!.careEveryNDays(sp.waterFreqDays)),
         _scheduleRow('fertilizing', 'Cada 4-6 semanas, en primavera y verano'),
         _scheduleRow('pruning', 'Retira hojas secas, amarillas o dañadas en cuanto las notes'),
         _scheduleRow('repotting', 'Cada 1-2 años, o cuando las raíces llenen la maceta'),

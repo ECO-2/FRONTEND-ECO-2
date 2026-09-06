@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend_eco_2/l10n/app_localizations.dart';
 import 'package:frontend_eco_2/models/models.dart';
 import 'package:frontend_eco_2/utils/care_task_labels.dart';
 
@@ -34,14 +35,14 @@ class CareHistoryList extends StatelessWidget {
     final recent = sorted.take(5);
 
     return Column(
-      children: recent.map((log) => _buildCareHistoryItem(log)).toList(),
+      children: recent.map((log) => _buildCareHistoryItem(context, log)).toList(),
     );
   }
 
-  Widget _buildCareHistoryItem(CareLog log) {
+  Widget _buildCareHistoryItem(BuildContext context, CareLog log) {
     final visual = careTaskVisual(log.taskType);
     final daysAgo = DateTime.now().difference(log.performedAt).inDays;
-    final timeAgoText = daysAgo <= 0 ? 'hoy' : daysAgo == 1 ? 'ayer' : 'hace $daysAgo días';
+    final timeAgoText = daysAgo <= 0 ? 'hoy' : daysAgo == 1 ? 'ayer' : AppLocalizations.of(context)!.timeAgoDays(daysAgo);
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),

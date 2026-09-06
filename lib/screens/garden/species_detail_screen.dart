@@ -2,25 +2,17 @@ import 'dart:ui';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:frontend_eco_2/l10n/app_localizations.dart';
 import 'package:frontend_eco_2/models/models.dart';
 import 'package:frontend_eco_2/providers/providers.dart';
 import 'package:frontend_eco_2/utils/achievement_feedback.dart';
 import 'package:frontend_eco_2/utils/plant_visuals.dart';
+import 'package:frontend_eco_2/utils/catalog_labels.dart';
 import 'package:frontend_eco_2/utils/cloudinary_transform.dart';
 import 'package:frontend_eco_2/utils/top_clamping_scroll_physics.dart';
 import 'package:frontend_eco_2/widgets/common/app_toast.dart';
 import 'package:frontend_eco_2/widgets/common/custom_status_bar.dart';
 import 'package:frontend_eco_2/widgets/garden/last_watered_sheet.dart';
-
-// Legacy mock species (s1-s5) still ship a real illustration asset; every
-// other (real, catalog-backed) species falls back to a category visual.
-const Map<String, String> _kLegacyAssetImages = {
-  's1': 'assets/images/monstera.png',
-  's2': 'assets/images/potus.png',
-  's3': 'assets/images/sansevieria.png',
-  's4': 'assets/images/ficus_lira.png',
-  's5': 'assets/images/cactus.png',
-};
 
 class SpeciesDetailScreen extends StatefulWidget {
   const SpeciesDetailScreen({super.key});
@@ -36,12 +28,11 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
   Widget build(BuildContext context) {
     final species = ModalRoute.of(context)?.settings.arguments as PlantSpecies?;
     if (species == null) {
-      return const Scaffold(body: Center(child: Text('Especie no encontrada')));
+      return Scaffold(body: Center(child: Text(AppLocalizations.of(context)!.speciesNotFound)));
     }
 
     final visual = visualForCategory(species.category);
     final bgColor = visual.background;
-    final assetImage = _kLegacyAssetImages[species.id];
     final bottomNavPadding = MediaQuery.of(context).padding.bottom;
 
     // air_purification_score is a real DB field on a 0-9 scale (see backend
@@ -102,9 +93,7 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
                                       color: visual.color.withValues(alpha: 0.35),
                                     ),
                                   )
-                                : assetImage != null
-                                    ? Image.asset(assetImage, fit: BoxFit.contain)
-                                    : Icon(
+                                : Icon(
                                         visual.icon,
                                         size: 140,
                                         color: visual.color.withValues(alpha: 0.35),
@@ -130,7 +119,7 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
                                 Icon(visual.icon, color: Colors.white, size: 13),
                                 const SizedBox(width: 6),
                                 Text(
-                                  visual.label,
+                                  categoryLabel(context, species.category),
                                   style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 12,
@@ -415,8 +404,8 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
                                 iconColor: const Color(0xFFFBC02D),
                                 iconBg: const Color(0xFFFFFDE7),
                                 label: 'Luz',
-                                value: lightLabelEs(species.lightRequirement),
-                                subText: lightHintEs(species.lightRequirement),
+                                value: lightLabel(context, species.lightRequirement),
+                                subText: lightHint(context, species.lightRequirement),
                               ),
                             ),
                           ],
@@ -432,7 +421,7 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
                                 label: 'Temperatura',
                                 value:
                                     '${species.minTemperature ?? 15}-${species.maxTemperature ?? 28}°C',
-                                subText: categoryLabelEs(species.category),
+                                subText: categoryLabel(context, species.category),
                               ),
                             ),
                             const SizedBox(width: 12),

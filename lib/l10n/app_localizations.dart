@@ -1315,6 +1315,228 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Acumulado: {grams} g'**
   String accumulatedGrams(String grams);
+
+  /// No description provided for @category.
+  ///
+  /// In es, this message translates to:
+  /// **'Categoría'**
+  String get category;
+
+  /// No description provided for @gallery.
+  ///
+  /// In es, this message translates to:
+  /// **'Galería'**
+  String get gallery;
+
+  /// No description provided for @chooseFromGallery.
+  ///
+  /// In es, this message translates to:
+  /// **'Elegir de la galería'**
+  String get chooseFromGallery;
+
+  /// No description provided for @cameraPermissionError.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo acceder a la cámara o galería. Revisa los permisos de la app.'**
+  String get cameraPermissionError;
+
+  /// No description provided for @flashAutoHint.
+  ///
+  /// In es, this message translates to:
+  /// **'El flash se activará de forma automática solo al realizar la captura.'**
+  String get flashAutoHint;
+
+  /// No description provided for @showThisGuide.
+  ///
+  /// In es, this message translates to:
+  /// **'Muestra esta guía.'**
+  String get showThisGuide;
+
+  /// No description provided for @upcomingAchievements.
+  ///
+  /// In es, this message translates to:
+  /// **'Próximos logros'**
+  String get upcomingAchievements;
+
+  /// No description provided for @closest.
+  ///
+  /// In es, this message translates to:
+  /// **'• MÁS CERCANO'**
+  String get closest;
+
+  /// No description provided for @paymentMethod.
+  ///
+  /// In es, this message translates to:
+  /// **'Método de pago'**
+  String get paymentMethod;
+
+  /// No description provided for @quickPay.
+  ///
+  /// In es, this message translates to:
+  /// **'Pago rápido'**
+  String get quickPay;
+
+  /// No description provided for @oneYearPlus.
+  ///
+  /// In es, this message translates to:
+  /// **'1 año de ECO2 Plus'**
+  String get oneYearPlus;
+
+  /// No description provided for @whatToDoNow.
+  ///
+  /// In es, this message translates to:
+  /// **'Qué hacer ahora'**
+  String get whatToDoNow;
+
+  /// No description provided for @uploadFromGallery.
+  ///
+  /// In es, this message translates to:
+  /// **'Subir de Galería'**
+  String get uploadFromGallery;
+
+  /// No description provided for @dayMon.
+  ///
+  /// In es, this message translates to:
+  /// **'Lun'**
+  String get dayMon;
+
+  /// No description provided for @dayTue.
+  ///
+  /// In es, this message translates to:
+  /// **'Mar'**
+  String get dayTue;
+
+  /// No description provided for @dayWed.
+  ///
+  /// In es, this message translates to:
+  /// **'Mié'**
+  String get dayWed;
+
+  /// No description provided for @dayThu.
+  ///
+  /// In es, this message translates to:
+  /// **'Jue'**
+  String get dayThu;
+
+  /// No description provided for @dayFri.
+  ///
+  /// In es, this message translates to:
+  /// **'Vie'**
+  String get dayFri;
+
+  /// No description provided for @daySat.
+  ///
+  /// In es, this message translates to:
+  /// **'Sáb'**
+  String get daySat;
+
+  /// No description provided for @daySun.
+  ///
+  /// In es, this message translates to:
+  /// **'Dom'**
+  String get daySun;
+
+  /// No description provided for @careEveryNDays.
+  ///
+  /// In es, this message translates to:
+  /// **'{count, plural, =1{Cada día} other{Cada {count} días}}'**
+  String careEveryNDays(int count);
+
+  /// No description provided for @timeAgoDays.
+  ///
+  /// In es, this message translates to:
+  /// **'{count, plural, =0{Hoy} =1{hace 1 día} other{hace {count} días}}'**
+  String timeAgoDays(int count);
+
+  /// No description provided for @achievementUnlockedNamed.
+  ///
+  /// In es, this message translates to:
+  /// **'¡Logro desbloqueado!: {name}'**
+  String achievementUnlockedNamed(String name);
+
+  /// No description provided for @purchaseSuccess.
+  ///
+  /// In es, this message translates to:
+  /// **'¡Compra exitosa!: {item}'**
+  String purchaseSuccess(String item);
+
+  /// No description provided for @plantAddedToGarden.
+  ///
+  /// In es, this message translates to:
+  /// **'¡{name} añadida a tu jardín! 🌿'**
+  String plantAddedToGarden(String name);
+
+  /// No description provided for @couldNotAddPlant.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo agregar la planta.'**
+  String get couldNotAddPlant;
+
+  /// No description provided for @addNewPlant.
+  ///
+  /// In es, this message translates to:
+  /// **'Añadir nueva planta'**
+  String get addNewPlant;
+
+  /// No description provided for @yourPlantName.
+  ///
+  /// In es, this message translates to:
+  /// **'Nombre de tu planta'**
+  String get yourPlantName;
+
+  /// No description provided for @potsFreeHint.
+  ///
+  /// In es, this message translates to:
+  /// **'[{count} macetas de 10 gratis]'**
+  String potsFreeHint(int count);
+
+  /// No description provided for @gramsPerDayShort.
+  ///
+  /// In es, this message translates to:
+  /// **'{grams} g/día'**
+  String gramsPerDayShort(String grams);
+
+  /// No description provided for @difficultyAll.
+  ///
+  /// In es, this message translates to:
+  /// **'Todas'**
+  String get difficultyAll;
+
+  /// No description provided for @lightHintLow.
+  ///
+  /// In es, this message translates to:
+  /// **'Rincones con poca luz'**
+  String get lightHintLow;
+
+  /// No description provided for @lightHintHigh.
+  ///
+  /// In es, this message translates to:
+  /// **'Cerca de la ventana'**
+  String get lightHintHigh;
+
+  /// No description provided for @lightHintIndirect.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin sol directo'**
+  String get lightHintIndirect;
+
+  /// No description provided for @lightHintDefault.
+  ///
+  /// In es, this message translates to:
+  /// **'Luz filtrada'**
+  String get lightHintDefault;
+
+  /// No description provided for @filterByCategory.
+  ///
+  /// In es, this message translates to:
+  /// **'Filtrar por categoría'**
+  String get filterByCategory;
+
+  /// No description provided for @speciesNotFound.
+  ///
+  /// In es, this message translates to:
+  /// **'Especie no encontrada'**
+  String get speciesNotFound;
 }
 
 class _AppLocalizationsDelegate

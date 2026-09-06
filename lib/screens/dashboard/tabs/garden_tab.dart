@@ -46,7 +46,7 @@ class _GardenTabState extends State<GardenTab> {
   // 'all'); difficulty stores the exact label PlantSpecies.difficulty
   // returns (or 'Todas').
   String _selectedCategoryValue = 'all';
-  String _selectedDifficulty = 'Todas';
+  String _selectedDifficulty = 'all';
   String _selectedLight = 'all';
 
   final TextEditingController _searchController = TextEditingController();
@@ -64,10 +64,12 @@ class _GardenTabState extends State<GardenTab> {
     'tree',
     'other',
   ];
-  static const List<String> _difficultyOptions = ['Todas', 'Muy fácil', 'Fácil', 'Media'];
+  // Claves estables, no etiquetas: el texto visible se traduce, así que
+  // comparar contra él rompería el filtro al cambiar de idioma.
+  static const List<String> _difficultyOptions = ['all', 'very_easy', 'easy', 'medium'];
   static const List<String> _lightKeys = ['low', 'medium', 'high', 'indirect'];
 
-  bool get _hasAdvancedFilters => _selectedDifficulty != 'Todas' || _selectedLight != 'all';
+  bool get _hasAdvancedFilters => _selectedDifficulty != 'all' || _selectedLight != 'all';
 
   @override
   void dispose() {
@@ -243,7 +245,8 @@ class _GardenTabState extends State<GardenTab> {
       final matchesCategory =
           _selectedCategoryValue == 'all' || species.category == _selectedCategoryValue;
       final matchesDifficulty =
-          _selectedDifficulty == 'Todas' || species.difficulty == _selectedDifficulty;
+          _selectedDifficulty == 'all' ||
+          difficultyKey(species.waterFrequencyDays) == _selectedDifficulty;
       final matchesLight = _selectedLight == 'all' || species.lightRequirement == _selectedLight;
       return matchesSearch && matchesCategory && matchesDifficulty && matchesLight;
     }).toList();
@@ -388,7 +391,7 @@ class _GardenTabState extends State<GardenTab> {
                 children: [
                   _buildQuickCategoryChip('Todas', 'all'),
                   ..._quickCategoryKeys.map(
-                    (key) => _buildQuickCategoryChip(categoryLabelEs(key), key),
+                    (key) => _buildQuickCategoryChip(categoryLabel(context, key), key),
                   ),
                 ],
               ),
@@ -465,7 +468,7 @@ class _GardenTabState extends State<GardenTab> {
           child: Row(
             children: [
               const Icon(Icons.trending_up_rounded, color: Colors.orange, size: 20),
-              const SizedBox(width: 6),
+              SizedBox(width: 6),
               Text(
                 AppLocalizations.of(context)!.trendingThisWeek,
                 style: const TextStyle(
@@ -626,7 +629,7 @@ class _GardenTabState extends State<GardenTab> {
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                   child: Text(
-                                    species.difficulty,
+                                    difficultyLabel(context, species.waterFrequencyDays),
                                     style: const TextStyle(
                                       fontSize: 9,
                                       fontWeight: FontWeight.bold,
@@ -824,7 +827,7 @@ class _GardenTabState extends State<GardenTab> {
                       TextButton(
                         onPressed: () => setSheetState(() {
                           tempCategory = 'all';
-                          tempDifficulty = 'Todas';
+                          tempDifficulty = 'all';
                           tempLight = 'all';
                         }),
                         child: const Text(
@@ -834,8 +837,8 @@ class _GardenTabState extends State<GardenTab> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 12),
-                  sectionTitle('Categoría'),
+                  SizedBox(height: 12),
+                  sectionTitle(AppLocalizations.of(context)!.category),
                   Wrap(
                     spacing: 8,
                     runSpacing: 8,
@@ -844,7 +847,7 @@ class _GardenTabState extends State<GardenTab> {
                           () => setSheetState(() => tempCategory = 'all')),
                       ..._allCategoryKeys.map(
                         (key) => filterChip(
-                          categoryLabelEs(key),
+                          categoryLabel(context, key),
                           tempCategory == key,
                           () => setSheetState(() => tempCategory = key),
                         ),
@@ -859,7 +862,7 @@ class _GardenTabState extends State<GardenTab> {
                     children: _difficultyOptions
                         .map(
                           (option) => filterChip(
-                            option,
+                            difficultyOptionLabel(context, option),
                             tempDifficulty == option,
                             () => setSheetState(() => tempDifficulty = option),
                           ),
@@ -1035,7 +1038,7 @@ class _GardenTabState extends State<GardenTab> {
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Text(
-                              species.difficulty,
+                              difficultyLabel(context, species.waterFrequencyDays),
                               style: const TextStyle(
                                 fontSize: 9,
                                 fontWeight: FontWeight.bold,
@@ -1066,14 +1069,14 @@ class _GardenTabState extends State<GardenTab> {
                             color: const Color(0xFFBDE038), // Lime Green
                             borderRadius: BorderRadius.circular(20),
                           ),
-                          child: const Row(
+                          child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Icon(Icons.add, size: 14, color: _kTextDark),
                               SizedBox(width: 4),
                               Text(
-                                'Añadir',
-                                style: TextStyle(
+                                AppLocalizations.of(context)!.add,
+                                style: const TextStyle(
                                   fontSize: 11,
                                   fontWeight: FontWeight.bold,
                                   color: _kTextDark,
@@ -1217,7 +1220,7 @@ class _GardenTabState extends State<GardenTab> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
-                          species.difficulty,
+                          difficultyLabel(context, species.waterFrequencyDays),
                           style: const TextStyle(
                             fontSize: 8,
                             fontWeight: FontWeight.bold,
@@ -1393,7 +1396,7 @@ class _GardenTabState extends State<GardenTab> {
                 children: [
                   _buildGardenCategoryChip('Todas', 'all'),
                   ..._kGardenQuickCategories.map(
-                    (key) => _buildGardenCategoryChip(categoryLabelEs(key), key),
+                    (key) => _buildGardenCategoryChip(categoryLabel(context, key), key),
                   ),
                 ],
               ),
@@ -1499,8 +1502,8 @@ class _GardenTabState extends State<GardenTab> {
                 ),
               ),
               const SizedBox(height: 16),
-              const Text(
-                'Filtrar por categoría',
+              Text(
+                AppLocalizations.of(context)!.filterByCategory,
                 style: TextStyle(
                   fontFamily: 'DM Sans',
                   fontWeight: FontWeight.bold,
@@ -1515,7 +1518,7 @@ class _GardenTabState extends State<GardenTab> {
                 children: [
                   _buildGardenCategoryChip('Todas', 'all'),
                   ..._allCategoryKeys.map(
-                    (key) => _buildGardenCategoryChip(categoryLabelEs(key), key),
+                    (key) => _buildGardenCategoryChip(categoryLabel(context, key), key),
                   ),
                 ],
               ),
@@ -1658,9 +1661,9 @@ class _GardenTabState extends State<GardenTab> {
                         color: _kTextDark,
                       ),
                     ),
-                    const SizedBox(height: 2),
+                    SizedBox(height: 2),
                     Text(
-                      '[$plantCount macetas de 10 gratis]',
+                      AppLocalizations.of(context)!.potsFreeHint(plantCount),
                       style: const TextStyle(
                         fontFamily: 'DM Sans',
                         fontSize: 11,
@@ -1741,34 +1744,8 @@ class _DashedCornerPainter extends CustomPainter {
 }
 
 // ── Species data (mirrors plant_card.dart) ───────────────────────────────────
-const _kSpeciesData = {
-  's1': _GardenSpecies(
-    scientificName: 'Monstera deliciosa',
-    tags: ['Tropical', 'Luz indirecta', 'Riego semanal'],
-    imageBg: Color(0xFFF2F7F2),
-    assetImage: 'assets/images/monstera.png',
-  ),
-  's2': _GardenSpecies(
-    scientificName: 'Epipremnum aureum',
-    tags: ['Tropical', 'Luz indirecta', 'Riego semanal'],
-    imageBg: Color(0xFFEAF5EA),
-  ),
-  's3': _GardenSpecies(
-    scientificName: 'Sansevieria',
-    tags: ['Desértica', 'Luz Adaptable', 'Riego 2-3 sem.'],
-    imageBg: Color(0xFFF0F4EC),
-  ),
-  's4': _GardenSpecies(
-    scientificName: 'Ficus lyrata',
-    tags: ['Tropical', 'Luz brillante', 'Riego semanal'],
-    imageBg: Color(0xFFEAF0E8),
-  ),
-  's5': _GardenSpecies(
-    scientificName: 'Cactaceae',
-    tags: ['Desértica', 'Pleno sol', 'Riego mensual'],
-    imageBg: Color(0xFFF5F2E8),
-  ),
-};
+// _kSpeciesData (mocks s1-s5) eliminado: sus IDs no existen en el
+// catálogo real, que usa UUID.
 
 class _GardenSpecies {
   final String scientificName;
@@ -1892,7 +1869,7 @@ class _PlantListCard extends StatelessWidget {
     final status = WateringStatus.of(plant, species.waterFrequencyDays);
     final neverWatered = status.neverWatered;
     final needsWater = status.needsWater;
-    final sp = _kSpeciesData[plant.speciesId] ?? _GardenSpecies.fromReal(species);
+    final sp = _GardenSpecies.fromReal(species);
 
     // Status pill — siempre con ícono de check (estilo Figma), el color y el
     // texto reflejan el estado real: días exactos sin riego cuando ya toca,

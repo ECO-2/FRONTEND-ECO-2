@@ -688,4 +688,144 @@ class AppLocalizationsEs extends AppLocalizations {
   String accumulatedGrams(String grams) {
     return 'Acumulado: $grams g';
   }
+
+  @override
+  String get category => 'Categoría';
+
+  @override
+  String get gallery => 'Galería';
+
+  @override
+  String get chooseFromGallery => 'Elegir de la galería';
+
+  @override
+  String get cameraPermissionError =>
+      'No se pudo acceder a la cámara o galería. Revisa los permisos de la app.';
+
+  @override
+  String get flashAutoHint =>
+      'El flash se activará de forma automática solo al realizar la captura.';
+
+  @override
+  String get showThisGuide => 'Muestra esta guía.';
+
+  @override
+  String get upcomingAchievements => 'Próximos logros';
+
+  @override
+  String get closest => '• MÁS CERCANO';
+
+  @override
+  String get paymentMethod => 'Método de pago';
+
+  @override
+  String get quickPay => 'Pago rápido';
+
+  @override
+  String get oneYearPlus => '1 año de ECO2 Plus';
+
+  @override
+  String get whatToDoNow => 'Qué hacer ahora';
+
+  @override
+  String get uploadFromGallery => 'Subir de Galería';
+
+  @override
+  String get dayMon => 'Lun';
+
+  @override
+  String get dayTue => 'Mar';
+
+  @override
+  String get dayWed => 'Mié';
+
+  @override
+  String get dayThu => 'Jue';
+
+  @override
+  String get dayFri => 'Vie';
+
+  @override
+  String get daySat => 'Sáb';
+
+  @override
+  String get daySun => 'Dom';
+
+  @override
+  String careEveryNDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Cada $count días',
+      one: 'Cada día',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String timeAgoDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'hace $count días',
+      one: 'hace 1 día',
+      zero: 'Hoy',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String achievementUnlockedNamed(String name) {
+    return '¡Logro desbloqueado!: $name';
+  }
+
+  @override
+  String purchaseSuccess(String item) {
+    return '¡Compra exitosa!: $item';
+  }
+
+  @override
+  String plantAddedToGarden(String name) {
+    return '¡$name añadida a tu jardín! 🌿';
+  }
+
+  @override
+  String get couldNotAddPlant => 'No se pudo agregar la planta.';
+
+  @override
+  String get addNewPlant => 'Añadir nueva planta';
+
+  @override
+  String get yourPlantName => 'Nombre de tu planta';
+
+  @override
+  String potsFreeHint(int count) {
+    return '[$count macetas de 10 gratis]';
+  }
+
+  @override
+  String gramsPerDayShort(String grams) {
+    return '$grams g/día';
+  }
+
+  @override
+  String get difficultyAll => 'Todas';
+
+  @override
+  String get lightHintLow => 'Rincones con poca luz';
+
+  @override
+  String get lightHintHigh => 'Cerca de la ventana';
+
+  @override
+  String get lightHintIndirect => 'Sin sol directo';
+
+  @override
+  String get lightHintDefault => 'Luz filtrada';
+
+  @override
+  String get filterByCategory => 'Filtrar por categoría';
+
+  @override
+  String get speciesNotFound => 'Especie no encontrada';
 }

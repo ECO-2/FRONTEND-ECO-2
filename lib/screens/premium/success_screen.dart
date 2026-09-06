@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend_eco_2/l10n/app_localizations.dart';
 import 'package:confetti/confetti.dart';
 import 'package:frontend_eco_2/widgets/common/leaf_burst.dart';
 import 'package:frontend_eco_2/theme/app_colors.dart';
@@ -170,12 +171,12 @@ class _SuccessScreenState extends State<SuccessScreen> {
                             children: [
                               // Card Header
                               Row(
-                                children: const [
+                                children: [
                                   Icon(Icons.star_outline_rounded, color: AppColors.primaryDark, size: 20),
                                   SizedBox(width: 8),
                                   Text(
-                                    'Qué hacer ahora',
-                                    style: TextStyle(
+                                    AppLocalizations.of(context)!.whatToDoNow,
+                                    style: const TextStyle(
                                       fontSize: 15,
                                       fontWeight: FontWeight.bold,
                                       color: AppColors.primaryDark,

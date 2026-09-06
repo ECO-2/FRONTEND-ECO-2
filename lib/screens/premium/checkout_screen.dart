@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend_eco_2/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:frontend_eco_2/providers/providers.dart';
 import 'package:frontend_eco_2/theme/app_colors.dart';
@@ -39,9 +40,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   const SizedBox(height: 24),
                   
                   // Payment Method Section Title
-                  const Text(
-                    'Método de pago',
-                    style: TextStyle(
+                  Text(
+                    AppLocalizations.of(context)!.paymentMethod,
+                    style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                       color: AppColors.textPrimary,
@@ -57,12 +58,12 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     subtitle: '•••• 4242',
                     icon: Icons.credit_card_rounded,
                   ),
-                  const SizedBox(height: 12),
+                  SizedBox(height: 12),
                   
                   _buildPaymentOption(
                     id: 'apple_pay',
                     title: 'Apple Pay',
-                    subtitle: 'Pago rápido',
+                    subtitle: AppLocalizations.of(context)!.quickPay,
                     icon: Icons.apple,
                   ),
                   const SizedBox(height: 12),
@@ -335,7 +336,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               children: [
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
+                  children: [
                     Text(
                       'Total a pagar',
                       style: TextStyle(
@@ -346,8 +347,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     ),
                     SizedBox(height: 2),
                     Text(
-                      '1 año de ECO2 Plus',
-                      style: TextStyle(
+                      AppLocalizations.of(context)!.oneYearPlus,
+                      style: const TextStyle(
                         fontSize: 11,
                         color: AppColors.textMuted,
                         fontFamily: 'Inter',

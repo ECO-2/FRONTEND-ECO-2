@@ -270,7 +270,7 @@ class _StoreScreenState extends State<StoreScreen> {
                     color: Colors.white,
                   ),
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: 4),
                 Text(
                   AppLocalizations.of(context)!.redeemSeeds,
                   style: TextStyle(
@@ -477,7 +477,7 @@ class _StoreScreenState extends State<StoreScreen> {
               if (!context.mounted) return;
               showAppToast(
                 context,
-                success ? '¡Compra exitosa!: ${item.title} 🎉' : 'No se pudo completar la compra.',
+                success ? '${AppLocalizations.of(context)!.purchaseSuccess(item.title)} 🎉' : 'No se pudo completar la compra.',
                 type: success ? ToastType.success : ToastType.error,
               );
             },

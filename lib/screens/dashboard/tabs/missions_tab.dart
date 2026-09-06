@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend_eco_2/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:frontend_eco_2/models/models.dart';
 import 'package:frontend_eco_2/providers/providers.dart';
@@ -54,11 +55,11 @@ class _MissionsTabState extends State<MissionsTab> {
                     if (_selectedTab == 0) ...[
                       if (featured != null) ...[
                         _buildActiveMissionCard(mp, featured),
-                        const SizedBox(height: 24),
+                        SizedBox(height: 24),
                       ] else
                         _buildEmptyState('¡Completaste todos los logros disponibles!'),
                       if (upcoming.isNotEmpty) ...[
-                        _buildSectionHeader('Próximos logros'),
+                        _buildSectionHeader(AppLocalizations.of(context)!.upcomingAchievements),
                         const SizedBox(height: 12),
                         ...upcoming.map((a) => Padding(
                               padding: const EdgeInsets.only(bottom: 10),
@@ -207,9 +208,9 @@ class _MissionsTabState extends State<MissionsTab> {
                         color: _kLime,
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: const Text(
-                        '• MÁS CERCANO',
-                        style: TextStyle(
+                      child: Text(
+                        AppLocalizations.of(context)!.closest,
+                        style: const TextStyle(
                           fontFamily: 'DM Sans',
                           fontWeight: FontWeight.w700,
                           fontSize: 8,

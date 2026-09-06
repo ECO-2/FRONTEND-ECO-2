@@ -3,7 +3,9 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend_eco_2/models/models.dart';
 import 'package:frontend_eco_2/theme/app_colors.dart';
+import 'package:frontend_eco_2/utils/catalog_labels.dart';
 import 'package:frontend_eco_2/utils/plant_visuals.dart';
+import 'package:frontend_eco_2/utils/watering_status.dart';
 import 'package:frontend_eco_2/utils/cloudinary_transform.dart';
 import 'package:frontend_eco_2/widgets/garden/needs_water_badge.dart';
 import 'tag_chips_row.dart';
@@ -34,7 +36,7 @@ class PlantSpeciesInfo {
     final visual = visualForCategory(species.category);
     return PlantSpeciesInfo(
       scientificName: species.scientificName,
-      tags: species.tags,
+      tags: const [], // se resuelven traducidos en el widget
       imageBackgroundColor: visual.background,
       imageUrl: species.imageUrl,
       placeholderIcon: visual.icon,
@@ -43,37 +45,11 @@ class PlantSpeciesInfo {
   }
 }
 
-const _legacySpeciesInfo = {
-  's1': PlantSpeciesInfo(
-    scientificName: 'Monstera deliciosa',
-    tags: ['Tropical', 'Luz Indirecta', 'Riego semanal'],
-    imageBackgroundColor: Color(0xFFF2F7F2),
-    assetImage: 'assets/images/monstera.png',
-  ),
-  's2': PlantSpeciesInfo(
-    scientificName: 'Epipremnum aureum',
-    tags: ['Tropical', 'Luz Indirecta', 'Riego semanal'],
-    imageBackgroundColor: Color(0xFFEAF5EA),
-  ),
-  's3': PlantSpeciesInfo(
-    scientificName: 'Sansevieria',
-    tags: ['Desértica', 'Luz Adaptable', 'Riego 2-3 sem.'],
-    imageBackgroundColor: Color(0xFFF0F4EC),
-  ),
-  's4': PlantSpeciesInfo(
-    scientificName: 'Ficus lyrata',
-    tags: ['Tropical', 'Luz brillante', 'Riego semanal'],
-    imageBackgroundColor: Color(0xFFEAF0E8),
-  ),
-  's5': PlantSpeciesInfo(
-    scientificName: 'Cactaceae',
-    tags: ['Desértica', 'Pleno sol', 'Riego mensual'],
-    imageBackgroundColor: Color(0xFFF5F2E8),
-  ),
-};
+// _legacySpeciesInfo (mocks s1-s5) eliminado: sus IDs no existen en el
+// catálogo real, que usa UUID, así que nunca se resolvían.
 
 PlantSpeciesInfo _infoFor(String speciesId, PlantSpecies species) =>
-    _legacySpeciesInfo[speciesId] ?? PlantSpeciesInfo.fromReal(species);
+    PlantSpeciesInfo.fromReal(species);
 
 // ── Dashboard vertical card ───────────────────────────────────────────────────
 class PlantCard extends StatelessWidget {
@@ -92,10 +68,11 @@ class PlantCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final daysSinceWater = plant.lastWateredAt != null
-        ? DateTime.now().difference(plant.lastWateredAt!).inDays
-        : 10;
-    final needsWater = daysSinceWater >= 7;
+    // Mismo cálculo que el resto de la app. Antes esta tarjeta usaba su
+    // propia regla (7 días fijos, y 10 inventados si no había riego), así
+    // que podía contradecir a la lista y al detalle.
+    final needsWater =
+        WateringStatus.of(plant, species.waterFrequencyDays).needsWater;
     final info = _infoFor(plant.speciesId, species);
 
     return GestureDetector(
@@ -220,7 +197,14 @@ class PlantCard extends StatelessWidget {
                   // Tag chips — una sola línea con scroll horizontal para no
                   // deformar el área de la imagen si hay varios tags o son
                   // largos (ver tag_chips_row.dart).
-                  TagChipsRow(tags: info.tags.take(3).toList()),
+                  TagChipsRow(
+                    tags: speciesTags(
+                      context,
+                      category: species.category,
+                      lightRequirement: species.lightRequirement,
+                      waterFrequencyDays: species.waterFrequencyDays,
+                    ).take(3).toList(),
+                  ),
                 ],
               ),
             ),

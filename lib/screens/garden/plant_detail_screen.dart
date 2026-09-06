@@ -33,9 +33,6 @@ SpeciesData _resolveSpeciesData(
   String speciesId, {
   PlantSpecies? embedded,
 }) {
-  final legacy = speciesDataMap[speciesId];
-  if (legacy != null) return legacy;
-
   // La especie que viene embebida con la planta es la fuente más fiable:
   // llega siempre con la respuesta del backend, incluso si el catálogo
   // todavía no ha terminado de cargar.
@@ -53,17 +50,6 @@ PlantSpecies _resolveRealSpecies(BuildContext context, String speciesId) {
   final plantsProvider = Provider.of<PlantsProvider>(context, listen: false);
   final found = plantsProvider.speciesCatalog.where((s) => s.id == speciesId);
   if (found.isNotEmpty) return found.first;
-
-  final legacy = speciesDataMap[speciesId];
-  if (legacy != null) {
-    return PlantSpecies(
-      id: speciesId,
-      scientificName: legacy.scientific,
-      commonName: legacy.scientific,
-      waterFrequencyDays: legacy.waterFreqDays,
-      createdAt: DateTime.now(),
-    );
-  }
 
   return PlantSpecies(
     id: speciesId,
@@ -365,7 +351,7 @@ class _PlantDetailBodyState extends State<_PlantDetailBody> {
                           height: 1,
                           thickness: 1,
                         ),
-                        const SizedBox(height: 20),
+                        SizedBox(height: 20),
 
                         // ── Care Status Card ──
                         wrapWithTourStep(
@@ -766,7 +752,7 @@ class _PlantDetailBodyState extends State<_PlantDetailBody> {
             ),
             ListTile(
               leading: const Icon(Icons.photo_library_rounded, color: Color(0xFF0D2B31)),
-              title: const Text('Elegir de la galería'),
+              title: Text(AppLocalizations.of(context)!.chooseFromGallery),
               onTap: () => Navigator.pop(sheetContext, 'gallery'),
             ),
             if (hasCustomPhoto)
@@ -809,7 +795,7 @@ class _PlantDetailBodyState extends State<_PlantDetailBody> {
       if (context.mounted) {
         showAppToast(
           context,
-          'No se pudo acceder a la cámara o galería. Revisa los permisos de la app.',
+          AppLocalizations.of(context)!.cameraPermissionError,
           type: ToastType.error,
         );
       }

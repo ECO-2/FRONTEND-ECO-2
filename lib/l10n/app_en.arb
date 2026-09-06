@@ -362,5 +362,91 @@
         "type": "String"
       }
     }
-  }
+  },
+  "category": "Category",
+  "gallery": "Gallery",
+  "chooseFromGallery": "Choose from gallery",
+  "cameraPermissionError": "Couldn't access the camera or gallery. Check the app permissions.",
+  "flashAutoHint": "The flash turns on automatically only when taking the photo.",
+  "showThisGuide": "Show this guide.",
+  "upcomingAchievements": "Upcoming achievements",
+  "closest": "• CLOSEST",
+  "paymentMethod": "Payment method",
+  "quickPay": "Quick pay",
+  "oneYearPlus": "1 year of ECO2 Plus",
+  "whatToDoNow": "What to do now",
+  "uploadFromGallery": "Upload from Gallery",
+  "dayMon": "Mon",
+  "dayTue": "Tue",
+  "dayWed": "Wed",
+  "dayThu": "Thu",
+  "dayFri": "Fri",
+  "daySat": "Sat",
+  "daySun": "Sun",
+  "careEveryNDays": "{count, plural, =1{Every day} other{Every {count} days}}",
+  "@careEveryNDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "timeAgoDays": "{count, plural, =0{Today} =1{1 day ago} other{{count} days ago}}",
+  "@timeAgoDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "achievementUnlockedNamed": "Achievement unlocked: {name}",
+  "@achievementUnlockedNamed": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "purchaseSuccess": "Purchase successful: {item}",
+  "@purchaseSuccess": {
+    "placeholders": {
+      "item": {
+        "type": "String"
+      }
+    }
+  },
+  "plantAddedToGarden": "{name} added to your garden! 🌿",
+  "@plantAddedToGarden": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "couldNotAddPlant": "Couldn't add the plant.",
+  "addNewPlant": "Add a new plant",
+  "yourPlantName": "Your plant's name",
+  "potsFreeHint": "[{count} of 10 free pots]",
+  "@potsFreeHint": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "gramsPerDayShort": "{grams} g/day",
+  "@gramsPerDayShort": {
+    "placeholders": {
+      "grams": {
+        "type": "String"
+      }
+    }
+  },
+  "difficultyAll": "All",
+  "lightHintLow": "Low-light corners",
+  "lightHintHigh": "Near a window",
+  "lightHintIndirect": "No direct sun",
+  "lightHintDefault": "Filtered light",
+  "filterByCategory": "Filter by category",
+  "speciesNotFound": "Species not found"
 }

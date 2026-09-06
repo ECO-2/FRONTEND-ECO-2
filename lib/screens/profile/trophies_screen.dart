@@ -220,7 +220,7 @@ class _TrophiesScreenState extends State<TrophiesScreen> {
                     // en ninguna pantalla.
                     _heroStat(
                       Icons.local_fire_department_rounded,
-                      streak == 1 ? '1 día seguido' : '$streak días seguidos',
+                      AppLocalizations.of(context)!.streakDays(streak),
                     ),
                   ],
                 ),

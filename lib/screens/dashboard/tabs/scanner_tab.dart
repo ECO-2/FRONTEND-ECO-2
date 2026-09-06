@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend_eco_2/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:frontend_eco_2/models/models.dart';
 import 'package:frontend_eco_2/providers/providers.dart';
@@ -232,10 +233,10 @@ class _ViewfinderView extends StatelessWidget {
                   onPressed: onScan,
                 ),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: 12),
               Expanded(
                 child: CustomButton(
-                  text: 'Subir de Galería',
+                  text: AppLocalizations.of(context)!.uploadFromGallery,
                   icon: Icons.photo_library,
                   isOutlined: true,
                   backgroundColor: AppColors.primary,

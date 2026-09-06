@@ -451,17 +451,17 @@ class _ScannerScreenContentState extends State<ScannerScreenContent>
               _buildControlButton(
                 key: _flashKey,
                 tourTitle: 'Flash',
-                tourDesc: 'El flash se activará de forma automática solo al realizar la captura.',
+                tourDesc: AppLocalizations.of(context)!.flashAutoHint,
                 icon: Icons.flash_auto,
                 onTap: () {
                   cameraState.sensorConfig.switchCameraFlash();
                 },
               ),
-              const SizedBox(width: 15),
+              SizedBox(width: 15),
               _buildControlButton(
                 key: _helpKey,
                 tourTitle: 'Ayuda',
-                tourDesc: 'Muestra esta guía.',
+                tourDesc: AppLocalizations.of(context)!.showThisGuide,
                 icon: Icons.help_outline,
                 onTap: () => _startTour(context),
               ),
@@ -516,7 +516,7 @@ class _ScannerScreenContentState extends State<ScannerScreenContent>
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(Icons.auto_awesome, color: AppColors.accent, size: 14),
-                    const SizedBox(width: 8),
+                    SizedBox(width: 8),
                     Text(
                       AppLocalizations.of(context)!.analyzing,
                       style: const TextStyle(
@@ -969,7 +969,7 @@ class _ScannerScreenContentState extends State<ScannerScreenContent>
                     elevation: 0,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   ),
-                  child: const Text('Añadir', style: TextStyle(fontSize: 10, color: AppColors.primaryDark)),
+                  child: Text(AppLocalizations.of(context)!.add, style: const TextStyle(fontSize: 10, color: AppColors.primaryDark)),
                 ),
               ),
             ],
@@ -987,7 +987,7 @@ class _ScannerScreenContentState extends State<ScannerScreenContent>
         children: [
           wrapWithTourStep(
             key: _galleryKey,
-            title: 'Galería',
+            title: AppLocalizations.of(context)!.gallery,
             description: 'Sube una foto de tu galería para analizar.',
             child: GestureDetector(
               onTap: _pickImageFromGallery,

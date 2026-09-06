@@ -70,53 +70,7 @@ class SpeciesData {
   }
 }
 
-const speciesDataMap = {
-  's1': SpeciesData(
-    scientific: 'Monstera deliciosa',
-    bg: Color(0xFFF2F7F2),
-    tags: ['Araceas', 'Interior'],
-    assetImage: 'assets/images/monstera.png',
-    waterFreq: 'c/7d',
-    waterFreqDays: 7,
-    light: 'Indirecta',
-    temp: '18-27°C',
-    co2: '3.2 g/día',
-    humidity: '50-70%',
-    personalNote: 'Le encanta el salón. La riego los domingos. Última vez noté hoja nueva emergiendo...',
-    placementHint: 'Cerca de una ventana, sin sol directo sobre las hojas.',
-    careGuide: 'Prefiere luz indirecta abundante y sustrato que drene bien. '
-        'Riega cada 7 días dejando secar los primeros centímetros de tierra entre riegos, '
-        'y agradece un ambiente húmedo (rocíala o acércala a otras plantas).',
-  ),
-  's2': SpeciesData(
-    scientific: 'Epipremnum aureum',
-    bg: Color(0xFFEAF5EA),
-    tags: ['Araceas', 'Interior', 'Colgante'],
-    waterFreq: 'c/7d',
-    waterFreqDays: 7,
-    light: 'Indirecta',
-    temp: '15-30°C',
-    co2: '2.5 g/día',
-    humidity: '40-60%',
-    personalNote: 'Crece muy rápido en la repisa. Es súper resistente y perdona algún olvido de riego.',
-    placementHint: 'Luz indirecta o media; tolera rincones con menos luz.',
-    careGuide: 'Muy tolerante y fácil de cuidar: riega cada 7 días dejando secar el sustrato entre '
-        'riegos, y sitúala donde reciba luz indirecta. Poda las ramas largas para que crezca más tupida.',
-  ),
-  's3': SpeciesData(
-    scientific: 'Sansevieria trifasciata',
-    bg: Color(0xFFF0F4EC),
-    tags: ['Liliáceas', 'Interior', 'Resistente'],
-    waterFreq: 'c/20d',
-    waterFreqDays: 20,
-    light: 'Adaptable',
-    temp: '10-35°C',
-    co2: '1.8 g/día',
-    humidity: '20-40%',
-    personalNote: 'Ideal para el dormitorio. Prácticamente no necesita atención, dejar secar del todo el sustrato.',
-    placementHint: 'Se adapta a casi cualquier luz, incluso rincones oscuros.',
-    careGuide: 'Una de las plantas más resistentes que existen. Riega solo cada 20 días, dejando secar '
-        'el sustrato por completo — el exceso de agua es su principal riesgo, no la falta de ella.',
-  ),
-};
+// Las especies mock s1-s3 se eliminaron: sus IDs no existen en el
+// catálogo real (que usa UUID), así que nunca se resolvían. Además
+// llevaban valores de CO2 fijos que contradecían los del backend.
 
