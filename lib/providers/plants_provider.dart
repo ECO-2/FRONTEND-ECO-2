@@ -85,19 +85,37 @@ class PlantsProvider with ChangeNotifier {
   // Agregar planta
   // ---------------------------------------------------------------------------
 
-  Future<bool> addPlantFromSpecies(PlantSpecies species, {String? nickname}) {
-    return addPlant(nickname ?? species.commonName, species.id, species.commonName);
+  Future<bool> addPlantFromSpecies(
+    PlantSpecies species, {
+    String? nickname,
+    DateTime? lastWateredAt,
+  }) {
+    return addPlant(
+      nickname ?? species.commonName,
+      species.id,
+      species.commonName,
+      lastWateredAt: lastWateredAt,
+    );
   }
 
   /// Devuelve true si la planta se agregó correctamente, false si falló
   /// (con [errorMessage] explicando por qué), para que la UI que llama
   /// pueda mostrar feedback real en vez de asumir éxito.
-  Future<bool> addPlant(String nickname, String speciesId, String name) async {
+  ///
+  /// [lastWateredAt] es cuándo el usuario regó la planta por última vez antes
+  /// de registrarla; el backend programa el primer recordatorio desde ahí.
+  Future<bool> addPlant(
+    String nickname,
+    String speciesId,
+    String name, {
+    DateTime? lastWateredAt,
+  }) async {
     try {
       final newPlant = await _plantsService.addPlant(
         speciesId: speciesId,
         nickname: nickname,
         healthStatus: 'good',
+        lastWateredAt: lastWateredAt,
       );
       _userPlants.add(newPlant);
       notifyListeners();

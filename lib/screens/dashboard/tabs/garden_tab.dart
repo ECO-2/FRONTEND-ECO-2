@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:frontend_eco_2/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:frontend_eco_2/models/models.dart';
 import 'package:frontend_eco_2/providers/providers.dart';
@@ -8,7 +9,11 @@ import 'package:frontend_eco_2/routing/app_routes.dart';
 import 'package:frontend_eco_2/theme/app_colors.dart';
 import 'package:frontend_eco_2/utils/achievement_feedback.dart';
 import 'package:frontend_eco_2/utils/plant_visuals.dart';
+import 'package:frontend_eco_2/utils/catalog_labels.dart';
 import 'package:frontend_eco_2/utils/cloudinary_transform.dart';
+import 'package:frontend_eco_2/utils/watering_status.dart';
+import 'package:frontend_eco_2/widgets/garden/last_watered_sheet.dart';
+import 'package:frontend_eco_2/widgets/garden/needs_water_badge.dart';
 import 'package:frontend_eco_2/widgets/garden/add_plant_modal.dart';
 import 'package:frontend_eco_2/screens/garden/widgets/needs_care_modal.dart';
 import 'package:frontend_eco_2/widgets/common/tag_chips_row.dart';
@@ -79,7 +84,21 @@ class _GardenTabState extends State<GardenTab> {
     PlantSpecies species,
     PlantsProvider plantsProvider,
   ) async {
-    final success = await plantsProvider.addPlantFromSpecies(species);
+    // Preguntamos el último riego ANTES de crearla: el backend programa el
+    // primer recordatorio desde esa fecha, así que una planta que el usuario
+    // ya venía cuidando no espera un ciclo completo de más.
+    final answer = await askLastWatered(
+      context,
+      plantName: species.commonName,
+      imageUrl: species.imageUrl,
+    );
+    if (answer == null) return; // cerró la hoja: no damos de alta nada
+    if (!context.mounted) return;
+
+    final success = await plantsProvider.addPlantFromSpecies(
+      species,
+      lastWateredAt: answer.date,
+    );
     if (!context.mounted) return;
 
     if (!success) {
@@ -311,9 +330,9 @@ class _GardenTabState extends State<GardenTab> {
                           _searchQuery = val;
                         });
                       },
-                      decoration: const InputDecoration(
-                        hintText: 'Buscar mi planta...',
-                        hintStyle: TextStyle(
+                      decoration: InputDecoration(
+                        hintText: AppLocalizations.of(context)!.searchMyPlant,
+                        hintStyle: const TextStyle(
                           color: _kTextMuted,
                           fontSize: 13,
                           fontFamily: 'Inter',
@@ -441,15 +460,15 @@ class _GardenTabState extends State<GardenTab> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
-          padding: EdgeInsets.fromLTRB(16, 24, 16, 12),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 24, 16, 12),
           child: Row(
             children: [
-              Icon(Icons.trending_up_rounded, color: Colors.orange, size: 20),
-              SizedBox(width: 6),
+              const Icon(Icons.trending_up_rounded, color: Colors.orange, size: 20),
+              const SizedBox(width: 6),
               Text(
-                'Tendencias esta semana',
-                style: TextStyle(
+                AppLocalizations.of(context)!.trendingThisWeek,
+                style: const TextStyle(
                   fontFamily: 'DM Sans',
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
@@ -652,9 +671,9 @@ class _GardenTabState extends State<GardenTab> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Text(
-            'Explorar especies',
-            style: TextStyle(
+          Text(
+            AppLocalizations.of(context)!.exploreSpecies,
+            style: const TextStyle(
               fontFamily: 'DM Sans',
               fontWeight: FontWeight.bold,
               fontSize: 16,
@@ -857,7 +876,7 @@ class _GardenTabState extends State<GardenTab> {
                           () => setSheetState(() => tempLight = 'all')),
                       ..._lightKeys.map(
                         (key) => filterChip(
-                          lightLabelEs(key),
+                          lightLabel(context, key),
                           tempLight == key,
                           () => setSheetState(() => tempLight = key),
                         ),
@@ -1025,7 +1044,16 @@ class _GardenTabState extends State<GardenTab> {
                             ),
                           ),
                           const SizedBox(width: 6),
-                          Expanded(child: TagChipsRow(tags: species.tags)),
+                          Expanded(
+                            child: TagChipsRow(
+                              tags: speciesTags(
+                                context,
+                                category: species.category,
+                                lightRequirement: species.lightRequirement,
+                                waterFrequencyDays: species.waterFrequencyDays,
+                              ),
+                            ),
+                          ),
                         ],
                       ),
                       const SizedBox(height: 8),
@@ -1166,8 +1194,17 @@ class _GardenTabState extends State<GardenTab> {
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 6),
-                  if (species.tags.isNotEmpty) ...[
-                    TagChipsRow(tags: species.tags.take(2).toList(), fontSize: 8, iconSize: 9),
+                  ...[
+                    TagChipsRow(
+                      tags: speciesTags(
+                        context,
+                        category: species.category,
+                        lightRequirement: species.lightRequirement,
+                        waterFrequencyDays: species.waterFrequencyDays,
+                      ).take(2).toList(),
+                      fontSize: 8,
+                      iconSize: 9,
+                    ),
                     const SizedBox(height: 6),
                   ],
                   Row(
@@ -1215,8 +1252,9 @@ class _GardenTabState extends State<GardenTab> {
       (s) => s.id == p.speciesId,
       orElse: () => catalogFallback(p.speciesId),
     );
-    if (p.lastWateredAt == null) return true;
-    return DateTime.now().difference(p.lastWateredAt!).inDays >= species.waterFrequencyDays;
+    // Mismo cálculo que la ficha de detalle (WateringStatus), para que la
+    // tarjeta y el detalle no puedan volver a contradecirse.
+    return WateringStatus.of(p, species.waterFrequencyDays).needsWater;
   }
 
   Widget _buildMyGardenView(BuildContext context, PlantsProvider plantsProvider, List<UserPlant> plants) {
@@ -1851,16 +1889,10 @@ class _PlantListCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final neverWatered = plant.lastWateredAt == null;
-    final daysSinceWater =
-        neverWatered ? null : DateTime.now().difference(plant.lastWateredAt!).inDays;
-    final needsWater = neverWatered || daysSinceWater! >= species.waterFrequencyDays;
+    final status = WateringStatus.of(plant, species.waterFrequencyDays);
+    final neverWatered = status.neverWatered;
+    final needsWater = status.needsWater;
     final sp = _kSpeciesData[plant.speciesId] ?? _GardenSpecies.fromReal(species);
-
-    // Badge on image: "! Riego" in orange when needs water, "✓ Riego" in sage green when up-to-date
-    final riegoBadgeBg = needsWater ? const Color(0xFFF56B1C) : const Color(0xFF789D8C);
-    final riegoBadgeText = needsWater ? '! Riego' : '✓ Riego';
-    final riegoBadgeColor = Colors.white;
 
     // Status pill — siempre con ícono de check (estilo Figma), el color y el
     // texto reflejan el estado real: días exactos sin riego cuando ya toca,
@@ -1868,19 +1900,17 @@ class _PlantListCard extends StatelessWidget {
     final statusBg = needsWater ? const Color(0xFFFFF4EC) : const Color(0xFFF2F4EB);
     final statusBorderColor = needsWater ? const Color(0xFFFFCCA0) : const Color(0xFF8A9A65);
     final statusTextColor = needsWater ? const Color(0xFFB94E13) : const Color(0xFF10454F);
-    final overdueBy = daysSinceWater == null ? null : daysSinceWater - species.waterFrequencyDays;
+    final overdueBy = status.daysOverdue;
     final statusText = !needsWater
-        ? 'Al día'
-        : neverWatered
-            ? 'Nunca regada'
-            : overdueBy! <= 0
-                ? 'Riego hoy'
-                : '$overdueBy día${overdueBy == 1 ? '' : 's'} de retraso';
+        ? (neverWatered ? 'Sin riego aún' : 'Al día')
+        : overdueBy <= 0
+            ? 'Riego hoy'
+            : '$overdueBy día${overdueBy == 1 ? '' : 's'} de retraso';
     const statusIcon = Icons.check_rounded;
 
     final daysLabel = neverWatered
         ? 'Sin riego registrado · c/${species.waterFrequencyDays}d'
-        : '${daysSinceWater}d sin riego · c/${species.waterFrequencyDays}d';
+        : '${status.daysSinceReference}d sin riego · c/${species.waterFrequencyDays}d';
 
     return MediaQuery(
       // Bloquea el escalado de fuente del sistema solo para esta tarjeta —
@@ -1991,29 +2021,11 @@ class _PlantListCard extends StatelessWidget {
                                       ),
                       ),
                     ),
-                    // "! Riego" Badge — top-right
+                    // Cartel de riego — solo cuando de verdad hace falta.
                     Positioned(
                       top: 6,
                       right: 6,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 3,
-                        ),
-                        decoration: BoxDecoration(
-                          color: riegoBadgeBg,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          riegoBadgeText,
-                          style: TextStyle(
-                            fontSize: 9,
-                            fontWeight: FontWeight.w800,
-                            color: riegoBadgeColor,
-                            fontFamily: 'Inter',
-                          ),
-                        ),
-                      ),
+                      child: NeedsWaterBadge(needsWater: needsWater),
                     ),
                   ],
                 ),
@@ -2236,22 +2248,7 @@ class _PlantGridCard extends StatelessWidget {
                   Positioned(
                     top: 6,
                     right: 6,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                      decoration: BoxDecoration(
-                        color: needsWater ? const Color(0xFFF56B1C) : const Color(0xFF789D8C),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        needsWater ? '! Riego' : '✓ Riego',
-                        style: const TextStyle(
-                          fontSize: 9,
-                          fontWeight: FontWeight.w800,
-                          color: Colors.white,
-                          fontFamily: 'Inter',
-                        ),
-                      ),
-                    ),
+                    child: NeedsWaterBadge(needsWater: needsWater, compact: true),
                   ),
                 ],
               ),

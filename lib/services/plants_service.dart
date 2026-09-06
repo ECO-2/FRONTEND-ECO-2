@@ -36,10 +36,16 @@ class PlantsService {
     required String speciesId,
     String? nickname,
     String? healthStatus,
+    DateTime? lastWateredAt,
   }) async {
     final body = <String, dynamic>{'species_id': speciesId};
     if (nickname != null && nickname.isNotEmpty) body['nickname'] = nickname;
     if (healthStatus != null) body['health_status'] = healthStatus;
+    // Último riego anterior a registrarla en la app: el backend lo usa para
+    // programar el primer recordatorio desde esa fecha y no desde hoy.
+    if (lastWateredAt != null) {
+      body['last_watered_at'] = lastWateredAt.toIso8601String();
+    }
 
     final data = await _client.post('/plants', body: body) as Map<String, dynamic>;
     return UserPlant.fromJson(data);

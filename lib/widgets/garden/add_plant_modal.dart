@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend_eco_2/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:frontend_eco_2/models/models.dart';
 import 'package:frontend_eco_2/providers/providers.dart';
@@ -6,6 +7,7 @@ import 'package:frontend_eco_2/theme/app_colors.dart';
 import 'package:frontend_eco_2/utils/achievement_feedback.dart';
 import 'package:frontend_eco_2/utils/plant_visuals.dart';
 import 'package:frontend_eco_2/widgets/common/app_toast.dart';
+import 'package:frontend_eco_2/widgets/garden/last_watered_sheet.dart';
 
 class AddPlantModal extends StatefulWidget {
   const AddPlantModal({super.key});
@@ -65,9 +67,23 @@ class _AddPlantModalState extends State<AddPlantModal> {
     final nickname = _nameController.text.trim();
     final species = _selectedSpecies!;
 
+    // Preguntamos el último riego antes de crearla, para que el primer
+    // recordatorio se cuente desde esa fecha y no desde hoy.
+    final answer = await askLastWatered(
+      context,
+      plantName: species.commonName,
+      imageUrl: species.imageUrl,
+    );
+    if (answer == null || !mounted) return;
+
     setState(() => _isSubmitting = true);
     final plantsProvider = Provider.of<PlantsProvider>(context, listen: false);
-    final success = await plantsProvider.addPlant(nickname, species.id, species.commonName);
+    final success = await plantsProvider.addPlant(
+      nickname,
+      species.id,
+      species.commonName,
+      lastWateredAt: answer.date,
+    );
 
     if (!mounted) return;
 
@@ -263,12 +279,12 @@ class _AddPlantModalState extends State<AddPlantModal> {
                       child: TextField(
                         controller: _searchController,
                         onChanged: (val) => setState(() => _searchQuery = val),
-                        decoration: const InputDecoration(
-                          hintText: 'Buscar especie...',
-                          hintStyle: TextStyle(color: AppColors.textMuted, fontSize: 13),
+                        decoration: InputDecoration(
+                          hintText: AppLocalizations.of(context)!.searchSpecies,
+                          hintStyle: const TextStyle(color: AppColors.textMuted, fontSize: 13),
                           border: InputBorder.none,
                           isDense: true,
-                          contentPadding: EdgeInsets.symmetric(vertical: 12),
+                          contentPadding: const EdgeInsets.symmetric(vertical: 12),
                         ),
                       ),
                     ),

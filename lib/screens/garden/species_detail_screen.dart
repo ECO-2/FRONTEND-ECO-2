@@ -10,6 +10,7 @@ import 'package:frontend_eco_2/utils/cloudinary_transform.dart';
 import 'package:frontend_eco_2/utils/top_clamping_scroll_physics.dart';
 import 'package:frontend_eco_2/widgets/common/app_toast.dart';
 import 'package:frontend_eco_2/widgets/common/custom_status_bar.dart';
+import 'package:frontend_eco_2/widgets/garden/last_watered_sheet.dart';
 
 // Legacy mock species (s1-s5) still ship a real illustration asset; every
 // other (real, catalog-backed) species falls back to a category visual.
@@ -797,7 +798,20 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
 
   Future<void> _addToGarden(BuildContext context, PlantSpecies species) async {
     final plantsProvider = Provider.of<PlantsProvider>(context, listen: false);
-    final success = await plantsProvider.addPlantFromSpecies(species);
+
+    // El último riego previo define cuándo toca el primero: sin preguntarlo,
+    // una planta que ya venía cuidada esperaría un ciclo completo de más.
+    final answer = await askLastWatered(
+      context,
+      plantName: species.commonName,
+      imageUrl: species.imageUrl,
+    );
+    if (answer == null || !context.mounted) return;
+
+    final success = await plantsProvider.addPlantFromSpecies(
+      species,
+      lastWateredAt: answer.date,
+    );
     if (!context.mounted) return;
 
     if (!success) {
