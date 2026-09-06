@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend_eco_2/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:frontend_eco_2/models/models.dart';
 import 'package:frontend_eco_2/providers/providers.dart';
@@ -93,7 +94,7 @@ class _NeedsCareSheetState extends State<_NeedsCareSheet> {
                       const SizedBox(height: 2),
                       Text(
                         needsCare.isEmpty
-                            ? '¡Todo al día!'
+                            ? AppLocalizations.of(context)!.allUpToDate
                             : '${needsCare.length} planta${needsCare.length == 1 ? '' : 's'} con riego pendiente',
                         style: const TextStyle(
                           fontFamily: 'DM Sans',

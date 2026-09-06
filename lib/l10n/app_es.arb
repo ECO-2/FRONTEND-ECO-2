@@ -1,0 +1,366 @@
+{
+  "@@locale": "es",
+  "appTagline": "Cuidado de plantas con IA",
+  "createAccount": "Crear Cuenta",
+  "signIn": "Iniciar Sesión",
+  "signInAction": "Iniciar sesión",
+  "welcomeBack": "Bienvenido de vuelta",
+  "email": "Correo electrónico",
+  "emailHint": "correo@ejemplo.com",
+  "password": "Contraseña",
+  "passwordMinChars": "min. 8 caracteres",
+  "passwordTooShort": "La contraseña debe tener al menos 8 caracteres",
+  "confirmPassword": "Confirma contraseña",
+  "forgotPassword": "¿Olvidaste tu contraseña?",
+  "username": "Nombre de usuario",
+  "register": "Registrarse",
+  "noAccountYet": "¿No tienes cuenta? ",
+  "alreadyHaveAccount": "¿Ya tienes cuenta? ",
+  "enterYourEmail": "Por favor ingresa tu correo",
+  "enterYourPassword": "Por favor ingresa tu contraseña",
+  "termsNotice": "Al registrarte aceptas los Términos de Uso y la Política de Privacidad de ECO2.",
+  "navStore": "Tienda",
+  "navGarden": "Jardín",
+  "navDashboard": "Dashboard",
+  "navScanner": "Escáner",
+  "navProfile": "Perfil",
+  "myGarden": "Mi Jardín",
+  "viewAll": "ver todas",
+  "addPlant": "Añadir Planta",
+  "gardenEmpty": "Tu jardín está vacío",
+  "needsWater": "Riego",
+  "upToDate": "Al día",
+  "noWateringYet": "Sin riego aún",
+  "wateringToday": "Riego hoy",
+  "wateringOverdue": "Riego vencido",
+  "daysWithoutWater": "días sin riego",
+  "daysInYourGarden": "días en tu jardín",
+  "frequency": "frecuencia",
+  "remaining": "restantes",
+  "overdue": "vencido",
+  "careStatus": "Estado de cuidado",
+  "urgentWatering": "Riego Urgente",
+  "deletePlantTitle": "¿Eliminar planta?",
+  "deletePlantBody": "Se eliminará \"{plantName}\" de tu jardín. Esta acción no se puede deshacer.",
+  "@deletePlantBody": {
+    "placeholders": {
+      "plantName": {
+        "type": "String"
+      }
+    }
+  },
+  "cancel": "Cancelar",
+  "delete": "Eliminar",
+  "lastWateredQuestion": "¿Cuándo regaste {plantName} por última vez?",
+  "@lastWateredQuestion": {
+    "placeholders": {
+      "plantName": {
+        "type": "String"
+      }
+    }
+  },
+  "lastWateredHelp": "Así calculamos cuándo toca el próximo riego. Si no lo sabes, empezamos a contar desde hoy.",
+  "today": "Hoy",
+  "yesterday": "Ayer",
+  "someDaysAgo": "Hace unos días…",
+  "neverOrDontRemember": "Nunca / no lo recuerdo",
+  "lastWatering": "Último riego",
+  "settings": "Ajustes",
+  "account": "CUENTA",
+  "editProfile": "Editar perfil",
+  "editProfileSubtitle": "Nombre, bio, foto",
+  "changePassword": "Cambiar contraseña",
+  "biometricAuth": "Autenticación biométrica",
+  "notifications": "NOTIFICACIONES",
+  "pushNotifications": "Notificaciones push",
+  "wateringReminders": "Recordatorios de riego",
+  "achievementsAndMissions": "Logros y misiones",
+  "preferences": "PREFERENCIAS",
+  "systemLanguage": "Idioma del sistema",
+  "language": "Idioma",
+  "themeAndColors": "Tema y colores",
+  "privacyAndData": "PRIVACIDAD Y DATOS",
+  "privacy": "Privacidad",
+  "privacySubtitle": "Control de datos personales",
+  "exportMyData": "Exportar mis datos",
+  "application": "APLICACIÓN",
+  "helpAndSupport": "Ayuda y soporte",
+  "aboutEco2": "Sobre ECO2",
+  "dangerZone": "ZONA DE RIESGO",
+  "signOut": "Cerrar sesión",
+  "deleteAccount": "Eliminar cuenta",
+  "deleteAccountSubtitle": "Esta acción es permanente",
+  "spanish": "Español",
+  "english": "Inglés",
+  "profile": "Perfil",
+  "plants": "Plantas",
+  "seeds": "Semillas",
+  "co2Total": "CO₂ total",
+  "levelLabel": "Nivel {level}",
+  "@levelLabel": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "levelWithName": "Nivel {level} · {name}",
+  "@levelWithName": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "myTrophies": "Mis Trofeos",
+  "trophies": "Trofeos",
+  "missions": "Misiones",
+  "achievements": "Logros",
+  "obtained": "Obtenidos",
+  "available": "Disponibles",
+  "completedPercent": "Completado",
+  "streakDays": "{count, plural, =1{1 día seguido} other{{count} días seguidos}}",
+  "@streakDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "xpPoints": "{xp} XP",
+  "@xpPoints": {
+    "placeholders": {
+      "xp": {
+        "type": "int"
+      }
+    }
+  },
+  "seedsCount": "{count} semillas",
+  "@seedsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "greenFootprint": "Mi Huella Verde",
+  "co2AbsorbedToday": "CO₂ absorbido hoy",
+  "gramsPerDay": "gramos / día",
+  "contributionPerPlant": "Aporte por planta",
+  "weeklyEvolution": "Evolución semanal",
+  "weeklyEvolutionHelp": "Refleja cuándo entró cada planta a tu jardín.",
+  "copyMyFootprint": "Copiar mi huella verde",
+  "copiedToClipboard": "Copiado al portapapeles",
+  "accumulated": "Acumulado: {kg} kg",
+  "@accumulated": {
+    "placeholders": {
+      "kg": {
+        "type": "String"
+      }
+    }
+  },
+  "noPlantsYet": "Aún no tienes plantas en tu jardín",
+  "footprintError": "No pudimos calcular tu huella verde.",
+  "retry": "Reintentar",
+  "scannerPointAtPlant": "Apunta a una planta",
+  "scannerAnalyzing": "Analizando...",
+  "scannerNotInCatalog": "La reconocimos, pero todavía no está en el catálogo de ECO2 — no podemos añadirla a tu jardín todavía.",
+  "scannerLowConfidence": "No pudimos reconocerla con suficiente confianza. Prueba con más luz o de más cerca.",
+  "connectionError": "Error de conexión. Verifica tu internet.",
+  "wrongCredentials": "Correo o contraseña incorrectos.",
+  "emailAlreadyUsed": "Este correo ya tiene una cuenta registrada.",
+  "save": "Guardar",
+  "close": "Cerrar",
+  "greeting": "Namasté",
+  "yourSeeds": "Tus semillas",
+  "activeMission": "Misión Activa",
+  "searchSpecies": "Buscar especie...",
+  "searchMyPlant": "Buscar mi planta...",
+  "exploreSpecies": "Explorar especies",
+  "trendingThisWeek": "Tendencias esta semana",
+  "allCategory": "Todas",
+  "plantsCount": "{count} plantas",
+  "@plantsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "needsAttentionToday": "{count, plural, =1{1 planta necesita atención hoy} other{{count} plantas necesitan atención hoy}}",
+  "@needsAttentionToday": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "view": "Ver",
+  "add": "Añadir",
+  "allUpToDate": "¡Todo al día!",
+  "wateringStatus": "Estado de riego",
+  "logEveryCare": "Registra cada cuidado",
+  "viewHistory": "Ver historial",
+  "latestCare": "Últimos cuidados",
+  "careType": "Tipo de cuidado",
+  "suggestedNextWatering": "Próximo riego sugerido",
+  "inMyCollectionSince": "En mi colección desde",
+  "howToCareTitle": "Cómo cuidar tu planta",
+  "everyNDays": "Cada {days} días",
+  "@everyNDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "daysAgo": "{count, plural, =1{hace 1 día} other{hace {count} días}}",
+  "@daysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "noCareLogged": "Aún no has registrado cuidados.",
+  "scannerHint": "Apunta a una planta",
+  "analyzing": "Analizando...",
+  "notIdentified": "No identificada con certeza",
+  "potsRemaining": "Macetas restantes: {count}",
+  "@potsRemaining": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "notificationsTitle": "Notificaciones",
+  "markAllRead": "Marcar todas como leídas",
+  "todayLabel": "HOY",
+  "thatsAllForNow": "Eso es todo por ahora",
+  "noNotifications": "No tienes notificaciones",
+  "wateringPending": "Riego pendiente",
+  "achievementUnlocked": "¡Logro desbloqueado!",
+  "newPlantAdded": "Nueva planta agregada",
+  "seedbed": "Semillero",
+  "redeemSeeds": "Canjea tus semillas por recompensas",
+  "search": "Buscar...",
+  "communityFavorites": "Los favoritos de la comunidad",
+  "newBadge": "Nuevo",
+  "yourImpactEquals": "Tu impacto equivale a:",
+  "treesEquivalent": "{count} Árboles",
+  "@treesEquivalent": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "kilometersEquivalent": "{count} Kilómetros",
+  "@kilometersEquivalent": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "levelAndTrophies": "Nivel {level} · {trophies} trofeos",
+  "@levelAndTrophies": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      },
+      "trophies": {
+        "type": "int"
+      }
+    }
+  },
+  "noAchievementsYet": "No has completado logros todavía.",
+  "allAchievementsDone": "¡Ya desbloqueaste todos los logros!",
+  "noAchievementsConfigured": "Todavía no hay logros configurados.",
+  "comingSoon": "Próximamente",
+  "reward": "Recompensa",
+  "achievementUnlockedLabel": "Logro desbloqueado",
+  "achievementLockedLabel": "Logro bloqueado",
+  "activeMissions": "Misiones Activas",
+  "plantCatalog": "Catálogo de Plantas",
+  "seedStore": "Tienda de Semillas",
+  "freePlanActive": "Plan gratuito activo",
+  "user": "Usuario",
+  "loading": "Cargando...",
+  "genericError": "Algo salió mal. Inténtalo de nuevo.",
+  "catTropical": "Tropical",
+  "catSucculent": "Suculenta",
+  "catCactus": "Cactus",
+  "catFern": "Helecho",
+  "catFlowering": "Con flores",
+  "catHerb": "Aromática",
+  "catTree": "Árbol",
+  "catOther": "Planta",
+  "lightLow": "Baja",
+  "lightMedium": "Media",
+  "lightHigh": "Alta",
+  "lightIndirect": "Indirecta",
+  "lightPrefix": "Luz {level}",
+  "@lightPrefix": {
+    "placeholders": {
+      "level": {
+        "type": "String"
+      }
+    }
+  },
+  "difficultyVeryEasy": "Muy fácil",
+  "difficultyEasy": "Fácil",
+  "difficultyMedium": "Media",
+  "wateringEveryDays": "Riego c/{days}d",
+  "@wateringEveryDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "humidityLow": "Baja",
+  "humidityMedium": "Media",
+  "humidityHigh": "Alta",
+  "impactCarTitle": "{km} km en coche",
+  "@impactCarTitle": {
+    "placeholders": {
+      "km": {
+        "type": "String"
+      }
+    }
+  },
+  "impactCarSubtitle": "Que no haría falta conducir para emitir ese CO₂.",
+  "impactBulbTitle": "{hours} h de bombilla LED",
+  "@impactBulbTitle": {
+    "placeholders": {
+      "hours": {
+        "type": "String"
+      }
+    }
+  },
+  "impactBulbSubtitle": "De consumo eléctrico equivalente.",
+  "impactTreeTitle": "{days} días de un árbol",
+  "@impactTreeTitle": {
+    "placeholders": {
+      "days": {
+        "type": "String"
+      }
+    }
+  },
+  "impactTreeSubtitle": "Lo que tarda un árbol adulto en absorber lo mismo.",
+  "impactApproxNote": "Equivalencias aproximadas, calculadas a partir del CO₂ de tu jardín.",
+  "impactTooSmall": "Tu jardín aún no acumula CO₂ suficiente para una equivalencia útil.",
+  "accumulatedGrams": "Acumulado: {grams} g",
+  "@accumulatedGrams": {
+    "placeholders": {
+      "grams": {
+        "type": "String"
+      }
+    }
+  }
+}

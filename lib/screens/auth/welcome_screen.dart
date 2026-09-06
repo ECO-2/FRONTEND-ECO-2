@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:frontend_eco_2/l10n/app_localizations.dart';
 import 'package:frontend_eco_2/routing/app_routes.dart';
 import 'package:frontend_eco_2/theme/app_colors.dart';
 import 'package:frontend_eco_2/widgets/common/custom_button.dart';
@@ -39,9 +40,9 @@ class WelcomeScreen extends StatelessWidget {
                 // Desplazamiento del texto hacia arriba
                 Transform.translate(
                   offset: const Offset(0, -10),
-                  child: const Text(
-                    'Cuidado de plantas con IA',
-                    style: TextStyle(
+                  child: Text(
+                    AppLocalizations.of(context)!.appTagline,
+                    style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                       color: AppColors.accent,
@@ -58,7 +59,7 @@ class WelcomeScreen extends StatelessWidget {
                   children: [
                     // Crear Cuenta Button (Dark, top position)
                     CustomButton(
-                      text: 'Crear Cuenta',
+                      text: AppLocalizations.of(context)!.createAccount,
                       backgroundColor: AppColors.primaryDark,
                       foregroundColor: Colors.white,
                       height: 56,
@@ -74,7 +75,7 @@ class WelcomeScreen extends StatelessWidget {
                     
                     // Iniciar Sesión Button (Accent/Lime, bottom position)
                     CustomButton(
-                      text: 'Iniciar Sesión',
+                      text: AppLocalizations.of(context)!.signIn,
                       backgroundColor: AppColors.accent,
                       foregroundColor: Colors.black,
                       height: 56,

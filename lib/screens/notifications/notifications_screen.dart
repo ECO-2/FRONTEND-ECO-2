@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend_eco_2/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:frontend_eco_2/models/models.dart';
 import 'package:frontend_eco_2/providers/providers.dart';
@@ -129,9 +130,9 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                                   duration: const Duration(seconds: 1, milliseconds: 400),
                                 );
                               },
-                              child: const Text(
-                                'Marcar todas como leídas',
-                                style: TextStyle(
+                              child: Text(
+                                AppLocalizations.of(context)!.markAllRead,
+                                style: const TextStyle(
                                   color: _kDark,
                                   fontWeight: FontWeight.bold,
                                   fontSize: 13,
@@ -144,7 +145,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
                       // HOY
                       if (todayNotifications.isNotEmpty) ...[
-                        _sectionLabel('HOY'),
+                        _sectionLabel(AppLocalizations.of(context)!.todayLabel),
                         ...todayNotifications.map(
                           (n) => _buildNotifItem(context, n),
                         ),
@@ -160,12 +161,12 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                       ],
 
                       // Footer
-                      const Padding(
+                      Padding(
                         padding: EdgeInsets.symmetric(vertical: 20),
                         child: Center(
                           child: Text(
-                            'Eso es todo por ahora',
-                            style: TextStyle(
+                            AppLocalizations.of(context)!.thatsAllForNow,
+                            style: const TextStyle(
                               color: _kTextMuted,
                               fontSize: 13,
                               fontFamily: 'DM Sans',
@@ -380,10 +381,10 @@ class _NotifHeader extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 12),
-          const Expanded(
+          Expanded(
             child: Text(
-              'Notificaciones',
-              style: TextStyle(
+              AppLocalizations.of(context)!.notificationsTitle,
+              style: const TextStyle(
                 fontFamily: 'DM Sans',
                 fontWeight: FontWeight.w600,
                 fontSize: 20,

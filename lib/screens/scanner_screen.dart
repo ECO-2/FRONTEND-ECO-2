@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:frontend_eco_2/l10n/app_localizations.dart';
 import 'package:camerawesome/camerawesome_plugin.dart';
 import 'package:provider/provider.dart';
 import 'package:showcaseview/showcaseview.dart';
@@ -516,9 +517,9 @@ class _ScannerScreenContentState extends State<ScannerScreenContent>
                   children: [
                     Icon(Icons.auto_awesome, color: AppColors.accent, size: 14),
                     const SizedBox(width: 8),
-                    const Text(
-                      'Analizando...',
-                      style: TextStyle(
+                    Text(
+                      AppLocalizations.of(context)!.analyzing,
+                      style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.w600,
                         fontSize: 12,
@@ -544,9 +545,9 @@ class _ScannerScreenContentState extends State<ScannerScreenContent>
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
                 ),
-                child: const Text(
-                  'Apunta a una planta',
-                  style: TextStyle(
+                child: Text(
+                  AppLocalizations.of(context)!.scannerHint,
+                  style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w600,
                     fontSize: 12,
@@ -807,7 +808,7 @@ class _ScannerScreenContentState extends State<ScannerScreenContent>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      _unmatchedCommonName ?? 'No identificada con certeza',
+                      _unmatchedCommonName ?? AppLocalizations.of(context)!.notIdentified,
                       style: const TextStyle(
                         color: AppColors.primary,
                         fontSize: 15,

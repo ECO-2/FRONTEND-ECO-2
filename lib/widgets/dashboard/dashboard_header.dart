@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend_eco_2/l10n/app_localizations.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:frontend_eco_2/theme/app_colors.dart';
@@ -56,7 +57,7 @@ class DashboardHeader extends StatelessWidget implements PreferredSizeWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Namasté',
+                          AppLocalizations.of(context)!.greeting,
                           style: TextStyle(
                             fontFamily: 'Inter',
                             fontSize: 14,
@@ -81,7 +82,7 @@ class DashboardHeader extends StatelessWidget implements PreferredSizeWidget {
                   // Seed balance pill
                   wrapWithTourStep(
                     key: seedsKey,
-                    title: 'Tus semillas',
+                    title: AppLocalizations.of(context)!.yourSeeds,
                     description: 'Ganas semillas cuidando tus plantas y cumpliendo misiones. Úsalas en la Tienda.',
                     child: Container(
                       padding: const EdgeInsets.symmetric(

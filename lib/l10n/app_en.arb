@@ -1,0 +1,366 @@
+{
+  "@@locale": "en",
+  "appTagline": "AI-powered plant care",
+  "createAccount": "Create Account",
+  "signIn": "Sign In",
+  "signInAction": "Sign in",
+  "welcomeBack": "Welcome back",
+  "email": "Email",
+  "emailHint": "email@example.com",
+  "password": "Password",
+  "passwordMinChars": "min. 8 characters",
+  "passwordTooShort": "Password must be at least 8 characters",
+  "confirmPassword": "Confirm password",
+  "forgotPassword": "Forgot your password?",
+  "username": "Username",
+  "register": "Sign up",
+  "noAccountYet": "Don't have an account? ",
+  "alreadyHaveAccount": "Already have an account? ",
+  "enterYourEmail": "Please enter your email",
+  "enterYourPassword": "Please enter your password",
+  "termsNotice": "By signing up you accept ECO2's Terms of Use and Privacy Policy.",
+  "navStore": "Store",
+  "navGarden": "Garden",
+  "navDashboard": "Dashboard",
+  "navScanner": "Scanner",
+  "navProfile": "Profile",
+  "myGarden": "My Garden",
+  "viewAll": "view all",
+  "addPlant": "Add Plant",
+  "gardenEmpty": "Your garden is empty",
+  "needsWater": "Water",
+  "upToDate": "Up to date",
+  "noWateringYet": "Not watered yet",
+  "wateringToday": "Water today",
+  "wateringOverdue": "Watering overdue",
+  "daysWithoutWater": "days without water",
+  "daysInYourGarden": "days in your garden",
+  "frequency": "frequency",
+  "remaining": "remaining",
+  "overdue": "overdue",
+  "careStatus": "Care status",
+  "urgentWatering": "Needs Water",
+  "deletePlantTitle": "Delete plant?",
+  "deletePlantBody": "\"{plantName}\" will be removed from your garden. This action cannot be undone.",
+  "@deletePlantBody": {
+    "placeholders": {
+      "plantName": {
+        "type": "String"
+      }
+    }
+  },
+  "cancel": "Cancel",
+  "delete": "Delete",
+  "lastWateredQuestion": "When did you last water {plantName}?",
+  "@lastWateredQuestion": {
+    "placeholders": {
+      "plantName": {
+        "type": "String"
+      }
+    }
+  },
+  "lastWateredHelp": "This is how we work out when the next watering is due. If you're not sure, we'll start counting from today.",
+  "today": "Today",
+  "yesterday": "Yesterday",
+  "someDaysAgo": "A few days ago…",
+  "neverOrDontRemember": "Never / can't remember",
+  "lastWatering": "Last watering",
+  "settings": "Settings",
+  "account": "ACCOUNT",
+  "editProfile": "Edit profile",
+  "editProfileSubtitle": "Name, bio, photo",
+  "changePassword": "Change password",
+  "biometricAuth": "Biometric authentication",
+  "notifications": "NOTIFICATIONS",
+  "pushNotifications": "Push notifications",
+  "wateringReminders": "Watering reminders",
+  "achievementsAndMissions": "Achievements and missions",
+  "preferences": "PREFERENCES",
+  "systemLanguage": "System language",
+  "language": "Language",
+  "themeAndColors": "Theme and colours",
+  "privacyAndData": "PRIVACY AND DATA",
+  "privacy": "Privacy",
+  "privacySubtitle": "Personal data controls",
+  "exportMyData": "Export my data",
+  "application": "APP",
+  "helpAndSupport": "Help and support",
+  "aboutEco2": "About ECO2",
+  "dangerZone": "DANGER ZONE",
+  "signOut": "Sign out",
+  "deleteAccount": "Delete account",
+  "deleteAccountSubtitle": "This action is permanent",
+  "spanish": "Spanish",
+  "english": "English",
+  "profile": "Profile",
+  "plants": "Plants",
+  "seeds": "Seeds",
+  "co2Total": "Total CO₂",
+  "levelLabel": "Level {level}",
+  "@levelLabel": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "levelWithName": "Level {level} · {name}",
+  "@levelWithName": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "myTrophies": "My Trophies",
+  "trophies": "Trophies",
+  "missions": "Missions",
+  "achievements": "Achievements",
+  "obtained": "Earned",
+  "available": "Available",
+  "completedPercent": "Completed",
+  "streakDays": "{count, plural, =1{1 day streak} other{{count} day streak}}",
+  "@streakDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "xpPoints": "{xp} XP",
+  "@xpPoints": {
+    "placeholders": {
+      "xp": {
+        "type": "int"
+      }
+    }
+  },
+  "seedsCount": "{count} seeds",
+  "@seedsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "greenFootprint": "My Green Footprint",
+  "co2AbsorbedToday": "CO₂ absorbed today",
+  "gramsPerDay": "grams / day",
+  "contributionPerPlant": "Contribution per plant",
+  "weeklyEvolution": "Weekly evolution",
+  "weeklyEvolutionHelp": "Reflects when each plant joined your garden.",
+  "copyMyFootprint": "Copy my green footprint",
+  "copiedToClipboard": "Copied to clipboard",
+  "accumulated": "Accumulated: {kg} kg",
+  "@accumulated": {
+    "placeholders": {
+      "kg": {
+        "type": "String"
+      }
+    }
+  },
+  "noPlantsYet": "You don't have any plants yet",
+  "footprintError": "We couldn't work out your green footprint.",
+  "retry": "Try again",
+  "scannerPointAtPlant": "Point at a plant",
+  "scannerAnalyzing": "Analysing...",
+  "scannerNotInCatalog": "We recognised it, but it's not in the ECO2 catalogue yet — we can't add it to your garden for now.",
+  "scannerLowConfidence": "We couldn't recognise it confidently. Try again with more light or from closer up.",
+  "connectionError": "Connection error. Check your internet.",
+  "wrongCredentials": "Incorrect email or password.",
+  "emailAlreadyUsed": "This email already has an account.",
+  "save": "Save",
+  "close": "Close",
+  "greeting": "Namaste",
+  "yourSeeds": "Your seeds",
+  "activeMission": "Active Mission",
+  "searchSpecies": "Search species...",
+  "searchMyPlant": "Search my plant...",
+  "exploreSpecies": "Explore species",
+  "trendingThisWeek": "Trending this week",
+  "allCategory": "All",
+  "plantsCount": "{count} plants",
+  "@plantsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "needsAttentionToday": "{count, plural, =1{1 plant needs attention today} other{{count} plants need attention today}}",
+  "@needsAttentionToday": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "view": "View",
+  "add": "Add",
+  "allUpToDate": "All up to date!",
+  "wateringStatus": "Watering status",
+  "logEveryCare": "Log every care action",
+  "viewHistory": "View history",
+  "latestCare": "Latest care",
+  "careType": "Care type",
+  "suggestedNextWatering": "Suggested next watering",
+  "inMyCollectionSince": "In my collection since",
+  "howToCareTitle": "How to care for your plant",
+  "everyNDays": "Every {days} days",
+  "@everyNDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "daysAgo": "{count, plural, =1{1 day ago} other{{count} days ago}}",
+  "@daysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "noCareLogged": "No care logged yet.",
+  "scannerHint": "Point at a plant",
+  "analyzing": "Analyzing...",
+  "notIdentified": "Not confidently identified",
+  "potsRemaining": "Pots remaining: {count}",
+  "@potsRemaining": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "notificationsTitle": "Notifications",
+  "markAllRead": "Mark all as read",
+  "todayLabel": "TODAY",
+  "thatsAllForNow": "That's all for now",
+  "noNotifications": "You have no notifications",
+  "wateringPending": "Watering due",
+  "achievementUnlocked": "Achievement unlocked!",
+  "newPlantAdded": "New plant added",
+  "seedbed": "Seedbed",
+  "redeemSeeds": "Redeem your seeds for rewards",
+  "search": "Search...",
+  "communityFavorites": "Community favourites",
+  "newBadge": "New",
+  "yourImpactEquals": "Your impact is equivalent to:",
+  "treesEquivalent": "{count} Trees",
+  "@treesEquivalent": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "kilometersEquivalent": "{count} Kilometres",
+  "@kilometersEquivalent": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "levelAndTrophies": "Level {level} · {trophies} trophies",
+  "@levelAndTrophies": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      },
+      "trophies": {
+        "type": "int"
+      }
+    }
+  },
+  "noAchievementsYet": "You haven't completed any achievements yet.",
+  "allAchievementsDone": "You've unlocked every achievement!",
+  "noAchievementsConfigured": "No achievements configured yet.",
+  "comingSoon": "Coming soon",
+  "reward": "Reward",
+  "achievementUnlockedLabel": "Achievement unlocked",
+  "achievementLockedLabel": "Achievement locked",
+  "activeMissions": "Active Missions",
+  "plantCatalog": "Plant Catalogue",
+  "seedStore": "Seed Store",
+  "freePlanActive": "Free plan active",
+  "user": "User",
+  "loading": "Loading...",
+  "genericError": "Something went wrong. Please try again.",
+  "catTropical": "Tropical",
+  "catSucculent": "Succulent",
+  "catCactus": "Cactus",
+  "catFern": "Fern",
+  "catFlowering": "Flowering",
+  "catHerb": "Herb",
+  "catTree": "Tree",
+  "catOther": "Plant",
+  "lightLow": "Low",
+  "lightMedium": "Medium",
+  "lightHigh": "High",
+  "lightIndirect": "Indirect",
+  "lightPrefix": "{level} light",
+  "@lightPrefix": {
+    "placeholders": {
+      "level": {
+        "type": "String"
+      }
+    }
+  },
+  "difficultyVeryEasy": "Very easy",
+  "difficultyEasy": "Easy",
+  "difficultyMedium": "Medium",
+  "wateringEveryDays": "Water every {days}d",
+  "@wateringEveryDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "humidityLow": "Low",
+  "humidityMedium": "Medium",
+  "humidityHigh": "High",
+  "impactCarTitle": "{km} km by car",
+  "@impactCarTitle": {
+    "placeholders": {
+      "km": {
+        "type": "String"
+      }
+    }
+  },
+  "impactCarSubtitle": "That wouldn't need to be driven to emit that CO₂.",
+  "impactBulbTitle": "{hours} h of LED bulb",
+  "@impactBulbTitle": {
+    "placeholders": {
+      "hours": {
+        "type": "String"
+      }
+    }
+  },
+  "impactBulbSubtitle": "Of equivalent electricity use.",
+  "impactTreeTitle": "{days} days of one tree",
+  "@impactTreeTitle": {
+    "placeholders": {
+      "days": {
+        "type": "String"
+      }
+    }
+  },
+  "impactTreeSubtitle": "How long a mature tree takes to absorb the same.",
+  "impactApproxNote": "Approximate equivalences, calculated from your garden's CO₂.",
+  "impactTooSmall": "Your garden hasn't yet absorbed enough CO₂ for a useful equivalence.",
+  "accumulatedGrams": "Accumulated: {grams} g",
+  "@accumulatedGrams": {
+    "placeholders": {
+      "grams": {
+        "type": "String"
+      }
+    }
+  }
+}

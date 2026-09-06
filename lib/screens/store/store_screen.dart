@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend_eco_2/l10n/app_localizations.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:provider/provider.dart';
 import 'package:frontend_eco_2/providers/providers.dart';
@@ -203,7 +204,7 @@ class _StoreScreenState extends State<StoreScreen> {
       case 'Macetas':
         return 'Consigue más espacio para tus plantas';
       default:
-        return 'Los favoritos de la comunidad';
+        return AppLocalizations.of(context)!.communityFavorites;
     }
   }
 
@@ -260,9 +261,9 @@ class _StoreScreenState extends State<StoreScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Semillero',
-                  style: TextStyle(
+                Text(
+                  AppLocalizations.of(context)!.seedbed,
+                  style: const TextStyle(
                     fontFamily: 'DM Sans',
                     fontWeight: FontWeight.bold,
                     fontSize: 26,
@@ -271,7 +272,7 @@ class _StoreScreenState extends State<StoreScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Canjea tus semillas por recompensas',
+                  AppLocalizations.of(context)!.redeemSeeds,
                   style: TextStyle(
                     fontFamily: 'Inter',
                     fontSize: 12,
@@ -336,9 +337,9 @@ class _StoreScreenState extends State<StoreScreen> {
             child: TextField(
               controller: _searchController,
               onChanged: (val) => setState(() => _searchQuery = val),
-              decoration: const InputDecoration(
-                hintText: 'Buscar...',
-                hintStyle: TextStyle(
+              decoration: InputDecoration(
+                hintText: AppLocalizations.of(context)!.search,
+                hintStyle: const TextStyle(
                   color: AppColors.textSecondary,
                   fontSize: 13,
                   fontFamily: 'Inter',

@@ -6,6 +6,7 @@ class SecureStorage {
   static const _refreshTokenKey = 'refresh_token';
   static const _appTourSeenKey = 'app_tour_seen';
   static const _plantCareTourSeenKey = 'plant_care_tour_seen';
+  static const _languageCodeKey = 'language_code';
 
   final FlutterSecureStorage _storage = const FlutterSecureStorage(
     aOptions: AndroidOptions(encryptedSharedPreferences: true),
@@ -51,4 +52,13 @@ class SecureStorage {
 
   Future<void> markPlantCareTourSeen() =>
       _storage.write(key: _plantCareTourSeenKey, value: 'true');
+
+  // ── Idioma elegido por el usuario ─────────────────────────────────────
+  // Null significa "seguir el idioma del sistema".
+  Future<String?> getLanguageCode() => _storage.read(key: _languageCodeKey);
+
+  Future<void> saveLanguageCode(String code) =>
+      _storage.write(key: _languageCodeKey, value: code);
+
+  Future<void> clearLanguageCode() => _storage.delete(key: _languageCodeKey);
 }

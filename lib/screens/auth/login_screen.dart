@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend_eco_2/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:frontend_eco_2/providers/providers.dart';
 import 'package:frontend_eco_2/routing/app_routes.dart';
@@ -106,7 +107,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       
                       Center(
                         child: Text(
-                          'Bienvenido de vuelta',
+                          AppLocalizations.of(context)!.welcomeBack,
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
@@ -117,9 +118,9 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       const SizedBox(height: 4),
                       Center(
-                        child: const Text(
-                          'Iniciar Sesión',
-                          style: TextStyle(
+                        child: Text(
+                          AppLocalizations.of(context)!.signIn,
+                          style: const TextStyle(
                             fontSize: 32,
                            
                             color: AppColors.primary,
@@ -132,12 +133,12 @@ class _LoginScreenState extends State<LoginScreen> {
                       // Email Field
                       CustomTextField(
                         controller: _emailController,
-                        labelText: 'Correo electrónico',
-                        hintText: 'correo@ejemplo.com',
+                        labelText: AppLocalizations.of(context)!.email,
+                        hintText: AppLocalizations.of(context)!.emailHint,
                         keyboardType: TextInputType.emailAddress,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Por favor ingresa tu correo';
+                            return AppLocalizations.of(context)!.enterYourEmail;
                           }
                           if (!value.contains('@')) {
                             return 'Por favor ingresa un correo válido';
@@ -150,7 +151,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       // Password Field
                       CustomTextField(
                         controller: _passwordController,
-                        labelText: 'Contraseña',
+                        labelText: AppLocalizations.of(context)!.password,
                         hintText: '••••••',
                         obscureText: _obscurePassword,
                         suffixIcon: IconButton(
@@ -168,7 +169,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Por favor ingresa tu contraseña';
+                            return AppLocalizations.of(context)!.enterYourPassword;
                           }
                           if (value.length < 6) {
                             return 'La contraseña debe tener al menos 6 caracteres';
@@ -193,9 +194,9 @@ class _LoginScreenState extends State<LoginScreen> {
                             minimumSize: Size.zero,
                             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                           ),
-                          child: const Text(
-                            '¿Olvidaste tu contraseña?',
-                            style: TextStyle(
+                          child: Text(
+                            AppLocalizations.of(context)!.forgotPassword,
+                            style: const TextStyle(
                               color: AppColors.primary,
                               fontWeight: FontWeight.bold,
                               fontSize: 14,
@@ -210,7 +211,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       SizedBox(
                         width: double.infinity,
                         child: CustomButton(
-                          text: 'Iniciar sesión',
+                          text: AppLocalizations.of(context)!.signInAction,
                           backgroundColor: AppColors.primaryDark,
                           foregroundColor: Colors.white,
                           isLoading: userProvider.isLoading,
@@ -223,9 +224,9 @@ class _LoginScreenState extends State<LoginScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Text(
-                            '¿No tienes cuenta? ',
-                            style: TextStyle(
+                          Text(
+                            AppLocalizations.of(context)!.noAccountYet,
+                            style: const TextStyle(
                               color: AppColors.textSecondary,
                               fontFamily: 'Inter',
                               fontSize: 14,
@@ -235,9 +236,9 @@ class _LoginScreenState extends State<LoginScreen> {
                             onTap: () {
                               Navigator.pushReplacementNamed(context, AppRoutes.register);
                             },
-                            child: const Text(
-                              'Crear cuenta',
-                              style: TextStyle(
+                            child: Text(
+                              AppLocalizations.of(context)!.createAccount,
+                              style: const TextStyle(
                                 color: AppColors.primary,
                                 fontWeight: FontWeight.bold,
                                 fontFamily: 'Inter',

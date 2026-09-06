@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend_eco_2/l10n/app_localizations.dart';
 import 'package:frontend_eco_2/theme/app_colors.dart';
 import 'package:frontend_eco_2/utils/app_tour.dart';
 
@@ -65,7 +66,7 @@ class CustomBottomNavBar extends StatelessWidget {
             children: [
               _buildItem(
                 index: 0,
-                label: 'Tienda',
+                label: AppLocalizations.of(context)!.navStore,
                 tourKey: tiendaKey,
                 tourTitle: 'Tienda',
                 tourDescription: 'Canjea tus semillas por macetas extra y funciones especiales.',
@@ -73,7 +74,7 @@ class CustomBottomNavBar extends StatelessWidget {
               ),
               _buildItem(
                 index: 1,
-                label: 'Jardín',
+                label: AppLocalizations.of(context)!.navGarden,
                 tourKey: jardinKey,
                 tourTitle: 'Tu Jardín',
                 tourDescription: 'Explora el catálogo de especies o gestiona las plantas que ya tienes.',
@@ -81,12 +82,12 @@ class CustomBottomNavBar extends StatelessWidget {
               ),
               _buildItem(
                 index: 2,
-                label: 'Dashboard',
+                label: AppLocalizations.of(context)!.navDashboard,
                 iconBuilder: (color, isSelected) => _buildDashboardIcon(color, isSelected),
               ),
               _buildItem(
                 index: 3,
-                label: 'Escáner',
+                label: AppLocalizations.of(context)!.navScanner,
                 tourKey: escanerKey,
                 tourTitle: 'Escáner IA',
                 tourDescription: 'Identifica una planta apuntando la cámara — la IA reconoce la especie.',
@@ -94,7 +95,7 @@ class CustomBottomNavBar extends StatelessWidget {
               ),
               _buildItem(
                 index: 4,
-                label: 'Perfil',
+                label: AppLocalizations.of(context)!.navProfile,
                 tourKey: perfilKey,
                 tourTitle: 'Tu Perfil',
                 tourDescription: 'Revisa tu progreso, ajustes de la cuenta y más.',

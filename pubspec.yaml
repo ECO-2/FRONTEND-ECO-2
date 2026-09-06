@@ -50,6 +50,7 @@ dependencies:
   permission_handler: 11.3.1
   path_provider: ^2.1.5
   cached_network_image: ^3.4.1
+  intl: any
   firebase_messaging: ^15.0.0
   firebase_core: ^3.0.0
 dev_dependencies:
@@ -88,6 +89,9 @@ flutter_launcher_icons:
 
 # The following section is specific to Flutter packages.
 flutter:
+
+  # Genera AppLocalizations a partir de los .arb de lib/l10n (ver l10n.yaml).
+  generate: true
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in

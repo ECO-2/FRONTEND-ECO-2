@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend_eco_2/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:frontend_eco_2/providers/providers.dart';
 import 'package:frontend_eco_2/routing/app_routes.dart';
@@ -79,9 +80,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     children: [
                       const SizedBox(height: 16),
                       Center(
-                        child: const Text(
-                          'Crear cuenta',
-                          style: TextStyle(
+                        child: Text(
+                          AppLocalizations.of(context)!.createAccount,
+                          style: const TextStyle(
                             fontSize: 32,
                             fontWeight: FontWeight.bold,
                             color: AppColors.primary,
@@ -94,7 +95,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       // Username Field
                       CustomTextField(
                         controller: _usernameController,
-                        labelText: 'Nombre de usuario',
+                        labelText: AppLocalizations.of(context)!.username,
                         hintText: 'carlos_eco',
                         validator: (value) {
                           if (value == null || value.isEmpty) {
@@ -111,8 +112,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       // Email Field
                       CustomTextField(
                         controller: _emailController,
-                        labelText: 'Correo electrónico',
-                        hintText: 'correo@ejemplo.com',
+                        labelText: AppLocalizations.of(context)!.email,
+                        hintText: AppLocalizations.of(context)!.emailHint,
                         keyboardType: TextInputType.emailAddress,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
@@ -129,17 +130,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       // Password Field (with Rich Text label and suffixText)
                       CustomTextField(
                         controller: _passwordController,
-                        labelText: 'Contraseña',
+                        labelText: AppLocalizations.of(context)!.password,
                         customLabel: RichText(
-                          text: const TextSpan(
-                            style: TextStyle(
+                          text: TextSpan(
+                            style: const TextStyle(
                               fontSize: 14,
                               fontFamily: 'Inter',
                             ),
                             children: [
                               TextSpan(
-                                text: 'Contraseña',
-                                style: TextStyle(
+                                text: AppLocalizations.of(context)!.password,
+                                style: const TextStyle(
                                   fontWeight: FontWeight.w600,
                                   color: AppColors.primary,
                                 ),
@@ -162,15 +163,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             return 'Por favor ingresa tu contraseña';
                           }
                           if (value.length < 8) {
-                            return 'La contraseña debe tener al menos 8 caracteres';
+                            return AppLocalizations.of(context)!.passwordTooShort;
                           }
                           return null;
                         },
                       ),
                       const SizedBox(height: 6),
-                      const Text(
-                        'La contraseña debe tener al menos 8 caracteres',
-                        style: TextStyle(
+                      Text(
+                        AppLocalizations.of(context)!.passwordTooShort,
+                        style: const TextStyle(
                           color: AppColors.textSecondary,
                           fontSize: 12,
                           fontFamily: 'Inter',
@@ -181,7 +182,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       // Confirm Password Field
                       CustomTextField(
                         controller: _confirmPasswordController,
-                        labelText: 'Confirma contraseña',
+                        labelText: AppLocalizations.of(context)!.confirmPassword,
                         hintText: '••••••••',
                         suffixText: 'min. 8 chars',
                         obscureText: _obscurePassword,
@@ -201,7 +202,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       SizedBox(
                         width: double.infinity,
                         child: CustomButton(
-                          text: 'Registrarse',
+                          text: AppLocalizations.of(context)!.register,
                           backgroundColor: AppColors.primaryDark,
                           foregroundColor: Colors.white,
                           isLoading: userProvider.isLoading,
@@ -214,9 +215,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Text(
-                            '¿Ya tienes cuenta? ',
-                            style: TextStyle(
+                          Text(
+                            AppLocalizations.of(context)!.alreadyHaveAccount,
+                            style: const TextStyle(
                               color: AppColors.textSecondary,
                               fontFamily: 'Inter',
                               fontSize: 14,
@@ -226,9 +227,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             onTap: () {
                               Navigator.pushReplacementNamed(context, AppRoutes.login);
                             },
-                            child: const Text(
-                              'Inicia sesión',
-                              style: TextStyle(
+                            child: Text(
+                              AppLocalizations.of(context)!.signInAction,
+                              style: const TextStyle(
                                 color: AppColors.primary,
                                 fontWeight: FontWeight.bold,
                                 fontFamily: 'Inter',

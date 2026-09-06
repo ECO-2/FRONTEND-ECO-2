@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend_eco_2/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:frontend_eco_2/models/models.dart';
 import 'package:frontend_eco_2/providers/providers.dart';
@@ -157,9 +158,9 @@ class _CareSheetContentState extends State<CareSheetContent> {
               const SizedBox(height: 20),
               
               // Tipo de cuidado label
-              const Text(
-                'Tipo de cuidado',
-                style: TextStyle(
+              Text(
+                AppLocalizations.of(context)!.careType,
+                style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 14,
                   color: Color(0xFF0D2B31),
@@ -290,9 +291,9 @@ class _CareSheetContentState extends State<CareSheetContent> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'Próximo riego sugerido',
-                            style: TextStyle(
+                          Text(
+                            AppLocalizations.of(context)!.suggestedNextWatering,
+                            style: const TextStyle(
                               fontSize: 11,
                               color: Color(0xFF7E8A83),
                             ),
