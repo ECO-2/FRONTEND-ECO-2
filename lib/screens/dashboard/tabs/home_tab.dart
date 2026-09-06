@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend_eco_2/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:frontend_eco_2/models/models.dart';
 import 'package:frontend_eco_2/providers/providers.dart';
@@ -7,6 +8,7 @@ import 'package:frontend_eco_2/theme/app_colors.dart';
 import 'package:frontend_eco_2/widgets/common/plant_card.dart';
 import 'package:frontend_eco_2/widgets/garden/add_plant_modal.dart';
 import 'package:frontend_eco_2/utils/achievement_ui.dart';
+import 'package:frontend_eco_2/utils/co2_estimate.dart';
 
 class HomeTab extends StatelessWidget {
   final VoidCallback onViewAll;
@@ -15,6 +17,7 @@ class HomeTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     final user = Provider.of<UserProvider>(context).currentUser;
     final plantsProvider = Provider.of<PlantsProvider>(context);
     final missionsProvider = Provider.of<MissionsProvider>(context);
@@ -36,9 +39,10 @@ class HomeTab extends StatelessWidget {
         children: [
           // ── Mi Jardín section ─────────────────────────
           _buildSectionHeader(
-            title: 'Mi Jardín',
-            actionLabel: 'ver todas  →',
+            title: l.myGarden,
+            actionLabel: '${l.viewAll}  →',
             onAction: onViewAll,
+            showGardenIcon: true,
           ),
           const SizedBox(height: 14),
 
@@ -93,9 +97,9 @@ class HomeTab extends StatelessWidget {
           // ── Mi Huella Verde header ────────────────────
           Row(
             children: [
-              const Text(
-                'Mi Huella Verde',
-                style: TextStyle(
+              Text(
+                l.greenFootprint,
+                style: const TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
                   color: AppColors.textPrimary,
@@ -124,7 +128,7 @@ class HomeTab extends StatelessWidget {
           const SizedBox(height: 14),
 
           // ── CO2 Block ─────────────────────────────────
-          _buildCO2Block(context),
+          _buildCO2Block(context, plantsProvider),
           const SizedBox(height: 24),
 
           // ── Misión Activa ─────────────────────────────
@@ -148,6 +152,9 @@ class HomeTab extends StatelessWidget {
     required String title,
     required String actionLabel,
     required VoidCallback onAction,
+    // Antes se comparaba el título con el literal 'Mi Jardín', lo que dejaba
+    // de funcionar en cuanto el texto se traduce.
+    bool showGardenIcon = false,
   }) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -163,7 +170,7 @@ class HomeTab extends StatelessWidget {
                 fontFamily: 'DM Sans',
               ),
             ),
-            if (title == 'Mi Jardín') ...[
+            if (showGardenIcon) ...[
               const SizedBox(width: 8),
               Container(
                 padding: const EdgeInsets.all(4),
@@ -210,9 +217,9 @@ class HomeTab extends StatelessWidget {
         children: [
           const Icon(Icons.eco_outlined, color: AppColors.primary, size: 32),
           const SizedBox(height: 8),
-          const Text(
-            'Tu jardín está vacío',
-            style: TextStyle(
+          Text(
+            AppLocalizations.of(context)!.gardenEmpty,
+            style: const TextStyle(
               color: AppColors.textSecondary,
               fontFamily: 'Inter',
               fontSize: 13,
@@ -227,9 +234,9 @@ class HomeTab extends StatelessWidget {
                 color: AppColors.primary,
                 borderRadius: BorderRadius.circular(20),
               ),
-              child: const Text(
-                '+ Añadir Planta',
-                style: TextStyle(
+              child: Text(
+                '+ ${AppLocalizations.of(context)!.addPlant}',
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
@@ -312,7 +319,14 @@ class HomeTab extends StatelessWidget {
     );
   }
 
-  Widget _buildCO2Block(BuildContext context) {
+  Widget _buildCO2Block(BuildContext context, PlantsProvider plantsProvider) {
+    // Estimación real a partir de las plantas del usuario. Antes este
+    // bloque mostraba "12.4 g/dia" escrito a mano: el mismo número para
+    // todo el mundo, tuviera 0 o 20 plantas.
+    final co2 = Co2Estimate.forPlants(
+      plantsProvider.userPlants,
+      speciesById: {for (final s in plantsProvider.speciesCatalog) s.id: s},
+    );
     return GestureDetector(
       onTap: () => Navigator.pushNamed(context, AppRoutes.greenFootprint),
       child: Container(
@@ -361,9 +375,9 @@ class HomeTab extends StatelessWidget {
                   Text.rich(
                     TextSpan(
                       children: [
-                        const TextSpan(
-                          text: '12.4 ',
-                          style: TextStyle(
+                        TextSpan(
+                          text: '${co2.gramsPerDay.toStringAsFixed(1)} ',
+                          style: const TextStyle(
                             color: Colors.white,
                             fontSize: 34,
                             fontWeight: FontWeight.bold,

@@ -13,6 +13,13 @@ class UserService {
     return User.fromJson(data);
   }
 
+  /// GET /user/green-footprint — CO₂ real del jardín del usuario, calculado
+  /// por el backend con los valores por especie del catálogo.
+  Future<GreenFootprint> getGreenFootprint() async {
+    final data = await _client.get('/user/green-footprint') as Map<String, dynamic>;
+    return GreenFootprint.fromJson(data);
+  }
+
   /// PATCH /user/profile — actualiza nombre, notificaciones y horarios de recordatorio.
   Future<User> updateProfile({
     String? username,

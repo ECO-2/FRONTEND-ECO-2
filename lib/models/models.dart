@@ -21,3 +21,4 @@ export 'snapshot_score.dart';
 export 'plant_identification.dart';
 export 'identification_result.dart';
 export 'notification.dart';
+export 'green_footprint.dart';

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:frontend_eco_2/providers/providers.dart';
+import 'package:frontend_eco_2/l10n/app_localizations.dart';
 import 'package:frontend_eco_2/services/services.dart';
 import 'package:frontend_eco_2/routing/app_routes.dart';
 import 'package:frontend_eco_2/theme/app_colors.dart';
@@ -72,6 +73,10 @@ class MyApp extends StatelessWidget {
         Provider<IdentificationService>.value(value: identificationService),
         Provider<SecureStorage>.value(value: storage),
         Provider<NotificationService>.value(value: notificationService),
+        // Lo consume GreenFootprintScreen para pedir el CO2 real del jardín.
+        Provider<UserService>.value(value: userService),
+        // Idioma elegido por el usuario, recordado entre sesiones.
+        ChangeNotifierProvider(create: (_) => LocaleProvider(storage)..load()),
         ChangeNotifierProvider(
           create: (_) => UserProvider(
             authService: authService,
@@ -92,13 +97,19 @@ class MyApp extends StatelessWidget {
       ],
       // ECO2 no ofrece modo oscuro: la app siempre usa el tema claro,
       // sin importar el ajuste de tema del sistema del teléfono.
-      child: _AppLoader(
+      // Consumer y no context.watch: el `context` de este build está por
+      // encima del MultiProvider y no vería el LocaleProvider.
+      child: Consumer<LocaleProvider>(
+        builder: (context, localeProvider, _) => _AppLoader(
         child: MaterialApp(
           navigatorKey: navigatorKey,
           title: 'ECO2',
           themeMode: ThemeMode.light,
           debugShowCheckedModeBanner: false,
+          // `locale` null = seguir el idioma del sistema.
+          locale: localeProvider.locale,
           localizationsDelegates: const [
+            AppLocalizations.delegate,
             GlobalMaterialLocalizations.delegate,
             GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
@@ -120,6 +131,7 @@ class MyApp extends StatelessWidget {
           ),
           initialRoute: AppRoutes.welcome,
           onGenerateRoute: AppRoutes.onGenerateRoute,
+        ),
         ),
       ),
     );

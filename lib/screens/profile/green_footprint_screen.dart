@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
+import 'package:frontend_eco_2/models/models.dart';
+import 'package:frontend_eco_2/services/services.dart';
 import 'package:frontend_eco_2/widgets/common/custom_app_bar.dart';
-
+import 'package:frontend_eco_2/widgets/common/app_toast.dart';
+import 'package:frontend_eco_2/widgets/profile/impact_equivalents.dart';
 
 // ── Color tokens extracted from Figma ────────────────────────────────────
 const _kDark = Color(0xFF10454F);
@@ -10,20 +15,52 @@ const _kTextDark = Color(0xFF0D2B31);
 const _kLime = Color(0xFFBDE038);
 const _kBarBg = Color(0xFFF0F0F0);
 
-class GreenFootprintScreen extends StatelessWidget {
+/// "Mi Huella Verde".
+///
+/// Toda la pantalla estaba con datos escritos a mano ("36.5 g/día", tres
+/// plantas de ejemplo y una serie semanal inventada), iguales para cualquier
+/// usuario. Ahora se pide al backend (`GET /user/green-footprint`), que calcula
+/// el CO₂ a partir de las plantas reales del usuario y del valor por especie
+/// cargado en el catálogo.
+class GreenFootprintScreen extends StatefulWidget {
   const GreenFootprintScreen({super.key});
 
-  // Mock plant CO2 data (gramos/día)
-  static const _plants = [
-    (name: 'Mi Monstera', grams: 16.4, ratio: 0.85),
-    (name: 'Pothos dorado', grams: 11.0, ratio: 0.57),
-    (name: 'Aloe vera', grams: 9.1, ratio: 0.47),
-  ];
+  @override
+  State<GreenFootprintScreen> createState() => _GreenFootprintScreenState();
+}
 
-  // Weekly data L M X J V S D
-  static const _weekDays = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
-  static const _weekValues = [38.5, 49.0, 59.5, 52.5, 63.0, 56.0, 63.88];
-  static const _maxBar = 63.88; // Max bar height ref (pixel heights from Figma)
+class _GreenFootprintScreenState extends State<GreenFootprintScreen> {
+  GreenFootprint? _data;
+  bool _loading = true;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    try {
+      final service = Provider.of<UserService>(context, listen: false);
+      final data = await service.getGreenFootprint();
+      if (!mounted) return;
+      setState(() {
+        _data = data;
+        _loading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = 'No pudimos calcular tu huella verde.';
+        _loading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,40 +70,70 @@ class GreenFootprintScreen extends StatelessWidget {
         title: 'Mi Huella Verde',
         automaticallyImplyLeading: true,
       ),
-      body: Column(
-        children: [
-          // ── Scrollable content ──────────────────────────────────
-          Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  // Hero blanco con número grande
-                  _buildHero(),
-                  _Divider(),
-                  // Aporte por planta
-                  _buildPlantContributions(),
-                  _Divider(),
-                  // Evolución semanal
-                  _buildWeeklyChart(),
-                  // CTA
-                  _buildShareCTA(),
-                ],
-              ),
+      body: _loading
+          ? const Center(child: CircularProgressIndicator())
+          : _error != null
+              ? _buildError()
+              : RefreshIndicator(
+                  onRefresh: _load,
+                  child: SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    child: Column(
+                      children: [
+                        _buildHero(_data!),
+                        const _Divider(),
+                        _buildPlantContributions(_data!),
+                        const _Divider(),
+                        _buildWeeklyChart(_data!),
+                        const _Divider(),
+                        // Equivalencias calculadas desde el CO2 real.
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(24, 18, 24, 4),
+                          child: ImpactEquivalentsCard(
+                            totalGrams: _data!.totalKg * 1000,
+                          ),
+                        ),
+                        _buildShareCTA(_data!),
+                      ],
+                    ),
+                  ),
+                ),
+    );
+  }
+
+  Widget _buildError() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.cloud_off_rounded, size: 44, color: _kTextMuted),
+            const SizedBox(height: 12),
+            Text(
+              _error!,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontFamily: 'DM Sans', color: _kTextMuted),
             ),
-          ),
-        ],
+            const SizedBox(height: 16),
+            OutlinedButton(onPressed: _load, child: const Text('Reintentar')),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildHero() {
+  Widget _buildHero(GreenFootprint data) {
+    // Un ejemplar de interior fija décimas de gramo al día, así que dos
+    // decimales; con uno solo casi todo se vería como "0.0".
+    final value = data.gramsPerDay.toStringAsFixed(2);
+
     return Container(
       width: double.infinity,
       color: Colors.white,
       padding: const EdgeInsets.fromLTRB(24, 22, 24, 18),
       child: Column(
         children: [
-          // Label
           const Text(
             'CO₂ absorbido hoy',
             style: TextStyle(
@@ -77,10 +144,9 @@ class GreenFootprintScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 4),
-          // Big number — Syne Bold 64 (using DM Sans Bold as fallback)
-          const Text(
-            '36.5',
-            style: TextStyle(
+          Text(
+            value,
+            style: const TextStyle(
               fontFamily: 'DM Sans',
               fontWeight: FontWeight.w900,
               fontSize: 72,
@@ -98,29 +164,63 @@ class GreenFootprintScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 14),
-          // Equivalence pill
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
             decoration: BoxDecoration(
               color: const Color(0xFFA3AB78).withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(20),
             ),
-            child: const Text(
-              '= No recorrer 0.19 km en auto por día',
-              style: TextStyle(
+            child: Text(
+              data.plantCount == 0
+                  ? 'Aún no tienes plantas en tu jardín'
+                  : 'Acumulado: ${(data.totalKg * 1000).toStringAsFixed(2)} g',
+              style: const TextStyle(
                 fontFamily: 'DM Sans',
-                fontWeight: FontWeight.w500,
-                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                fontSize: 12,
                 color: _kTextDark,
               ),
             ),
           ),
+          if (data.hasDerivedValues) ...[
+            const SizedBox(height: 10),
+            // De las 51 especies del catálogo solo 9 tienen medición publicada.
+            // Decirlo evita presentar una inferencia como si fuera un dato.
+            Text(
+              'Valor estimado: ${data.measured} de ${data.plantCount} '
+              '${data.plantCount == 1 ? "planta se apoya" : "plantas se apoyan"} '
+              'en una medición publicada.',
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontFamily: 'DM Sans',
+                fontSize: 11,
+                color: _kTextMuted,
+                height: 1.35,
+              ),
+            ),
+          ],
         ],
       ),
     );
   }
 
-  Widget _buildPlantContributions() {
+  Widget _buildPlantContributions(GreenFootprint data) {
+    if (data.breakdown.isEmpty) {
+      return const Padding(
+        padding: EdgeInsets.fromLTRB(24, 18, 24, 18),
+        child: Text(
+          'Añade plantas a tu jardín para ver cuánto aporta cada una.',
+          style: TextStyle(fontFamily: 'DM Sans', fontSize: 13, color: _kTextMuted),
+        ),
+      );
+    }
+
+    // La barra se escala contra el mayor valor absoluto, para que una planta
+    // con aporte negativo también se represente proporcionalmente.
+    final maxAbs = data.breakdown
+        .map((p) => p.gramsPerDay.abs())
+        .fold<double>(0, (a, b) => a > b ? a : b);
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(24, 18, 24, 14),
@@ -137,70 +237,83 @@ class GreenFootprintScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          ..._plants.map((p) => Padding(
-                padding: const EdgeInsets.only(bottom: 14),
-                child: Row(
-                  children: [
-                    // Name column
-                    SizedBox(
-                      width: 90,
-                      child: Text(
-                        p.name,
-                        style: const TextStyle(
-                          fontFamily: 'DM Sans',
-                          fontWeight: FontWeight.w500,
-                          fontSize: 12,
-                          color: _kTextDark,
-                        ),
+          ...data.breakdown.map((p) {
+            final ratio = maxAbs == 0 ? 0.0 : (p.gramsPerDay.abs() / maxAbs).clamp(0.0, 1.0);
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 14),
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 90,
+                    child: Text(
+                      p.name,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontFamily: 'DM Sans',
+                        fontWeight: FontWeight.w500,
+                        fontSize: 12,
+                        color: _kTextDark,
                       ),
                     ),
-                    const SizedBox(width: 10),
-                    // Bar
-                    Expanded(
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(5),
-                        child: Stack(
-                          children: [
-                            Container(height: 10, color: _kBarBg),
-                            FractionallySizedBox(
-                              widthFactor: p.ratio,
-                              child: Container(
-                                height: 10,
-                                decoration: BoxDecoration(
-                                  color: _kDark,
-                                  borderRadius: BorderRadius.circular(5),
-                                ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(5),
+                      child: Stack(
+                        children: [
+                          Container(height: 10, color: _kBarBg),
+                          FractionallySizedBox(
+                            widthFactor: ratio,
+                            child: Container(
+                              height: 10,
+                              decoration: BoxDecoration(
+                                color: _kDark,
+                                borderRadius: BorderRadius.circular(5),
                               ),
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(width: 10),
-                    // Value
-                    SizedBox(
-                      width: 44,
-                      child: Text(
-                        '${p.grams} g',
-                        textAlign: TextAlign.right,
-                        style: const TextStyle(
-                          fontFamily: 'DM Sans',
-                          fontWeight: FontWeight.w500,
-                          fontSize: 12,
-                          color: _kTextMuted,
-                        ),
+                  ),
+                  const SizedBox(width: 10),
+                  SizedBox(
+                    width: 52,
+                    child: Text(
+                      // El valor se muestra tal cual, negativo incluido.
+                      '${p.gramsPerDay.toStringAsFixed(2)} g',
+                      textAlign: TextAlign.right,
+                      style: const TextStyle(
+                        fontFamily: 'DM Sans',
+                        fontWeight: FontWeight.w500,
+                        fontSize: 12,
+                        color: _kTextMuted,
                       ),
                     ),
-                  ],
-                ),
-              )),
+                  ),
+                ],
+              ),
+            );
+          }),
         ],
       ),
     );
   }
 
-  Widget _buildWeeklyChart() {
+  Widget _buildWeeklyChart(GreenFootprint data) {
     const chartHeight = 110.0;
+    final days = data.last7Days;
+    if (days.isEmpty) return const SizedBox.shrink();
+
+    // Escala por valor absoluto para que los días negativos también se vean.
+    final maxAbs = days
+        .map((d) => d.gramsPerDay.abs())
+        .fold<double>(0, (a, b) => a > b ? a : b);
+
+    const labels = ['D', 'L', 'M', 'X', 'J', 'V', 'S'];
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(24, 18, 24, 14),
@@ -216,6 +329,11 @@ class GreenFootprintScreen extends StatelessWidget {
               color: _kTextDark,
             ),
           ),
+          const SizedBox(height: 4),
+          const Text(
+            'Refleja cuándo entró cada planta a tu jardín.',
+            style: TextStyle(fontFamily: 'DM Sans', fontSize: 11, color: _kTextMuted),
+          ),
           const SizedBox(height: 12),
           Container(
             height: chartHeight + 40,
@@ -227,14 +345,19 @@ class GreenFootprintScreen extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: List.generate(_weekDays.length, (i) {
-                final barH = (_weekValues[i] / _maxBar) * chartHeight;
+              children: List.generate(days.length, (i) {
+                final d = days[i];
+                final barH = maxAbs == 0 ? 0.0 : (d.gramsPerDay.abs() / maxAbs) * chartHeight;
+                // Etiqueta a partir de la fecha real devuelta por el backend.
+                final parsed = DateTime.tryParse(d.date);
+                final label = parsed == null ? '' : labels[parsed.weekday % 7];
+
                 return Column(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     Container(
                       width: 24,
-                      height: barH,
+                      height: barH < 2 && d.gramsPerDay != 0 ? 2 : barH,
                       decoration: BoxDecoration(
                         color: _kDark,
                         borderRadius: BorderRadius.circular(4),
@@ -242,7 +365,7 @@ class GreenFootprintScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      _weekDays[i],
+                      label,
                       style: const TextStyle(
                         fontFamily: 'DM Sans',
                         fontWeight: FontWeight.w500,
@@ -261,7 +384,7 @@ class GreenFootprintScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildShareCTA() {
+  Widget _buildShareCTA(GreenFootprint data) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
       child: SizedBox(
@@ -276,16 +399,30 @@ class GreenFootprintScreen extends StatelessWidget {
               borderRadius: BorderRadius.circular(27),
             ),
           ),
-          icon: const Icon(Icons.share_rounded, size: 20),
+          icon: const Icon(Icons.copy_rounded, size: 20),
           label: const Text(
-            'Compartir mi huella verde',
+            'Copiar mi huella verde',
             style: TextStyle(
               fontFamily: 'DM Sans',
               fontWeight: FontWeight.w700,
               fontSize: 14,
             ),
           ),
-          onPressed: () {},
+          // El botón antes tenía `onPressed: () {}` y no hacía nada. Copiar al
+          // portapapeles funciona sin añadir dependencias; si se quiere abrir
+          // el diálogo de compartir del sistema hace falta un paquete como
+          // share_plus.
+          onPressed: () async {
+            final resumen = data.plantCount == 0
+                ? 'Todavía no tengo plantas en mi jardín ECO2.'
+                : 'Mi jardín ECO2: ${data.plantCount} '
+                    '${data.plantCount == 1 ? "planta" : "plantas"} y '
+                    '${data.gramsPerDay.toStringAsFixed(2)} g de CO₂ al día '
+                    '(${(data.totalKg * 1000).toStringAsFixed(2)} g acumulados).';
+            await Clipboard.setData(ClipboardData(text: resumen));
+            if (!mounted) return;
+            showAppToast(context, 'Copiado al portapapeles', type: ToastType.success);
+          },
         ),
       ),
     );
