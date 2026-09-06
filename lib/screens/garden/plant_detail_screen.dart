@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:frontend_eco_2/l10n/app_localizations.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:showcaseview/showcaseview.dart';
@@ -27,9 +28,18 @@ import 'widgets/care_history_list.dart';
 // Legacy mock species (s1-s3) keep their curated SpeciesData entry; every
 // real catalog species (real UUID from the backend) gets one built from its
 // actual fields instead of falling back to the same generic placeholder.
-SpeciesData _resolveSpeciesData(BuildContext context, String speciesId) {
+SpeciesData _resolveSpeciesData(
+  BuildContext context,
+  String speciesId, {
+  PlantSpecies? embedded,
+}) {
   final legacy = speciesDataMap[speciesId];
   if (legacy != null) return legacy;
+
+  // La especie que viene embebida con la planta es la fuente más fiable:
+  // llega siempre con la respuesta del backend, incluso si el catálogo
+  // todavía no ha terminado de cargar.
+  if (embedded != null) return SpeciesData.fromReal(embedded);
 
   final species = _resolveRealSpecies(context, speciesId);
   return SpeciesData.fromReal(species);
@@ -123,7 +133,7 @@ class _PlantDetailBodyState extends State<_PlantDetailBody> {
       (p) => p.id == widget.plant.id,
       orElse: () => widget.plant,
     );
-    final sp = _resolveSpeciesData(context, plant.speciesId);
+    final sp = _resolveSpeciesData(context, plant.speciesId, embedded: plant.species);
     final customPhoto = plantsProvider.customPhotoFor(plant.id);
 
     final statusBarHeight = MediaQuery.of(context).padding.top;
@@ -292,9 +302,9 @@ class _PlantDetailBodyState extends State<_PlantDetailBody> {
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
-                                const Text(
-                                  'En mi colección desde',
-                                  style: TextStyle(
+                                Text(
+                                  AppLocalizations.of(context)!.inMyCollectionSince,
+                                  style: const TextStyle(
                                     fontFamily: 'DM Sans',
                                     fontSize: 11,
                                     color: Color(0xFF807F7F),
@@ -360,7 +370,7 @@ class _PlantDetailBodyState extends State<_PlantDetailBody> {
                         // ── Care Status Card ──
                         wrapWithTourStep(
                           key: _tourKeys.statusCard,
-                          title: 'Estado de riego',
+                          title: AppLocalizations.of(context)!.wateringStatus,
                           description:
                               'Aquí ves si ya toca regarla, cuántos días lleva sin riego y cuántos '
                               'días faltan (o cuántos de retraso lleva) según la frecuencia de la especie.',
@@ -378,7 +388,7 @@ class _PlantDetailBodyState extends State<_PlantDetailBody> {
                             Expanded(
                               child: wrapWithTourStep(
                                 key: _tourKeys.registerButton,
-                                title: 'Registra cada cuidado',
+                                title: AppLocalizations.of(context)!.logEveryCare,
                                 description:
                                     'Cada vez que la riegues, fertilices, podes o trasplantes, regístralo '
                                     'aquí — así el estado de riego y tu historial quedan al día de verdad.',
@@ -434,9 +444,9 @@ class _PlantDetailBodyState extends State<_PlantDetailBody> {
                                     arguments: plant,
                                   );
                                 },
-                                child: const Text(
-                                  'Ver historial',
-                                  style: TextStyle(
+                                child: Text(
+                                  AppLocalizations.of(context)!.viewHistory,
+                                  style: const TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 14,
                                     fontFamily: 'Inter',
@@ -452,9 +462,9 @@ class _PlantDetailBodyState extends State<_PlantDetailBody> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text(
-                              'Últimos cuidados',
-                              style: TextStyle(
+                            Text(
+                              AppLocalizations.of(context)!.latestCare,
+                              style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16,
                                 color: Color(0xFF0D2B31),
@@ -528,7 +538,7 @@ class _PlantDetailBodyState extends State<_PlantDetailBody> {
                               onTap: () => Navigator.pushNamed(
                                 context,
                                 AppRoutes.speciesDetail,
-                                arguments: _resolveRealSpecies(context, plant.speciesId),
+                                arguments: plant.species ?? _resolveRealSpecies(context, plant.speciesId),
                               ),
                               child: const Row(
                                 children: [
@@ -807,7 +817,7 @@ class _PlantDetailBodyState extends State<_PlantDetailBody> {
   }
 
   void _showCareSheet(BuildContext context, UserPlant plant) {
-    final sp = _resolveSpeciesData(context, plant.speciesId);
+    final sp = _resolveSpeciesData(context, plant.speciesId, embedded: plant.species);
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,

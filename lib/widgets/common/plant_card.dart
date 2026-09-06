@@ -5,6 +5,7 @@ import 'package:frontend_eco_2/models/models.dart';
 import 'package:frontend_eco_2/theme/app_colors.dart';
 import 'package:frontend_eco_2/utils/plant_visuals.dart';
 import 'package:frontend_eco_2/utils/cloudinary_transform.dart';
+import 'package:frontend_eco_2/widgets/garden/needs_water_badge.dart';
 import 'tag_chips_row.dart';
 
 // ── Species metadata ──────────────────────────────────────────────────────────
@@ -174,27 +175,13 @@ class PlantCard extends StatelessWidget {
                                     ),
                     ),
                   ),
-                  // Badge — top right
+                  // Cartel de riego — solo cuando hace falta. Antes se pintaba
+                  // siempre con el texto "! Riego" y solo cambiaba el color,
+                  // así que una planta al día también parecía necesitar agua.
                   Positioned(
                     top: 10,
                     right: 10,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: needsWater ? AppColors.orange : AppColors.accent,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: const Text(
-                        '! Riego',
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w800,
-                          color: Colors.white,
-                          fontFamily: 'Inter',
-                        ),
-                      ),
-                    ),
+                    child: NeedsWaterBadge(needsWater: needsWater),
                   ),
                 ],
               ),

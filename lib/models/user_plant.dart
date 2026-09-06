@@ -1,3 +1,5 @@
+import 'plant_species.dart';
+
 class UserPlant {
   final String id;
   final String userId;
@@ -11,6 +13,14 @@ class UserPlant {
   final DateTime? updatedAt;
   final DateTime? deletedAt;
 
+  /// Especie tal como la devuelve el backend junto a la planta.
+  ///
+  /// Antes se descartaba y cada pantalla tenía que buscarla en el catálogo
+  /// cargado; si no estaba (catálogo aún cargando, o especie retirada) se
+  /// caía en un valor inventado de 7 días de frecuencia, que se mostraba al
+  /// usuario como si fuera real. Conservarla aquí evita esa invención.
+  final PlantSpecies? species;
+
   UserPlant({
     required this.name,
     required this.id,
@@ -23,6 +33,7 @@ class UserPlant {
     required this.createdAt,
     this.updatedAt,
     this.deletedAt,
+    this.species,
   });
 
   factory UserPlant.fromJson(Map<String, dynamic> json) {
@@ -50,6 +61,7 @@ class UserPlant {
           ? DateTime.tryParse(json['deleted_at'] as String)
           : null,
       name: speciesName ?? json['name'] as String? ?? json['nickname'] as String? ?? '',
+      species: species != null ? PlantSpecies.fromJson(species) : null,
     );
   }
 
@@ -80,6 +92,7 @@ class UserPlant {
     DateTime? createdAt,
     DateTime? updatedAt,
     DateTime? deletedAt,
+    PlantSpecies? species,
   }) {
     return UserPlant(
       name: name ?? this.name,
@@ -93,6 +106,7 @@ class UserPlant {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       deletedAt: deletedAt ?? this.deletedAt,
+      species: species ?? this.species,
     );
   }
 }
