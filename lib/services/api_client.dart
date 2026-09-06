@@ -45,7 +45,22 @@ class ApiClient {
   // Refresh de token
   // ---------------------------------------------------------------------------
 
-  Future<void> _refreshAccessToken() async {
+  /// Refresh en vuelo, compartido por todas las peticiones que reciban un 401
+  /// al mismo tiempo. Sin esto, dos peticiones concurrentes (p. ej. dashboard
+  /// y jardín cargando a la vez) disparaban cada una su propio refresh: el
+  /// backend rota el refresh token en cada llamada, así que la segunda
+  /// invalidaba el token que acababa de guardar la primera y la sesión se
+  /// cerraba sola a los pocos minutos.
+  Future<void>? _refreshInFlight;
+
+  Future<void> _refreshAccessToken() {
+    // Si ya hay un refresh corriendo, esperamos ese en vez de lanzar otro.
+    return _refreshInFlight ??= _performRefresh().whenComplete(() {
+      _refreshInFlight = null;
+    });
+  }
+
+  Future<void> _performRefresh() async {
     final refreshToken = await _storage.getRefreshToken();
     if (refreshToken == null) {
       await _storage.clearTokens();
