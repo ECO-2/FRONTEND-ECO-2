@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend_eco_2/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:frontend_eco_2/providers/providers.dart';
 import 'package:frontend_eco_2/theme/app_colors.dart';
@@ -19,9 +20,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   late TextEditingController _fullNameController;
   late TextEditingController _usernameController;
   late TextEditingController _emailController;
-  late TextEditingController _phoneController;
-  late TextEditingController _locationController;
-  late TextEditingController _birthDateController;
 
   @override
   void initState() {
@@ -36,16 +34,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           : 'Carlos Eco',
     );
     _usernameController = TextEditingController(
+      // Solo datos reales. Antes venía precargado '@carlos_eco', y teléfono,
+      // ciudad y fecha de nacimiento traían valores inventados que el usuario
+      // podía acabar guardando como suyos.
       text: user != null && user.username.isNotEmpty && user.username != 'usuario'
           ? '@${user.username}'
-          : '@carlos_eco',
+          : '',
     );
-    _emailController = TextEditingController(
-      text: user?.email ?? 'carlos@eco2.app',
-    );
-    _phoneController = TextEditingController(text: '+1 809 555 0142');
-    _locationController = TextEditingController(text: 'Santo Domingo, DO');
-    _birthDateController = TextEditingController(text: '12 / 08 / 1995');
+    _emailController = TextEditingController(text: user?.email ?? '');
   }
 
   @override
@@ -53,10 +49,45 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _fullNameController.dispose();
     _usernameController.dispose();
     _emailController.dispose();
-    _phoneController.dispose();
-    _locationController.dispose();
-    _birthDateController.dispose();
     super.dispose();
+  }
+
+  bool _saving = false;
+
+  /// Guarda contra el backend de verdad.
+  ///
+  /// Antes esto solo actualizaba el estado local (el propio código lo decía:
+  /// "Simulate saving changes") y aun así mostraba "¡Perfil guardado con
+  /// éxito!". Al reiniciar la app los cambios desaparecían, porque nunca
+  /// llegaban al servidor.
+  Future<void> _save() async {
+    final l = AppLocalizations.of(context)!;
+    var username = _usernameController.text.trim();
+    if (username.startsWith('@')) username = username.substring(1);
+
+    if (username.isEmpty) {
+      showAppToast(context, l.enterYourEmail, type: ToastType.error);
+      return;
+    }
+
+    setState(() => _saving = true);
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final ok = await userProvider.updateProfile(username: username);
+    if (!mounted) return;
+    setState(() => _saving = false);
+
+    if (!ok) {
+      // Mensaje real del backend (p. ej. nombre de usuario ya en uso).
+      showAppToast(
+        context,
+        userProvider.errorMessage ?? l.genericError,
+        type: ToastType.error,
+      );
+      return;
+    }
+
+    showAppToast(context, l.save, type: ToastType.success);
+    Navigator.of(context).pop();
   }
 
   @override
@@ -64,7 +95,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: CustomAppBar(
-        title: 'Editar perfil',
+        title: AppLocalizations.of(context)!.editProfile,
         actions: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
@@ -78,29 +109,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 ),
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
               ),
-              onPressed: () {
-                // Simulate saving changes
-                final userProvider = Provider.of<UserProvider>(context, listen: false);
-                final currentUser = userProvider.currentUser;
-                if (currentUser != null) {
-                  // Update username and email in state
-                  String newUsername = _usernameController.text;
-                  if (newUsername.startsWith('@')) {
-                    newUsername = newUsername.substring(1);
-                  }
-                  final updatedUser = currentUser.copyWith(
-                    username: newUsername,
-                    email: _emailController.text,
-                  );
-                  userProvider.setUser(updatedUser);
-                }
-                
-                showAppToast(context, '¡Perfil guardado con éxito! 💾', type: ToastType.success);
-                Navigator.of(context).pop();
-              },
-              child: const Text(
-                'Guardar',
-                style: TextStyle(
+              onPressed: _saving ? null : _save,
+              child: Text(
+                AppLocalizations.of(context)!.save,
+                style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 14,
                   fontFamily: 'Inter',
@@ -219,8 +231,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           // Username
                           CustomTextField(
                             controller: _usernameController,
-                            labelText: 'Nombre de usuario',
-                            customLabel: _buildCustomLabel('Nombre de usuario'),
+                            labelText: AppLocalizations.of(context)!.username,
+                            customLabel: _buildCustomLabel(AppLocalizations.of(context)!.username),
                             // No prefix icon as in Figma mockup!
                           ),
                           const SizedBox(height: 20),
@@ -235,32 +247,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           ),
                           const SizedBox(height: 20),
 
-                          // Phone
-                          CustomTextField(
-                            controller: _phoneController,
-                            labelText: 'Teléfono',
-                            customLabel: _buildCustomLabel('Teléfono'),
-                            prefixIcon: Icons.phone_outlined,
-                            keyboardType: TextInputType.phone,
-                          ),
-                          const SizedBox(height: 20),
-
-                          // Location
-                          CustomTextField(
-                            controller: _locationController,
-                            labelText: 'Ubicación',
-                            customLabel: _buildCustomLabel('Ubicación'),
-                            prefixIcon: Icons.location_on_outlined,
-                          ),
-                          const SizedBox(height: 20),
-
-                          // Birth Date
-                          CustomTextField(
-                            controller: _birthDateController,
-                            labelText: 'Fecha de nacimiento',
-                            customLabel: _buildCustomLabel('Fecha de nacimiento'),
-                            prefixIcon: Icons.calendar_today_outlined,
-                          ),
+                          // Teléfono, ubicación y fecha de nacimiento se
+                          // eliminaron: no existen en el modelo de usuario ni
+                          // los guarda ningún endpoint, así que eran campos
+                          // decorativos con datos de ejemplo dentro.
                           const SizedBox(height: 40),
                         ],
                       ),

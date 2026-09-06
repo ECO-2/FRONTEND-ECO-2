@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:frontend_eco_2/l10n/app_localizations.dart';
+import 'package:frontend_eco_2/models/models.dart';
 import 'package:frontend_eco_2/providers/providers.dart';
 import 'package:frontend_eco_2/theme/app_colors.dart';
 import 'package:frontend_eco_2/routing/app_routes.dart';
@@ -20,14 +22,99 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _wateringReminders = true;
   bool _achievementsMissions = false;
 
+  /// Etiqueta del idioma activo. Si el usuario no ha elegido ninguno, la app
+  /// sigue el del sistema y se indica así en vez de mentir con "Español".
+  String _currentLanguageLabel(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
+    final chosen = context.watch<LocaleProvider>().locale;
+    if (chosen == null) return l.systemLanguage;
+    return chosen.languageCode == 'en' ? l.english : l.spanish;
+  }
+
+  Future<void> _showLanguagePicker(BuildContext context) async {
+    final l = AppLocalizations.of(context)!;
+    final provider = context.read<LocaleProvider>();
+    final current = provider.locale?.languageCode;
+
+    await showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) => Container(
+        padding: const EdgeInsets.fromLTRB(8, 12, 8, 24),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+              child: Text(
+                l.language,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                  fontFamily: 'Inter',
+                ),
+              ),
+            ),
+            RadioListTile<String?>(
+              value: 'es',
+              groupValue: current,
+              title: Text(l.spanish),
+              onChanged: (_) {
+                provider.setLocale(const Locale('es'));
+                Navigator.pop(sheetContext);
+              },
+            ),
+            RadioListTile<String?>(
+              value: 'en',
+              groupValue: current,
+              title: Text(l.english),
+              onChanged: (_) {
+                provider.setLocale(const Locale('en'));
+                Navigator.pop(sheetContext);
+              },
+            ),
+            RadioListTile<String?>(
+              value: null,
+              groupValue: current,
+              title: Text(l.systemLanguage),
+              onChanged: (_) {
+                provider.useSystemLocale();
+                Navigator.pop(sheetContext);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// "@usuario · Nivel 3 Retoño" con datos reales. Si no hay username todavía
+  /// se omite esa parte en vez de mostrar el "@carlos_eco" de ejemplo.
+  String _profileSubtitle(User? user, MissionsProvider mp) {
+    final progress = mp.progress;
+    final level = progress?.level ?? 1;
+    final name = progress?.levelName;
+    final levelText = name == null ? 'Nivel $level' : 'Nivel $level $name';
+
+    final hasUsername =
+        user != null && user.username.isNotEmpty && user.username != 'usuario';
+    return hasUsername ? '@${user.username} · $levelText' : levelText;
+  }
+
   @override
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context);
+    final missionsProvider = Provider.of<MissionsProvider>(context);
     final user = userProvider.currentUser;
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: const CustomAppBar(title: 'Ajustes'),
+      appBar: CustomAppBar(title: AppLocalizations.of(context)!.settings),
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
         children: [
@@ -67,9 +154,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ),
                     ),
                     subtitle: Text(
-                      user != null && user.username.isNotEmpty && user.username != 'usuario'
-                          ? '@${user.username} · Nivel 2 Brote'
-                          : '@carlos_eco · Nivel 2 Brote',
+                      // Nivel real del backend. Antes era texto fijo
+                      // ("Nivel 2 Brote"), y el usuario de ejemplo
+                      // "@carlos_eco" se mostraba a quien no tuviera username.
+                      _profileSubtitle(user, missionsProvider),
                       style: const TextStyle(
                         fontSize: 12,
                         color: AppColors.textSecondary,
@@ -102,7 +190,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       SettingsOptionTile(
                         icon: Icons.lock_outline_rounded,
                         title: 'Cambiar contraseña',
-                        subtitle: 'Última: hace 3 meses',
+                        // Se quita "Última: hace 3 meses": no se guarda en
+                        // ninguna parte cuándo se cambió la contraseña, así
+                        // que era un dato inventado.
                         useIconContainer: true,
                         onTap: () {
                           showAppToast(context, 'Función para cambiar contraseña próximamente 🔒');
@@ -230,22 +320,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         iconBgColor: const Color(0xFFEFF3F1),
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
-                          children: const [
+                          children: [
                             Text(
-                              'Español',
-                              style: TextStyle(
+                              _currentLanguageLabel(context),
+                              style: const TextStyle(
                                 color: AppColors.textSecondary,
                                 fontSize: 13,
                                 fontFamily: 'Inter',
                               ),
                             ),
-                            SizedBox(width: 4),
-                            Icon(Icons.chevron_right_rounded, color: AppColors.textSecondary),
+                            const SizedBox(width: 4),
+                            const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondary),
                           ],
                         ),
-                        onTap: () {
-                          showAppToast(context, 'Configuración de idioma próximamente 🌐');
-                        },
+                        onTap: () => _showLanguagePicker(context),
                       ),
                       const Divider(height: 1, indent: 68, endIndent: 16, color: Color(0xFFE2E7E4)),
                       SettingsOptionTile(
