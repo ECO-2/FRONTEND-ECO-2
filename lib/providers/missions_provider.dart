@@ -56,6 +56,10 @@ class MissionsProvider with ChangeNotifier {
   /// Semillas actuales del usuario (0 si no ha cargado aún).
   int get userSeeds => _progress?.seeds ?? 0;
 
+  /// Número de logros ya desbloqueados. El Perfil mostraba un "(12)" fijo.
+  int get unlockedCount =>
+      _achievements.where((a) => isAchievementCompleted(a.id)).length;
+
   bool isAchievementCompleted(String id) =>
       completedAchievementIds.contains(id);
 

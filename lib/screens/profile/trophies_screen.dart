@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:frontend_eco_2/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:frontend_eco_2/models/models.dart';
 import 'package:frontend_eco_2/providers/providers.dart';
 import 'package:frontend_eco_2/widgets/common/custom_app_bar.dart';
 import 'package:frontend_eco_2/utils/achievement_ui.dart';
+import 'package:frontend_eco_2/utils/achievement_visuals.dart';
 
 // ── Figma color tokens ────────────────────────────────────────────────────
 const _kDark = Color(0xFF10454F);
@@ -14,7 +16,6 @@ const _kLime = Color(0xFFBDE038);
 const _kCardBorder = Color(0xFFE5E5E5);
 
 const _kTrackableConditions = kTrackableAchievementConditions;
-final _iconForCondition = iconForAchievementCondition;
 
 class TrophiesScreen extends StatefulWidget {
   const TrophiesScreen({super.key});
@@ -88,9 +89,12 @@ class _TrophiesScreenState extends State<TrophiesScreen> {
   ) {
     if (_selectedTab == 0) {
       // Trofeos: todos los logros, como grid de insignias.
-      if (all.isEmpty) return _buildEmpty('Todavía no hay logros configurados.');
+      if (all.isEmpty) return _buildEmpty(AppLocalizations.of(context)!.noAchievementsConfigured);
       final screenWidth = MediaQuery.of(context).size.width;
-      final childAspectRatio = screenWidth < 360 ? 0.58 : 0.68;
+      // Tarjetas algo más altas: con 3 columnas el ancho útil ronda los 85dp
+      // y nombres como "Maestro del Cuidado" o "Cuidador Constante" necesitan
+      // tres líneas para no salir recortados.
+      final childAspectRatio = screenWidth < 360 ? 0.52 : 0.60;
       return GridView.builder(
         padding: EdgeInsets.zero,
         physics: const NeverScrollableScrollPhysics(),
@@ -107,7 +111,7 @@ class _TrophiesScreenState extends State<TrophiesScreen> {
       );
     } else if (_selectedTab == 1) {
       // Misiones: logros aún no desbloqueados, con progreso real si es rastreable.
-      if (inProgress.isEmpty) return _buildEmpty('¡Ya desbloqueaste todos los logros!');
+      if (inProgress.isEmpty) return _buildEmpty(AppLocalizations.of(context)!.allAchievementsDone);
       return Column(
         children: inProgress
             .map((a) => Padding(
@@ -118,7 +122,7 @@ class _TrophiesScreenState extends State<TrophiesScreen> {
       );
     } else {
       // Logros: los ya completados.
-      if (completed.isEmpty) return _buildEmpty('No has completado logros todavía.');
+      if (completed.isEmpty) return _buildEmpty(AppLocalizations.of(context)!.noAchievementsYet);
       return Column(
         children: completed
             .map((a) => Padding(
@@ -146,6 +150,7 @@ class _TrophiesScreenState extends State<TrophiesScreen> {
     final level = mp.progress?.level ?? 1;
     final xp = mp.progress?.xp ?? 0;
     final seeds = mp.progress?.seeds ?? 0;
+    final streak = mp.progress?.streakDays ?? 0;
     final username = userProvider.currentUser?.username ?? 'Jardinera';
 
     return Container(
@@ -190,7 +195,11 @@ class _TrophiesScreenState extends State<TrophiesScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Nivel $level · $trophyCount trofeos',
+                  // Se añade el nombre del nivel que ahora devuelve el backend
+                  // ("Semilla", "Brote"...), en vez de solo el número.
+                  mp.progress?.levelName == null
+                      ? 'Nivel $level · $trophyCount trofeos'
+                      : 'Nivel $level ${mp.progress!.levelName} · $trophyCount trofeos',
                   style: const TextStyle(
                     fontFamily: 'DM Sans',
                     fontWeight: FontWeight.w500,
@@ -199,11 +208,20 @@ class _TrophiesScreenState extends State<TrophiesScreen> {
                   ),
                 ),
                 const SizedBox(height: 8),
-                Row(
+                // Wrap y no Row: con racha de dos cifras las tres insignias
+                // no caben en una línea en pantallas estrechas.
+                Wrap(
+                  spacing: 10,
+                  runSpacing: 6,
                   children: [
                     _heroStat(Icons.bolt_rounded, '$xp XP'),
-                    const SizedBox(width: 10),
                     _heroStat(Icons.spa_rounded, '$seeds semillas'),
+                    // La racha se calculaba en el backend pero no se mostraba
+                    // en ninguna pantalla.
+                    _heroStat(
+                      Icons.local_fire_department_rounded,
+                      streak == 1 ? '1 día seguido' : '$streak días seguidos',
+                    ),
                   ],
                 ),
               ],
@@ -344,7 +362,7 @@ class _TrophiesScreenState extends State<TrophiesScreen> {
   Widget _buildTrophyCard(MissionsProvider mp, Achievement a, bool unlocked) {
     final circleBg = unlocked ? const Color(0xFFFEF8E7) : const Color(0xFFECECEC);
     final iconColor = unlocked ? const Color(0xFFFABF2E) : const Color(0xFF909090);
-    final iconData = unlocked ? _iconForCondition(a.conditionType) : Icons.lock_rounded;
+    final iconData = unlocked ? visualForAchievement(a).icon : Icons.lock_rounded;
 
     return PressableCard(
       onTap: () => showAchievementDetailSheet(
@@ -381,9 +399,9 @@ class _TrophiesScreenState extends State<TrophiesScreen> {
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
                   color: unlocked ? _kTextDark : const Color(0xFF808080),
-                  height: 1.2,
+                  height: 1.15,
                 ),
-                maxLines: 2,
+                maxLines: 3,
                 overflow: TextOverflow.ellipsis,
               ),
             ),
@@ -424,7 +442,7 @@ class _TrophiesScreenState extends State<TrophiesScreen> {
               height: 44,
               decoration: BoxDecoration(color: _kLime.withValues(alpha: 0.25), borderRadius: BorderRadius.circular(12)),
               alignment: Alignment.center,
-              child: Icon(_iconForCondition(a.conditionType), color: _kDark, size: 20),
+              child: Icon(visualForAchievement(a).icon, color: visualForAchievement(a).color, size: 20),
             ),
             const SizedBox(width: 12),
             Expanded(

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:frontend_eco_2/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:frontend_eco_2/providers/providers.dart';
 import 'package:frontend_eco_2/routing/app_routes.dart';
 import 'package:frontend_eco_2/widgets/common/custom_button.dart';
 import 'package:frontend_eco_2/theme/app_colors.dart';
+import 'package:frontend_eco_2/utils/co2_estimate.dart';
 import 'package:frontend_eco_2/widgets/common/stat_card.dart';
 import 'package:frontend_eco_2/widgets/common/settings_option_tile.dart';
 
@@ -13,12 +15,28 @@ class ProfileTab extends StatelessWidget {
 
   const ProfileTab({super.key, this.onNavigateToGarden, this.onStartTour});
 
+  /// "Nivel 3 · Retoño" con los datos reales del backend. Si el progreso aún
+  /// no ha cargado, se muestra el nivel base en vez de un texto inventado.
+  String _levelLabel(MissionsProvider mp) {
+    final progress = mp.progress;
+    final level = progress?.level ?? 1;
+    final name = progress?.levelName;
+    return name == null ? 'Nivel $level' : 'Nivel $level · $name';
+  }
+
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     final userProvider = Provider.of<UserProvider>(context);
     final plantsProvider = Provider.of<PlantsProvider>(context);
     final missionsProvider = Provider.of<MissionsProvider>(context);
     final user = userProvider.currentUser;
+    // CO2 acumulado real del jardín. Antes era "36.5 kg" escrito a mano,
+    // el mismo número para cualquier usuario.
+    final co2 = Co2Estimate.forPlants(
+      plantsProvider.userPlants,
+      speciesById: {for (final s in plantsProvider.speciesCatalog) s.id: s},
+    );
 
     return SafeArea(
       top: false,
@@ -30,9 +48,9 @@ class ProfileTab extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'Perfil',
-                style: TextStyle(
+              Text(
+                l.profile,
+                style: const TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
                   color: AppColors.primary,
@@ -99,12 +117,15 @@ class ProfileTab extends StatelessWidget {
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
-                    children: const [
-                      Icon(Icons.bolt, color: AppColors.primary, size: 16),
-                      SizedBox(width: 4),
+                    children: [
+                      const Icon(Icons.bolt, color: AppColors.primary, size: 16),
+                      const SizedBox(width: 4),
                       Text(
-                        'Nivel 2 · Brote',
-                        style: TextStyle(
+                        // Nivel real del usuario. Antes decía "Nivel 2 · Brote"
+                        // escrito a mano, igual para todos y en contradicción
+                        // con la pantalla de Trofeos, que sí leía el dato.
+                        _levelLabel(missionsProvider),
+                        style: const TextStyle(
                           color: AppColors.primary,
                           fontWeight: FontWeight.bold,
                           fontSize: 13,
@@ -125,7 +146,7 @@ class ProfileTab extends StatelessWidget {
               Expanded(
                 child: StatCard(
                   value: '${plantsProvider.userPlants.length}',
-                  label: 'Plantas',
+                  label: l.plants,
                   valueColor: AppColors.primary,
                   showBorder: true,
                 ),
@@ -136,7 +157,7 @@ class ProfileTab extends StatelessWidget {
                   onTap: () => Navigator.pushNamed(context, AppRoutes.greenFootprint),
                   child: StatCard(
                     value: '${missionsProvider.userSeeds}',
-                    label: 'Semillas',
+                    label: l.seeds,
                     valueColor: AppColors.accentLight,
                     showBorder: true,
                   ),
@@ -147,8 +168,8 @@ class ProfileTab extends StatelessWidget {
                 child: GestureDetector(
                   onTap: () => Navigator.pushNamed(context, AppRoutes.greenFootprint),
                   child: StatCard(
-                    value: '36.5 kg',
-                    label: 'CO₂ total',
+                    value: '${co2.totalKg.toStringAsFixed(2)} kg',
+                    label: l.co2Total,
                     valueColor: AppColors.textSecondary,
                     showBorder: true,
                   ),
@@ -162,7 +183,7 @@ class ProfileTab extends StatelessWidget {
           SizedBox(
             width: double.infinity,
             child: CustomButton(
-              text: 'Editar perfil',
+              text: l.editProfile,
               isOutlined: true,
               backgroundColor: AppColors.primary,
               foregroundColor: AppColors.primary,
@@ -243,8 +264,8 @@ class ProfileTab extends StatelessWidget {
           // Option Items list with Dividers
           SettingsOptionTile(
             icon: Icons.emoji_events_outlined,
-            title: 'Mis Trofeos',
-            subtitle: 'Trofeos y Nivel (12)',
+            title: l.myTrophies,
+            subtitle: '${l.trophies} · ${missionsProvider.unlockedCount}',
             onTap: () => Navigator.pushNamed(context, AppRoutes.trophies),
           ),
           const Divider(height: 1, color: Color(0xFFE2E7E4)),

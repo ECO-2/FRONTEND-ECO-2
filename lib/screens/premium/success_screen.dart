@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:confetti/confetti.dart';
+import 'package:frontend_eco_2/widgets/common/leaf_burst.dart';
 import 'package:frontend_eco_2/theme/app_colors.dart';
 import 'package:frontend_eco_2/routing/app_routes.dart';
 import 'package:frontend_eco_2/widgets/common/custom_status_bar.dart';
@@ -259,22 +260,7 @@ class _SuccessScreenState extends State<SuccessScreen> {
           // 4. Confetti Widget overlay on top of everything
           Align(
             alignment: Alignment.topCenter,
-            child: ConfettiWidget(
-              confettiController: _confettiController,
-              blastDirectionality: BlastDirectionality.explosive, // radial explosion
-              shouldLoop: false,
-              colors: const [
-                AppColors.primaryDark,
-                AppColors.primary,
-                Colors.white,
-                Color(0xFFFABF2E), // Gold/Yellow
-                Color(0xFFE26B26), // Bronze/Orange
-              ],
-              numberOfParticles: 35,
-              gravity: 0.15,
-              minBlastForce: 4,
-              maxBlastForce: 8,
-            ),
+            child: LeafBurst(controller: _confettiController),
           ),
         ],
       ),

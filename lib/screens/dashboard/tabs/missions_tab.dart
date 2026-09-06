@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:frontend_eco_2/models/models.dart';
 import 'package:frontend_eco_2/providers/providers.dart';
 import 'package:frontend_eco_2/utils/achievement_ui.dart';
+import 'package:frontend_eco_2/utils/achievement_visuals.dart';
 
 // ── Color tokens ─────────────────────────────────────────────────────────
 const _kDark = Color(0xFF10454F);
@@ -249,7 +250,7 @@ class _MissionsTabState extends State<MissionsTab> {
                   borderRadius: BorderRadius.circular(16),
                 ),
                 alignment: Alignment.center,
-                child: Icon(_iconForCondition(a.conditionType), color: Colors.white, size: 28),
+                child: Icon(visualForAchievement(a).icon, color: Colors.white, size: 28),
               ),
             ],
           ),
@@ -339,7 +340,7 @@ class _MissionsTabState extends State<MissionsTab> {
             ),
             alignment: Alignment.center,
             child: Icon(
-              locked ? Icons.lock_rounded : _iconForCondition(a.conditionType),
+              locked ? Icons.lock_rounded : visualForAchievement(a).icon,
               color: locked ? const Color(0xFF909090) : _kTextDark,
               size: 22,
             ),

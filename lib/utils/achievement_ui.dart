@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend_eco_2/models/models.dart';
 import 'package:frontend_eco_2/providers/providers.dart';
 import 'package:frontend_eco_2/theme/app_colors.dart';
+import 'package:frontend_eco_2/utils/achievement_visuals.dart';
 
 /// Condiciones para las que hoy existe un contador real en la app. El resto
 /// (plant_scans, rooms_created) no tiene una feature real detrás todavía —
@@ -195,8 +196,10 @@ void showAchievementDetailSheet(
                   ),
                   alignment: Alignment.center,
                   child: Icon(
-                    unlocked ? iconForAchievementCondition(achievement.conditionType) : Icons.lock_rounded,
-                    color: unlocked ? AppColors.gold : const Color(0xFF909090),
+                    unlocked ? visualForAchievement(achievement).icon : Icons.lock_rounded,
+                    color: unlocked
+                        ? visualForAchievement(achievement).color
+                        : const Color(0xFF909090),
                     size: 26,
                   ),
                 ),
