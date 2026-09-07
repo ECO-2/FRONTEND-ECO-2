@@ -100,7 +100,13 @@ class _DashboardBodyState extends State<_DashboardBody> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _maybeStartTour());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _maybeStartTour();
+      // El plan puede haber caducado desde el ultimo arranque, o haberse
+      // activado en otro dispositivo: se refresca al entrar para que la
+      // insignia no mienta.
+      context.read<PlanProvider>().refresh();
+    });
   }
 
   Future<void> _maybeStartTour() async {

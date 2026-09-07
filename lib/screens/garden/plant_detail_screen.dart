@@ -27,6 +27,7 @@ import 'widgets/species_care_grid.dart';
 import 'widgets/care_history_list.dart';
 import 'widgets/plant_photo_viewer.dart';
 import 'package:frontend_eco_2/utils/date_labels.dart';
+import 'package:frontend_eco_2/routing/tab_navigation.dart';
 
 // Legacy mock species (s1-s3) keep their curated SpeciesData entry; every
 // real catalog species (real UUID from the backend) gets one built from its
@@ -712,16 +713,13 @@ class _PlantDetailBodyState extends State<_PlantDetailBody> {
       bottomNavigationBar: CustomBottomNavBar(
         selectedIndex: 1, // Jardín
         onTap: (index) {
+          // Jardin vuelve atras, porque el detalle se abrio desde ahi; el
+          // resto va a la pestaña pedida del dashboard.
           if (index == 1) {
             Navigator.pop(context);
-          } else {
-            Navigator.pushNamedAndRemoveUntil(
-              context,
-              AppRoutes.dashboard,
-              (route) => false,
-              arguments: index,
-            );
+            return;
           }
+          openDashboardTab(context, index);
         },
       ),
     );

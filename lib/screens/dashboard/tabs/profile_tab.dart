@@ -8,6 +8,7 @@ import 'package:frontend_eco_2/theme/app_colors.dart';
 import 'package:frontend_eco_2/utils/co2_estimate.dart';
 import 'package:frontend_eco_2/widgets/common/stat_card.dart';
 import 'package:frontend_eco_2/widgets/common/settings_option_tile.dart';
+import 'package:frontend_eco_2/widgets/common/plus_badge.dart';
 
 class ProfileTab extends StatelessWidget {
   /// Abre la pestaña Jardín en el catálogo de especies.
@@ -103,13 +104,25 @@ class ProfileTab extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 4),
-                Text(
-                  '@${user?.username ?? 'usuario'}',
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: AppColors.textSecondary,
-                    fontFamily: 'Inter',
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      '@${user?.username ?? 'usuario'}',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: AppColors.textSecondary,
+                        fontFamily: 'Inter',
+                      ),
+                    ),
+                    // Insignia de miembro O2+. Solo aparece con la suscripcion
+                    // vigente: el backend comprueba plan_type y la fecha de
+                    // fin juntos, asi que una caducada deja de mostrarla sola.
+                    if (context.watch<PlanProvider>().isPlusActive) ...[
+                      const SizedBox(width: 8),
+                      const PlusBadge(compact: true),
+                    ],
+                  ],
                 ),
                 const SizedBox(height: 16),
                 // Level Badge: "⚡ Nivel 2 • Brote"

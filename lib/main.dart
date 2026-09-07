@@ -95,6 +95,9 @@ class MyApp extends StatelessWidget {
           ),
         ),
         ChangeNotifierProvider(create: (_) => NotificationsProvider()),
+        ChangeNotifierProvider(
+          create: (_) => PlanProvider(userService: userService),
+        ),
       ],
       // ECO2 no ofrece modo oscuro: la app siempre usa el tema claro,
       // sin importar el ajuste de tema del sistema del teléfono.
@@ -194,9 +197,11 @@ class _AppLoaderState extends State<_AppLoader> {
       // Carga paralela de datos del dashboard.
       final plantsProvider = context.read<PlantsProvider>();
       final missionsProvider = context.read<MissionsProvider>();
+      final planProvider = context.read<PlanProvider>();
       await Future.wait([
         plantsProvider.init(),
         missionsProvider.init(),
+        planProvider.refresh(),
       ]);
       missionsProvider.syncUserPlantsCount(plantsProvider.userPlants.length);
 

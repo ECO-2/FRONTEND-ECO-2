@@ -2120,4 +2120,77 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get tabLocked => 'Bloqueadas';
+
+  @override
+  String get plantLimitReached =>
+      'Has llegado a tus 10 macetas. Con O₂₊ son ilimitadas.';
+
+  @override
+  String get scanLimitReached =>
+      'Ya usaste tus 5 escaneos de hoy. Con O₂₊ son ilimitados.';
+
+  @override
+  String get plusMember => 'Miembro O₂₊';
+
+  @override
+  String plusActiveUntil(String date) {
+    return 'Activo hasta el $date';
+  }
+
+  @override
+  String get freePlanLabel => 'Plan gratuito';
+
+  @override
+  String potsUsage(int used, int limit) {
+    return '$used de $limit macetas';
+  }
+
+  @override
+  String scansUsage(int used, int limit) {
+    return '$used de $limit escaneos hoy';
+  }
+
+  @override
+  String get unlimited => 'Ilimitado';
+
+  @override
+  String get activatePlus => 'Activar O₂₊';
+
+  @override
+  String get plusActivated => '¡O₂₊ activado! Macetas y escaneos ilimitados.';
+
+  @override
+  String get cancelPlus => 'Cancelar O₂₊';
+
+  @override
+  String get plusCancelled => 'Has vuelto al plan gratuito.';
+
+  @override
+  String get simulatedPayment =>
+      'Pago simulado: esta app es un trabajo universitario y no realiza ningún cobro.';
+
+  @override
+  String get nurseryDiscount => 'Descuento en viveros';
+
+  @override
+  String get nurseryDiscountIntro =>
+      'Muestra este código en los viveros asociados para aplicar tu descuento.';
+
+  @override
+  String get yourCode => 'Tu código';
+
+  @override
+  String get codeCopied => 'Código copiado';
+
+  @override
+  String get plusOnlyFeature => 'Disponible con O₂₊';
+
+  @override
+  String get copyCode => 'Copiar código';
+
+  @override
+  String get plusUnlimitedSummary => 'Macetas y escaneos ilimitados';
+
+  @override
+  String get manage => 'Gestionar';
 }

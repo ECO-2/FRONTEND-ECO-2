@@ -3734,6 +3734,132 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Bloqueadas'**
   String get tabLocked;
+
+  /// No description provided for @plantLimitReached.
+  ///
+  /// In es, this message translates to:
+  /// **'Has llegado a tus 10 macetas. Con O₂₊ son ilimitadas.'**
+  String get plantLimitReached;
+
+  /// No description provided for @scanLimitReached.
+  ///
+  /// In es, this message translates to:
+  /// **'Ya usaste tus 5 escaneos de hoy. Con O₂₊ son ilimitados.'**
+  String get scanLimitReached;
+
+  /// No description provided for @plusMember.
+  ///
+  /// In es, this message translates to:
+  /// **'Miembro O₂₊'**
+  String get plusMember;
+
+  /// No description provided for @plusActiveUntil.
+  ///
+  /// In es, this message translates to:
+  /// **'Activo hasta el {date}'**
+  String plusActiveUntil(String date);
+
+  /// No description provided for @freePlanLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Plan gratuito'**
+  String get freePlanLabel;
+
+  /// No description provided for @potsUsage.
+  ///
+  /// In es, this message translates to:
+  /// **'{used} de {limit} macetas'**
+  String potsUsage(int used, int limit);
+
+  /// No description provided for @scansUsage.
+  ///
+  /// In es, this message translates to:
+  /// **'{used} de {limit} escaneos hoy'**
+  String scansUsage(int used, int limit);
+
+  /// No description provided for @unlimited.
+  ///
+  /// In es, this message translates to:
+  /// **'Ilimitado'**
+  String get unlimited;
+
+  /// No description provided for @activatePlus.
+  ///
+  /// In es, this message translates to:
+  /// **'Activar O₂₊'**
+  String get activatePlus;
+
+  /// No description provided for @plusActivated.
+  ///
+  /// In es, this message translates to:
+  /// **'¡O₂₊ activado! Macetas y escaneos ilimitados.'**
+  String get plusActivated;
+
+  /// No description provided for @cancelPlus.
+  ///
+  /// In es, this message translates to:
+  /// **'Cancelar O₂₊'**
+  String get cancelPlus;
+
+  /// No description provided for @plusCancelled.
+  ///
+  /// In es, this message translates to:
+  /// **'Has vuelto al plan gratuito.'**
+  String get plusCancelled;
+
+  /// No description provided for @simulatedPayment.
+  ///
+  /// In es, this message translates to:
+  /// **'Pago simulado: esta app es un trabajo universitario y no realiza ningún cobro.'**
+  String get simulatedPayment;
+
+  /// No description provided for @nurseryDiscount.
+  ///
+  /// In es, this message translates to:
+  /// **'Descuento en viveros'**
+  String get nurseryDiscount;
+
+  /// No description provided for @nurseryDiscountIntro.
+  ///
+  /// In es, this message translates to:
+  /// **'Muestra este código en los viveros asociados para aplicar tu descuento.'**
+  String get nurseryDiscountIntro;
+
+  /// No description provided for @yourCode.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu código'**
+  String get yourCode;
+
+  /// No description provided for @codeCopied.
+  ///
+  /// In es, this message translates to:
+  /// **'Código copiado'**
+  String get codeCopied;
+
+  /// No description provided for @plusOnlyFeature.
+  ///
+  /// In es, this message translates to:
+  /// **'Disponible con O₂₊'**
+  String get plusOnlyFeature;
+
+  /// No description provided for @copyCode.
+  ///
+  /// In es, this message translates to:
+  /// **'Copiar código'**
+  String get copyCode;
+
+  /// No description provided for @plusUnlimitedSummary.
+  ///
+  /// In es, this message translates to:
+  /// **'Macetas y escaneos ilimitados'**
+  String get plusUnlimitedSummary;
+
+  /// No description provided for @manage.
+  ///
+  /// In es, this message translates to:
+  /// **'Gestionar'**
+  String get manage;
 }
 
 class _AppLocalizationsDelegate

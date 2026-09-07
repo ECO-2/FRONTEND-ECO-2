@@ -10,6 +10,7 @@ import 'package:frontend_eco_2/widgets/garden/add_plant_modal.dart';
 import 'package:frontend_eco_2/utils/achievement_ui.dart';
 import 'package:frontend_eco_2/utils/co2_estimate.dart';
 import 'package:frontend_eco_2/utils/achievement_labels.dart';
+import 'package:frontend_eco_2/widgets/common/plus_badge.dart';
 
 /// Estilo unico de los titulos de seccion del dashboard.
 ///
@@ -244,6 +245,8 @@ class HomeTab extends StatelessWidget {
   }
 
   Widget _buildO2Banner(BuildContext context) {
+    final plan = context.watch<PlanProvider>();
+    final isPlus = plan.isPlusActive;
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -257,17 +260,34 @@ class HomeTab extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(AppLocalizations.of(context)!.unlockO2Features,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                    fontFamily: 'Inter',
-                  ),
+                Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                        isPlus ? AppLocalizations.of(context)!.plusMember : AppLocalizations.of(context)!.unlockO2Features,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                          fontFamily: 'Inter',
+                        ),
+                      ),
+                    ),
+                    if (isPlus) ...[
+                      const SizedBox(width: 8),
+                      const PlusBadge(compact: true),
+                    ],
+                  ],
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  AppLocalizations.of(context)!.redeemSeedsOrSubscribeShort,
+                  isPlus
+                      ? AppLocalizations.of(context)!.plusUnlimitedSummary
+                      : AppLocalizations.of(context)!.redeemSeedsOrSubscribeShort,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     color: AppColors.accent,
                     fontSize: 12,
@@ -288,7 +308,7 @@ class HomeTab extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  Text(AppLocalizations.of(context)!.view,
+                  Text(isPlus ? AppLocalizations.of(context)!.manage : AppLocalizations.of(context)!.view,
                     style: const TextStyle(
                       color: AppColors.accent,
                       fontWeight: FontWeight.bold,

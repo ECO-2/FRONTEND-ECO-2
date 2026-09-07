@@ -39,6 +39,28 @@ class UserService {
     return User.fromJson(data);
   }
 
+  /// GET /user/plan — plan actual y consumo (plantas y escaneos de hoy).
+  Future<PlanStatus> getPlan() async {
+    final data = await _client.get('/user/plan') as Map<String, dynamic>;
+    return PlanStatus.fromJson(data);
+  }
+
+  /// POST /user/plan/activate — activa O2+.
+  ///
+  /// El cobro es SIMULADO: la pasarela de la app es una maqueta para la
+  /// presentación, y el backend lo devuelve marcado como tal.
+  Future<PlanStatus> activatePlus({int months = 12}) async {
+    final data = await _client.post('/user/plan/activate',
+        body: {'months': months}) as Map<String, dynamic>;
+    return PlanStatus.fromJson(data);
+  }
+
+  /// POST /user/plan/cancel — vuelve al plan gratuito.
+  Future<PlanStatus> cancelPlus() async {
+    final data = await _client.post('/user/plan/cancel') as Map<String, dynamic>;
+    return PlanStatus.fromJson(data);
+  }
+
   /// PATCH /user/password — cambia la contraseña verificando la actual.
   Future<void> changePassword({
     required String currentPassword,

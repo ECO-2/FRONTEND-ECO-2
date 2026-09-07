@@ -2112,4 +2112,77 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get tabLocked => 'Locked';
+
+  @override
+  String get plantLimitReached =>
+      'You\'ve reached your 10 pots. With O₂₊ they\'re unlimited.';
+
+  @override
+  String get scanLimitReached =>
+      'You\'ve used your 5 scans for today. With O₂₊ they\'re unlimited.';
+
+  @override
+  String get plusMember => 'O₂₊ member';
+
+  @override
+  String plusActiveUntil(String date) {
+    return 'Active until $date';
+  }
+
+  @override
+  String get freePlanLabel => 'Free plan';
+
+  @override
+  String potsUsage(int used, int limit) {
+    return '$used of $limit pots';
+  }
+
+  @override
+  String scansUsage(int used, int limit) {
+    return '$used of $limit scans today';
+  }
+
+  @override
+  String get unlimited => 'Unlimited';
+
+  @override
+  String get activatePlus => 'Activate O₂₊';
+
+  @override
+  String get plusActivated => 'O₂₊ activated! Unlimited pots and scans.';
+
+  @override
+  String get cancelPlus => 'Cancel O₂₊';
+
+  @override
+  String get plusCancelled => 'You\'re back on the free plan.';
+
+  @override
+  String get simulatedPayment =>
+      'Simulated payment: this app is a university project and takes no money.';
+
+  @override
+  String get nurseryDiscount => 'Nursery discount';
+
+  @override
+  String get nurseryDiscountIntro =>
+      'Show this code at partner nurseries to get your discount.';
+
+  @override
+  String get yourCode => 'Your code';
+
+  @override
+  String get codeCopied => 'Code copied';
+
+  @override
+  String get plusOnlyFeature => 'Available with O₂₊';
+
+  @override
+  String get copyCode => 'Copy code';
+
+  @override
+  String get plusUnlimitedSummary => 'Unlimited pots and scans';
+
+  @override
+  String get manage => 'Manage';
 }

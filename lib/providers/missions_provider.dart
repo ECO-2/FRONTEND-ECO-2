@@ -3,6 +3,7 @@ import 'package:frontend_eco_2/models/models.dart';
 import 'package:frontend_eco_2/services/services.dart';
 import 'app_error.dart';
 import 'package:frontend_eco_2/l10n/app_localizations.dart';
+import 'plan_provider.dart';
 
 /// Tipo de condición usada por los logros sembrados en el backend
 /// (Achievement.conditionType). Centralizado acá porque tanto el conteo
@@ -54,6 +55,10 @@ class MissionsProvider with ChangeNotifier {
     if (_errorMessage == kSessionExpired) {
       return AppLocalizations.of(context)!.sessionExpired;
     }
+    // Topes del plan: el backend manda un codigo para que la app pueda
+    // ofrecer O2+ en vez de un error generico.
+    final planMessage = planLimitMessage(context, _errorMessage);
+    if (planMessage != null) return planMessage;
     return _errorMessage;
   }
 

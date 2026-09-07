@@ -6,15 +6,36 @@ import 'package:frontend_eco_2/widgets/common/custom_status_bar.dart';
 import 'package:frontend_eco_2/widgets/common/custom_button.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:frontend_eco_2/l10n/app_localizations.dart';
+import 'package:provider/provider.dart';
+import 'package:frontend_eco_2/providers/providers.dart';
+import 'package:frontend_eco_2/widgets/common/plus_badge.dart';
+import 'package:frontend_eco_2/widgets/common/app_toast.dart';
+import 'package:frontend_eco_2/screens/premium/nursery_discount_screen.dart';
+import 'package:frontend_eco_2/routing/tab_navigation.dart';
 
-class PremiumUpgradeScreen extends StatelessWidget {
+class PremiumUpgradeScreen extends StatefulWidget {
   final bool isTab;
 
   const PremiumUpgradeScreen({super.key, this.isTab = false});
 
   @override
+  State<PremiumUpgradeScreen> createState() => _PremiumUpgradeScreenState();
+}
+
+class _PremiumUpgradeScreenState extends State<PremiumUpgradeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // El consumo (macetas y escaneos de hoy) cambia con cada accion, asi que
+    // se pide al abrir en vez de fiarse del ultimo valor cargado.
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => context.read<PlanProvider>().refresh(),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
-    if (isTab) {
+    if (widget.isTab) {
       return Scaffold(
         backgroundColor: AppColors.background,
         body: _buildBodyContent(context),
@@ -27,10 +48,7 @@ class PremiumUpgradeScreen extends StatelessWidget {
       body: _buildBodyContent(context),
       bottomNavigationBar: CustomBottomNavBar(
         selectedIndex: 0, // Highlight O2 + tab
-        onTap: (index) {
-          // Pop back to the previous screen (e.g. Settings or Profile)
-          Navigator.of(context).pop();
-        },
+        onTap: (index) => openDashboardTab(context, index),
       ),
     );
   }
@@ -38,7 +56,7 @@ class PremiumUpgradeScreen extends StatelessWidget {
   Widget _buildBodyContent(BuildContext context) {
     return Column(
       children: [
-        if (!isTab) const CustomStatusBar(),
+        if (!widget.isTab) const CustomStatusBar(),
         Expanded(
           child: SingleChildScrollView(
             child: Column(
@@ -196,9 +214,106 @@ class PremiumUpgradeScreen extends StatelessWidget {
                         ).animate().fadeIn(delay: 750.ms, duration: 400.ms).slideX(begin: 0.1, end: 0),
                         const Divider(height: 1, color: Color(0xFFF1F4F3)),
 
-                        const SizedBox(height: 28),
+                        const SizedBox(height: 20),
 
-                        // Subscription Action Button
+                        // Consumo actual. Solo tiene sentido en el plan
+                        // gratuito: con O2+ los topes son ilimitados.
+                        Builder(builder: (context) {
+                          final status = context.watch<PlanProvider>().status;
+                          if (status.isPlusActive) return const SizedBox.shrink();
+                          final plants = status.plantsLimit;
+                          final scans = status.scansLimit;
+                          if (plants == null || scans == null) {
+                            return const SizedBox.shrink();
+                          }
+                          return Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF4F7F5),
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  AppLocalizations.of(context)!.freePlanLabel,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 13,
+                                    color: AppColors.primaryDark,
+                                    fontFamily: 'Inter',
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  AppLocalizations.of(context)!.potsUsage(status.plantsUsed, plants),
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    color: AppColors.textSecondary,
+                                    fontFamily: 'Inter',
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  AppLocalizations.of(context)!.scansUsage(status.scansUsedToday, scans),
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    color: AppColors.textSecondary,
+                                    fontFamily: 'Inter',
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }),
+                        const SizedBox(height: 20),
+
+                        // Con O2+ activo ya no tiene sentido ofrecer la
+                        // suscripcion: se da acceso a lo que desbloquea.
+                        if (context.watch<PlanProvider>().isPlusActive) ...[
+                          const Align(child: PlusBadge()),
+                          const SizedBox(height: 16),
+                          CustomButton(
+                            text: AppLocalizations.of(context)!.nurseryDiscount,
+                            backgroundColor: AppColors.primary,
+                            foregroundColor: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                            icon: Icons.qr_code_2_rounded,
+                            onPressed: () {
+                              final userId = context
+                                  .read<UserProvider>()
+                                  .currentUser
+                                  ?.id;
+                              if (userId == null) return;
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) =>
+                                      NurseryDiscountScreen(userId: userId),
+                                ),
+                              );
+                            },
+                          ),
+                          const SizedBox(height: 12),
+                          TextButton(
+                            onPressed: () async {
+                              final planProvider =
+                                  context.read<PlanProvider>();
+                              final ok = await planProvider.cancelPlus();
+                              if (!context.mounted) return;
+                              showAppToast(
+                                context,
+                                ok
+                                    ? AppLocalizations.of(context)!.plusCancelled
+                                    : (planProvider.errorText(context) ??
+                                        AppLocalizations.of(context)!.connectionError),
+                                type: ok
+                                    ? ToastType.success
+                                    : ToastType.error,
+                              );
+                            },
+                            child: Text(AppLocalizations.of(context)!.cancelPlus),
+                          ),
+                        ] else
                         CustomButton(
                           text: AppLocalizations.of(context)!.subscribeToO2Plus,
                           backgroundColor: AppColors.primary,

@@ -6,6 +6,7 @@ import 'package:frontend_eco_2/theme/app_colors.dart';
 import 'package:frontend_eco_2/providers/providers.dart';
 import 'package:frontend_eco_2/routing/app_routes.dart';
 import 'package:frontend_eco_2/utils/app_tour.dart';
+import 'package:frontend_eco_2/widgets/common/plus_badge.dart';
 
 class DashboardHeader extends StatelessWidget implements PreferredSizeWidget {
   // Solo se pasan desde DashboardScreen, para el recorrido guiado.
@@ -66,14 +67,29 @@ class DashboardHeader extends StatelessWidget implements PreferredSizeWidget {
                           ),
                         ),
                         const SizedBox(height: 4),
-                        Text(
-                          username,
-                          style: const TextStyle(
-                            fontFamily: 'DM Sans',
-                            fontSize: 26,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white,
-                          ),
+                        Row(
+                          children: [
+                            Flexible(
+                              child: Text(
+                                username,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontFamily: 'DM Sans',
+                                  fontSize: 26,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                            // Insignia O2+ junto al nombre: es lo primero que
+                            // se ve al abrir la app, asi que el dashboard deja
+                            // de no dar ninguna senal de la suscripcion.
+                            if (context.watch<PlanProvider>().isPlusActive) ...[
+                              const SizedBox(width: 8),
+                              const PlusBadge(compact: true),
+                            ],
+                          ],
                         ),
                       ],
                     ),

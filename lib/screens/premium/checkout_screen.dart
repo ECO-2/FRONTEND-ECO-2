@@ -6,6 +6,7 @@ import 'package:frontend_eco_2/theme/app_colors.dart';
 import 'package:frontend_eco_2/routing/app_routes.dart';
 import 'package:frontend_eco_2/widgets/common/custom_app_bar.dart';
 import 'package:frontend_eco_2/widgets/common/custom_button.dart';
+import 'package:frontend_eco_2/widgets/common/app_toast.dart';
 
 class CheckoutScreen extends StatefulWidget {
   const CheckoutScreen({super.key});
@@ -92,6 +93,36 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                               fontSize: 12,
                               color: AppColors.primary,
                               fontWeight: FontWeight.bold,
+                              fontFamily: 'Inter',
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Aviso honesto: la pasarela es una maqueta y no cobra nada.
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFFF6E5),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: const Color(0xFFF0D9A8)),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.info_outline_rounded,
+                            color: Color(0xFFB8860B), size: 20),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            AppLocalizations.of(context)!.simulatedPayment,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              height: 1.4,
+                              color: Color(0xFF7A5C00),
                               fontFamily: 'Inter',
                             ),
                           ),
@@ -382,26 +413,35 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   }
 
   void _processPayment() async {
-    setState(() {
-      _isProcessing = true;
-    });
-    
-    // Simulate payment processing
-    await Future.delayed(const Duration(milliseconds: 1500));
-    
-    if (mounted) {
-      // Update user subscription plan to premium in state
-      final userProvider = Provider.of<UserProvider>(context, listen: false);
-      final currentUser = userProvider.currentUser;
-      if (currentUser != null) {
-        userProvider.setUser(currentUser.copyWith(planType: 'premium'));
-      }
-      
-      setState(() {
-        _isProcessing = false;
-      });
-      
-      Navigator.pushReplacementNamed(context, AppRoutes.success);
+    setState(() => _isProcessing = true);
+
+    // Cobro simulado: la pasarela es una maqueta. Lo que si es real es la
+    // activacion del plan en el backend, que es lo que levanta los topes de
+    // macetas y escaneos. Antes esto solo escribia 'premium' en el estado
+    // local, asi que no cambiaba nada y se perdia al reiniciar.
+    final planProvider = Provider.of<PlanProvider>(context, listen: false);
+    final ok = await planProvider.activatePlus();
+    if (!mounted) return;
+
+    setState(() => _isProcessing = false);
+
+    if (!ok) {
+      showAppToast(
+        context,
+        planProvider.errorText(context) ??
+            AppLocalizations.of(context)!.connectionError,
+        type: ToastType.error,
+      );
+      return;
     }
+
+    // El perfil cacheado tambien debe reflejar el plan nuevo.
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final currentUser = userProvider.currentUser;
+    if (currentUser != null) {
+      userProvider.setUser(currentUser.copyWith(planType: 'plus'));
+    }
+
+    Navigator.pushReplacementNamed(context, AppRoutes.success);
   }
 }

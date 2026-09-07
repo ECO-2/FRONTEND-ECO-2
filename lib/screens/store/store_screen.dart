@@ -9,6 +9,7 @@ import 'package:frontend_eco_2/widgets/store/store_card_backdrop.dart';
 import 'package:frontend_eco_2/widgets/common/custom_bottom_nav_bar.dart';
 import 'package:frontend_eco_2/widgets/common/custom_status_bar.dart';
 import 'package:frontend_eco_2/widgets/common/app_toast.dart';
+import 'package:frontend_eco_2/routing/tab_navigation.dart';
 
 // Claves estables, no etiquetas: comparar contra el texto visible rompia el
 // filtro en cuanto la app cambiaba de idioma.
@@ -112,9 +113,7 @@ class _StoreScreenState extends State<StoreScreen> {
       body: _buildBodyContent(context),
       bottomNavigationBar: CustomBottomNavBar(
         selectedIndex: 0, // Highlight Tienda tab
-        onTap: (index) {
-          Navigator.of(context).pop();
-        },
+        onTap: (index) => openDashboardTab(context, index),
       ),
     );
   }

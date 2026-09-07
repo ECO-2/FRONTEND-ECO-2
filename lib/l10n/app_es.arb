@@ -1218,5 +1218,53 @@
   "fertilizings": "Abonos",
   "tabActive": "Activa",
   "tabCompleted": "Completadas",
-  "tabLocked": "Bloqueadas"
+  "tabLocked": "Bloqueadas",
+  "plantLimitReached": "Has llegado a tus 10 macetas. Con O₂₊ son ilimitadas.",
+  "scanLimitReached": "Ya usaste tus 5 escaneos de hoy. Con O₂₊ son ilimitados.",
+  "plusMember": "Miembro O₂₊",
+  "plusActiveUntil": "Activo hasta el {date}",
+  "@plusActiveUntil": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "freePlanLabel": "Plan gratuito",
+  "potsUsage": "{used} de {limit} macetas",
+  "@potsUsage": {
+    "placeholders": {
+      "used": {
+        "type": "int"
+      },
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "scansUsage": "{used} de {limit} escaneos hoy",
+  "@scansUsage": {
+    "placeholders": {
+      "used": {
+        "type": "int"
+      },
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "unlimited": "Ilimitado",
+  "activatePlus": "Activar O₂₊",
+  "plusActivated": "¡O₂₊ activado! Macetas y escaneos ilimitados.",
+  "cancelPlus": "Cancelar O₂₊",
+  "plusCancelled": "Has vuelto al plan gratuito.",
+  "simulatedPayment": "Pago simulado: esta app es un trabajo universitario y no realiza ningún cobro.",
+  "nurseryDiscount": "Descuento en viveros",
+  "nurseryDiscountIntro": "Muestra este código en los viveros asociados para aplicar tu descuento.",
+  "yourCode": "Tu código",
+  "codeCopied": "Código copiado",
+  "plusOnlyFeature": "Disponible con O₂₊",
+  "copyCode": "Copiar código",
+  "plusUnlimitedSummary": "Macetas y escaneos ilimitados",
+  "manage": "Gestionar"
 }
