@@ -3903,6 +3903,36 @@ abstract class AppLocalizations {
   /// **'{minutes, plural, =1{Vence en 1 minuto} other{Vence en {minutes} minutos}}'**
   String rentalPotsExpiresInMinutes(int minutes);
 
+  /// No description provided for @rentalExpiredTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu maceta alquilada venció'**
+  String get rentalExpiredTitle;
+
+  /// No description provided for @rentalExpiredOverLimit.
+  ///
+  /// In es, this message translates to:
+  /// **'{count, plural, =1{{names} supera tu tope actual de macetas.} other{{count} plantas superan tu tope actual de macetas: {names}.}}'**
+  String rentalExpiredOverLimit(int count, String names);
+
+  /// No description provided for @rentalExpiredNothingHeld.
+  ///
+  /// In es, this message translates to:
+  /// **'Ninguna planta dependía de ella: sigues con {used} de {limit} macetas.'**
+  String rentalExpiredNothingHeld(int used, int limit);
+
+  /// No description provided for @rentalExpiredNothingDeleted.
+  ///
+  /// In es, this message translates to:
+  /// **'No se ha borrado ninguna planta. Puedes seguir cuidándolas todas; el tope solo afecta a las nuevas.'**
+  String get rentalExpiredNothingDeleted;
+
+  /// No description provided for @rentalExpiredRentAgain.
+  ///
+  /// In es, this message translates to:
+  /// **'Alquilar otra'**
+  String get rentalExpiredRentAgain;
+
   /// No description provided for @freePlanLabel.
   ///
   /// In es, this message translates to:

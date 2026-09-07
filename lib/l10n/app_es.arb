@@ -1250,6 +1250,13 @@
   "@rentalPotsExpiresInHours": { "placeholders": { "hours": { "type": "int" } } },
   "rentalPotsExpiresInMinutes": "{minutes, plural, =1{Vence en 1 minuto} other{Vence en {minutes} minutos}}",
   "@rentalPotsExpiresInMinutes": { "placeholders": { "minutes": { "type": "int" } } },
+  "rentalExpiredTitle": "Tu maceta alquilada venció",
+  "rentalExpiredOverLimit": "{count, plural, =1{{names} supera tu tope actual de macetas.} other{{count} plantas superan tu tope actual de macetas: {names}.}}",
+  "@rentalExpiredOverLimit": { "placeholders": { "count": { "type": "int" }, "names": { "type": "String" } } },
+  "rentalExpiredNothingHeld": "Ninguna planta dependía de ella: sigues con {used} de {limit} macetas.",
+  "@rentalExpiredNothingHeld": { "placeholders": { "used": { "type": "int" }, "limit": { "type": "int" } } },
+  "rentalExpiredNothingDeleted": "No se ha borrado ninguna planta. Puedes seguir cuidándolas todas; el tope solo afecta a las nuevas.",
+  "rentalExpiredRentAgain": "Alquilar otra",
   "freePlanLabel": "Plan gratuito",
   "potsUsage": "{used} de {limit} macetas",
   "@potsUsage": {

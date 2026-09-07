@@ -2271,6 +2271,32 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String get rentalExpiredTitle => 'Tu maceta alquilada venció';
+
+  @override
+  String rentalExpiredOverLimit(int count, String names) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count plantas superan tu tope actual de macetas: $names.',
+      one: '$names supera tu tope actual de macetas.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String rentalExpiredNothingHeld(int used, int limit) {
+    return 'Ninguna planta dependía de ella: sigues con $used de $limit macetas.';
+  }
+
+  @override
+  String get rentalExpiredNothingDeleted =>
+      'No se ha borrado ninguna planta. Puedes seguir cuidándolas todas; el tope solo afecta a las nuevas.';
+
+  @override
+  String get rentalExpiredRentAgain => 'Alquilar otra';
+
+  @override
   String get freePlanLabel => 'Plan gratuito';
 
   @override

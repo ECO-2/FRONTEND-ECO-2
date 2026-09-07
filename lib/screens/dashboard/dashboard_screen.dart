@@ -6,6 +6,7 @@ import 'package:frontend_eco_2/providers/providers.dart';
 import 'package:frontend_eco_2/routing/app_routes.dart';
 import 'package:frontend_eco_2/services/services.dart';
 import 'package:frontend_eco_2/theme/app_colors.dart';
+import 'package:frontend_eco_2/widgets/garden/rental_expired_dialog.dart';
 import 'package:frontend_eco_2/utils/app_tour.dart';
 import 'package:frontend_eco_2/widgets/common/custom_bottom_nav_bar.dart';
 import 'package:frontend_eco_2/screens/dashboard/tabs/home_tab.dart';
@@ -105,7 +106,11 @@ class _DashboardBodyState extends State<_DashboardBody> {
       // El plan puede haber caducado desde el ultimo arranque, o haberse
       // activado en otro dispositivo: se refresca al entrar para que la
       // insignia no mienta.
-      context.read<PlanProvider>().refresh();
+      context.read<PlanProvider>().refresh().then((_) {
+        // Un alquiler vencido no deberia descubrirse al chocar con el tope:
+        // se avisa aqui, una sola vez, en cuanto el plan llega actualizado.
+        if (mounted) maybeShowRentalExpired(context);
+      });
     });
   }
 

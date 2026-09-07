@@ -8,6 +8,7 @@ class SecureStorage {
   static const _plantCareTourSeenKey = 'plant_care_tour_seen';
   static const _languageCodeKey = 'language_code';
   static const _biometricLockKey = 'biometric_lock_enabled';
+  static const _rentalNoticeKey = 'rental_expiry_notice_shown';
 
   final FlutterSecureStorage _storage = const FlutterSecureStorage(
     aOptions: AndroidOptions(encryptedSharedPreferences: true),
@@ -73,4 +74,14 @@ class SecureStorage {
   Future<void> setBiometricLockEnabled(bool enabled) => enabled
       ? _storage.write(key: _biometricLockKey, value: 'true')
       : _storage.delete(key: _biometricLockKey);
+
+  // ── Aviso de alquiler vencido ─────────────────────────────────────────
+  // Se guarda la fecha del alquiler ya avisado, no un simple "true": asi el
+  // aviso sale una vez por alquiler y vuelve a salir si el usuario alquila
+  // otra maceta mas adelante.
+  Future<String?> getRentalNoticeShownFor() =>
+      _storage.read(key: _rentalNoticeKey);
+
+  Future<void> markRentalNoticeShown(String expiresAtIso) =>
+      _storage.write(key: _rentalNoticeKey, value: expiresAtIso);
 }

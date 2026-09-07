@@ -2263,6 +2263,32 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get rentalExpiredTitle => 'Your rented pot expired';
+
+  @override
+  String rentalExpiredOverLimit(int count, String names) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count plants are over your current pot limit: $names.',
+      one: '$names is over your current pot limit.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String rentalExpiredNothingHeld(int used, int limit) {
+    return 'No plant depended on it: you are still at $used of $limit pots.';
+  }
+
+  @override
+  String get rentalExpiredNothingDeleted =>
+      'No plant has been deleted. You can keep caring for all of them; the limit only applies to new ones.';
+
+  @override
+  String get rentalExpiredRentAgain => 'Rent another';
+
+  @override
   String get freePlanLabel => 'Free plan';
 
   @override
