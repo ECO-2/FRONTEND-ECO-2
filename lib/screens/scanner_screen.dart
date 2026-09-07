@@ -8,12 +8,14 @@ import 'package:showcaseview/showcaseview.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:frontend_eco_2/theme/app_colors.dart';
+import 'package:frontend_eco_2/utils/catalog_labels.dart';
 import 'package:frontend_eco_2/utils/app_tour.dart';
 import 'package:frontend_eco_2/routing/app_routes.dart';
 import 'package:frontend_eco_2/providers/plants_provider.dart';
 import 'package:frontend_eco_2/models/models.dart';
 import 'package:frontend_eco_2/services/services.dart';
 import 'package:frontend_eco_2/widgets/common/app_toast.dart';
+import 'package:frontend_eco_2/utils/date_labels.dart';
 
 enum ScannerState { idle, scanning, success, notFound, notConfigured, offline }
 
@@ -167,7 +169,7 @@ class _ScannerScreenContentState extends State<ScannerScreenContent>
   void _showOfflineSnackbar() {
     showAppToast(
       context,
-      'No se pudo conectar para identificar la planta. Verifica tu conexión e inténtalo de nuevo.',
+      AppLocalizations.of(context)!.identifyConnectionError,
       type: ToastType.error,
     );
   }
@@ -182,15 +184,17 @@ class _ScannerScreenContentState extends State<ScannerScreenContent>
         builder: (context) => AlertDialog(
           backgroundColor: Colors.white,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          title: const Text('Planta ya registrada', style: TextStyle(color: AppColors.primaryDark, fontWeight: FontWeight.bold)),
-          content: const Text(
-            'Ya tienes esta planta registrada en tu jardín. Te sugerimos ponerle un apodo (diferenciador) para no confundirla.',
-            style: TextStyle(color: Colors.black87),
+          title: Text(AppLocalizations.of(context)!.plantAlreadyRegistered,
+              style: const TextStyle(color: AppColors.primaryDark, fontWeight: FontWeight.bold)),
+          content: Text(
+            AppLocalizations.of(context)!.plantAlreadyRegisteredBody,
+            style: const TextStyle(color: Colors.black87),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Entendido', style: TextStyle(color: AppColors.accent, fontWeight: FontWeight.bold)),
+              child: Text(AppLocalizations.of(context)!.gotIt,
+                  style: const TextStyle(color: AppColors.accent, fontWeight: FontWeight.bold)),
             ),
           ],
         ),
@@ -201,17 +205,18 @@ class _ScannerScreenContentState extends State<ScannerScreenContent>
         builder: (context) => AlertDialog(
           backgroundColor: Colors.white,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          title: const Text('¿Desea añadir esta planta a su jardín?', style: TextStyle(color: AppColors.primaryDark, fontWeight: FontWeight.bold)),
+          title: Text(AppLocalizations.of(context)!.addThisPlantQuestion,
+              style: const TextStyle(color: AppColors.primaryDark, fontWeight: FontWeight.bold)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Se añadirá a tu colección de plantas.', style: TextStyle(color: Colors.black87)),
+              Text(AppLocalizations.of(context)!.addThisPlantBody,
+                  style: const TextStyle(color: Colors.black87)),
               const SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Macetas restantes: 3', style: TextStyle(fontSize: 12, color: Colors.grey)),
                   TextButton(
                     onPressed: () {
                       Navigator.pop(context);
@@ -222,7 +227,8 @@ class _ScannerScreenContentState extends State<ScannerScreenContent>
                       minimumSize: Size.zero,
                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
-                    child: const Text('Canjear más', style: TextStyle(fontSize: 12, color: AppColors.primary, decoration: TextDecoration.underline)),
+                    child: Text(AppLocalizations.of(context)!.redeemMore,
+                        style: const TextStyle(fontSize: 12, color: AppColors.primary, decoration: TextDecoration.underline)),
                   ),
                 ],
               ),
@@ -231,14 +237,15 @@ class _ScannerScreenContentState extends State<ScannerScreenContent>
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancelar', style: TextStyle(color: Colors.grey)),
+              child: Text(AppLocalizations.of(context)!.cancel, style: const TextStyle(color: Colors.grey)),
             ),
             ElevatedButton(
               onPressed: () async {
                 Navigator.pop(context);
                 final success = await plantsProvider.addPlantFromSpecies(species);
                 if (success && mounted) {
-                  showAppToast(context, 'Planta añadida con éxito', type: ToastType.success);
+                  showAppToast(context, AppLocalizations.of(context)!.plantAddedSuccess,
+                      type: ToastType.success);
                 }
               },
               style: ElevatedButton.styleFrom(
@@ -246,7 +253,7 @@ class _ScannerScreenContentState extends State<ScannerScreenContent>
                 foregroundColor: AppColors.primaryDark,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
-              child: const Text('Aceptar', style: TextStyle(fontWeight: FontWeight.bold)),
+              child: Text(AppLocalizations.of(context)!.accept, style: const TextStyle(fontWeight: FontWeight.bold)),
             ),
           ],
         ),
@@ -275,8 +282,7 @@ class _ScannerScreenContentState extends State<ScannerScreenContent>
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Historial de Escaneos',
+              Text(AppLocalizations.of(context)!.scanHistory,
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -298,19 +304,19 @@ class _ScannerScreenContentState extends State<ScannerScreenContent>
                       );
                     }
                     if (snapshot.hasError) {
-                      return const Center(
+                      return Center(
                         child: Text(
-                          'No se pudo cargar el historial.',
-                          style: TextStyle(color: Colors.grey),
+                          AppLocalizations.of(context)!.historyLoadFailed,
+                          style: const TextStyle(color: Colors.grey),
                         ),
                       );
                     }
                     final history = snapshot.data ?? [];
                     if (history.isEmpty) {
-                      return const Center(
+                      return Center(
                         child: Text(
-                          'Todavía no has escaneado ninguna planta.',
-                          style: TextStyle(color: Colors.grey),
+                          AppLocalizations.of(context)!.noScansYet,
+                          style: const TextStyle(color: Colors.grey),
                         ),
                       );
                     }
@@ -324,7 +330,7 @@ class _ScannerScreenContentState extends State<ScannerScreenContent>
                             : 'Sin coincidencia';
                         return _buildHistoryItem(
                           species?.commonName ?? 'No identificada',
-                          _relativeTime(item.createdAt),
+                          _relativeTime(context, item.createdAt),
                           pct,
                           species == null
                               ? null
@@ -351,12 +357,13 @@ class _ScannerScreenContentState extends State<ScannerScreenContent>
     );
   }
 
-  String _relativeTime(DateTime dt) {
+  String _relativeTime(BuildContext context, DateTime dt) {
+    final l = AppLocalizations.of(context)!;
     final diff = DateTime.now().difference(dt);
-    if (diff.inMinutes < 60) return 'Hace ${diff.inMinutes}m';
-    if (diff.inHours < 24) return 'Hace ${diff.inHours}h';
-    if (diff.inDays < 7) return 'Hace ${diff.inDays}d';
-    return '${dt.day}/${dt.month}/${dt.year}';
+    if (diff.inMinutes < 60) return l.agoMinutes(diff.inMinutes);
+    if (diff.inHours < 24) return l.agoHours(diff.inHours);
+    if (diff.inDays < 7) return l.agoDays(diff.inDays);
+    return formatShortDate(context, dt);
   }
 
   Widget _buildHistoryItem(String title, String time, String subtitle, VoidCallback? onTap) {
@@ -698,7 +705,8 @@ class _ScannerScreenContentState extends State<ScannerScreenContent>
                       children: [
                         _buildTag(species.category ?? 'Planta'),
                         const SizedBox(width: 8),
-                        _buildTag(species.difficulty),
+                        _buildTag(difficultyLabel(
+                            context, species.waterFrequencyDays)),
                       ],
                     ),
                   ],
@@ -724,7 +732,8 @@ class _ScannerScreenContentState extends State<ScannerScreenContent>
                     ),
                     padding: const EdgeInsets.symmetric(vertical: 12),
                   ),
-                  child: const Text('Ver ficha', style: TextStyle(fontWeight: FontWeight.w600)),
+                  child: Text(AppLocalizations.of(context)!.viewSpecSheet,
+                      style: const TextStyle(fontWeight: FontWeight.w600)),
                 ),
               ),
               const SizedBox(width: 12),
@@ -732,7 +741,8 @@ class _ScannerScreenContentState extends State<ScannerScreenContent>
                 child: ElevatedButton.icon(
                   onPressed: () => _onAddToGarden(species),
                   icon: const Icon(Icons.add, size: 18),
-                  label: const Text('A mi jardín', style: TextStyle(fontWeight: FontWeight.w600)),
+                  label: Text(AppLocalizations.of(context)!.toMyGarden,
+                      style: const TextStyle(fontWeight: FontWeight.w600)),
                   style: ElevatedButton.styleFrom(
                     foregroundColor: AppColors.primary,
                     backgroundColor: AppColors.accent,
@@ -748,8 +758,7 @@ class _ScannerScreenContentState extends State<ScannerScreenContent>
           ),
           if (_alternates.isNotEmpty) ...[
             const SizedBox(height: 20),
-            Text(
-              'Otras posibilidades',
+            Text(AppLocalizations.of(context)!.otherPossibilities,
               style: TextStyle(
                 color: Colors.grey[500],
                 fontSize: 12,
@@ -832,8 +841,8 @@ class _ScannerScreenContentState extends State<ScannerScreenContent>
           const SizedBox(height: 12),
           Text(
             _unmatchedCommonName != null
-                ? 'La reconocimos, pero todavía no está en el catálogo de ECO2 — no podemos añadirla a tu jardín todavía.'
-                : 'No pudimos reconocerla con suficiente confianza. Prueba con más luz o de más cerca.',
+                ? AppLocalizations.of(context)!.scannerNotInCatalog
+                : AppLocalizations.of(context)!.scannerLowConfidence,
             style: TextStyle(color: Colors.grey[600], fontSize: 13, height: 1.4),
           ),
         ],
@@ -866,7 +875,7 @@ class _ScannerScreenContentState extends State<ScannerScreenContent>
           const SizedBox(width: 12),
           Expanded(
             child: Text(
-              'La identificación por IA todavía no está disponible en esta versión.',
+              AppLocalizations.of(context)!.aiNotAvailable,
               style: TextStyle(color: Colors.grey[700], fontSize: 13, height: 1.4),
             ),
           ),
@@ -955,7 +964,8 @@ class _ScannerScreenContentState extends State<ScannerScreenContent>
                     side: const BorderSide(color: AppColors.primary),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   ),
-                  child: const Text('Ver', style: TextStyle(fontSize: 10, color: AppColors.primary)),
+                  child: Text(AppLocalizations.of(context)!.view,
+                      style: const TextStyle(fontSize: 10, color: AppColors.primary)),
                 ),
               ),
               const SizedBox(width: 4),
@@ -988,7 +998,7 @@ class _ScannerScreenContentState extends State<ScannerScreenContent>
           wrapWithTourStep(
             key: _galleryKey,
             title: AppLocalizations.of(context)!.gallery,
-            description: 'Sube una foto de tu galería para analizar.',
+            description: AppLocalizations.of(context)!.tourGalleryDescription,
             child: GestureDetector(
               onTap: _pickImageFromGallery,
               child: Container(
@@ -1008,8 +1018,8 @@ class _ScannerScreenContentState extends State<ScannerScreenContent>
           ),
           wrapWithTourStep(
             key: _shutterKey,
-            title: 'Obturador',
-            description: 'Presiona aquí para escanear una planta y continuar.',
+            title: AppLocalizations.of(context)!.shutter,
+            description: AppLocalizations.of(context)!.tourShutterDescription,
             child: GestureDetector(
               onTap: () {
                 if (_state == ScannerState.scanning) return;
@@ -1046,8 +1056,8 @@ class _ScannerScreenContentState extends State<ScannerScreenContent>
           ),
           wrapWithTourStep(
             key: _historyKey,
-            title: 'Historial',
-            description: 'Consulta tus escaneos anteriores.',
+            title: AppLocalizations.of(context)!.history,
+            description: AppLocalizations.of(context)!.tourHistoryDesc,
             child: GestureDetector(
               onTap: _showHistoryModal,
               child: Container(

@@ -83,7 +83,7 @@ class DashboardHeader extends StatelessWidget implements PreferredSizeWidget {
                   wrapWithTourStep(
                     key: seedsKey,
                     title: AppLocalizations.of(context)!.yourSeeds,
-                    description: 'Ganas semillas cuidando tus plantas y cumpliendo misiones. Úsalas en la Tienda.',
+                    description: AppLocalizations.of(context)!.tourSeedsDesc,
                     child: Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 12,
@@ -152,8 +152,8 @@ class DashboardHeader extends StatelessWidget implements PreferredSizeWidget {
                   // Trophy icon with badge
                   wrapWithTourStep(
                     key: trophyKey,
-                    title: 'Logros y misiones',
-                    description: 'Aquí ves tus trofeos, el progreso de tus misiones y cuánto XP llevas.',
+                    title: AppLocalizations.of(context)!.achievementsAndMissionsTitle,
+                    description: AppLocalizations.of(context)!.tourTrophyDesc,
                     child: GestureDetector(
                       onTap: () {
                         Navigator.of(context).pushNamed(AppRoutes.trophies);
@@ -187,8 +187,8 @@ class DashboardHeader extends StatelessWidget implements PreferredSizeWidget {
                   // Bell icon with badge
                   wrapWithTourStep(
                     key: bellKey,
-                    title: 'Notificaciones',
-                    description: 'Avisos reales: riegos pendientes, logros desbloqueados y plantas nuevas.',
+                    title: AppLocalizations.of(context)!.notificationsTitle,
+                    description: AppLocalizations.of(context)!.tourNotificationsDesc,
                     child: GestureDetector(
                       onTap: () {
                         Navigator.of(context).pushNamed(AppRoutes.notifications);

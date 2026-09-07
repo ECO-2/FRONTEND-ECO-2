@@ -10,6 +10,7 @@ import 'package:frontend_eco_2/providers/providers.dart';
 import 'package:frontend_eco_2/routing/app_routes.dart';
 import 'package:frontend_eco_2/services/services.dart';
 import 'package:frontend_eco_2/utils/app_tour.dart';
+import 'package:frontend_eco_2/theme/app_colors.dart';
 import 'package:frontend_eco_2/utils/plant_visuals.dart';
 import 'package:frontend_eco_2/utils/cloudinary_transform.dart';
 import 'package:frontend_eco_2/utils/top_clamping_scroll_physics.dart';
@@ -24,6 +25,8 @@ import 'widgets/care_status_card.dart';
 import 'widgets/care_guide_card.dart';
 import 'widgets/species_care_grid.dart';
 import 'widgets/care_history_list.dart';
+import 'widgets/plant_photo_viewer.dart';
+import 'package:frontend_eco_2/utils/date_labels.dart';
 
 // Legacy mock species (s1-s3) keep their curated SpeciesData entry; every
 // real catalog species (real UUID from the backend) gets one built from its
@@ -36,10 +39,10 @@ SpeciesData _resolveSpeciesData(
   // La especie que viene embebida con la planta es la fuente más fiable:
   // llega siempre con la respuesta del backend, incluso si el catálogo
   // todavía no ha terminado de cargar.
-  if (embedded != null) return SpeciesData.fromReal(embedded);
+  if (embedded != null) return SpeciesData.fromReal(context, embedded);
 
   final species = _resolveRealSpecies(context, speciesId);
-  return SpeciesData.fromReal(species);
+  return SpeciesData.fromReal(context, species);
 }
 
 /// Especie real del catálogo (para navegar a SpeciesDetailScreen, que espera
@@ -67,10 +70,17 @@ class PlantDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final plant = ModalRoute.of(context)?.settings.arguments as UserPlant?;
     if (plant == null) {
-      return const Scaffold(body: Center(child: Text('Planta no encontrada')));
+      return Scaffold(
+          body: Center(child: Text(AppLocalizations.of(context)!.plantNotFound)));
     }
 
     return ShowCaseWidget(
+      // Sin esto el recorrido no se movia: los pasos 3 y 4 (registrar cuidado
+      // y ficha de la especie) quedan debajo del pliegue y showcaseview trae
+      // `enableAutoScroll` en false por defecto, asi que resaltaba un punto
+      // fuera de pantalla y parecia que el recorrido se colgaba.
+      enableAutoScroll: true,
+      scrollDuration: const Duration(milliseconds: 400),
       onFinish: () {
         Provider.of<SecureStorage>(context, listen: false).markPlantCareTourSeen();
       },
@@ -178,35 +188,6 @@ class _PlantDetailBodyState extends State<_PlantDetailBody> {
                                     ),
                     ),
                   ),
-                  // Botón para poner/cambiar la foto de esta planta —
-                  // se guarda solo en este dispositivo.
-                  Positioned(
-                    right: 12,
-                    bottom: 12,
-                    child: GestureDetector(
-                      onTap: () => _choosePhoto(context, plant.id, hasCustomPhoto: customPhoto != null),
-                      child: Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.15),
-                              blurRadius: 6,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: const Icon(
-                          Icons.camera_alt_rounded,
-                          size: 18,
-                          color: Color(0xFF0D2B31),
-                        ),
-                      ),
-                    ),
-                  ),
                 ],
               ),
             ),
@@ -218,9 +199,64 @@ class _PlantDetailBodyState extends State<_PlantDetailBody> {
               physics: const TopClampingScrollPhysics(),
               child: Column(
                 children: [
-                  // Espacio transparente para mostrar la imagen fija del fondo al principio
+                  // Espacio transparente para mostrar la imagen fija del fondo
+                  // al principio. El botón de la foto vive AQUÍ y no sobre la
+                  // imagen: esta capa es un Positioned.fill con un scroll que
+                  // cubre toda la pantalla, así que se quedaba con todos los
+                  // toques y el botón de abajo nunca reaccionaba.
                   SizedBox(
                     height: statusBarHeight + appBarHeight + imageHeight + 24,
+                    child: Stack(
+                      children: [
+                        // Toque sobre la zona de la imagen para verla de cerca.
+                        // Va aquí y no sobre la propia imagen porque esa capa
+                        // está debajo del scroll y no recibe toques.
+                        Positioned.fill(
+                          child: GestureDetector(
+                            behavior: HitTestBehavior.translucent,
+                            onTap: () => showPlantPhoto(
+                              context,
+                              customPhoto: customPhoto,
+                              imageUrl: sp.imageUrl,
+                              title: plant.nickname.isNotEmpty
+                                  ? plant.nickname
+                                  : plant.name,
+                            ),
+                          ),
+                        ),
+                        Positioned(
+                          right: 12,
+                          bottom: 20,
+                          child: GestureDetector(
+                            onTap: () => _choosePhoto(
+                              context,
+                              plant.id,
+                              hasCustomPhoto: customPhoto != null,
+                            ),
+                            child: Container(
+                              width: 40,
+                              height: 40,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.15),
+                                    blurRadius: 6,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: const Icon(
+                                Icons.camera_alt_rounded,
+                                size: 18,
+                                color: Color(0xFF0D2B31),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
 
                   // Caja contenedora sólida del detalle
@@ -298,7 +334,10 @@ class _PlantDetailBodyState extends State<_PlantDetailBody> {
                                 ),
                                 const SizedBox(height: 2),
                                 Text(
-                                  _formatAcquisitionDate(plant.acquiredAt),
+                                  plant.acquiredAt == null
+                                      ? '—'
+                                      : formatMediumDate(
+                                          context, plant.acquiredAt!),
                                   style: const TextStyle(
                                     fontFamily: 'DM Sans',
                                     fontWeight: FontWeight.bold,
@@ -317,7 +356,7 @@ class _PlantDetailBodyState extends State<_PlantDetailBody> {
                           spacing: 8,
                           runSpacing: 8,
                           children: sp.tags.map((tag) {
-                            final style = styleForTagKind(tagKindFor(tag));
+                            final style = styleForTagKind(tag.kind);
                             return Container(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 12,
@@ -333,7 +372,7 @@ class _PlantDetailBodyState extends State<_PlantDetailBody> {
                                   Icon(style.icon, size: 12, color: style.color),
                                   const SizedBox(width: 5),
                                   Text(
-                                    tag,
+                                    tag.text,
                                     style: TextStyle(
                                       fontSize: 11,
                                       fontWeight: FontWeight.w600,
@@ -358,8 +397,7 @@ class _PlantDetailBodyState extends State<_PlantDetailBody> {
                           key: _tourKeys.statusCard,
                           title: AppLocalizations.of(context)!.wateringStatus,
                           description:
-                              'Aquí ves si ya toca regarla, cuántos días lleva sin riego y cuántos '
-                              'días faltan (o cuántos de retraso lleva) según la frecuencia de la especie.',
+                              AppLocalizations.of(context)!.tourWateringStatusDesc,
                           child: CareStatusCard(plant: plant, sp: sp),
                         ),
                         const SizedBox(height: 20),
@@ -376,8 +414,7 @@ class _PlantDetailBodyState extends State<_PlantDetailBody> {
                                 key: _tourKeys.registerButton,
                                 title: AppLocalizations.of(context)!.logEveryCare,
                                 description:
-                                    'Cada vez que la riegues, fertilices, podes o trasplantes, regístralo '
-                                    'aquí — así el estado de riego y tu historial quedan al día de verdad.',
+                                    AppLocalizations.of(context)!.tourLogCareDesc,
                                 child: ElevatedButton.icon(
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: const Color(0xFF0D2B31),
@@ -396,9 +433,9 @@ class _PlantDetailBodyState extends State<_PlantDetailBody> {
                                     size: 18,
                                     color: Color.fromARGB(255, 236, 233, 21),
                                   ),
-                                  label: const Text(
-                                    'Registrar cuidado',
-                                    style: TextStyle(
+                                  label: Text(
+                                    AppLocalizations.of(context)!.logCare,
+                                    style: const TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 14,
                                       fontFamily: 'Inter',
@@ -463,11 +500,10 @@ class _PlantDetailBodyState extends State<_PlantDetailBody> {
                                 AppRoutes.careHistory,
                                 arguments: plant,
                               ),
-                              child: const Row(
+                              child: Row(
                                 children: [
-                                  Text(
-                                    'ver todas',
-                                    style: TextStyle(
+                                  Text(AppLocalizations.of(context)!.viewAll,
+                                    style: const TextStyle(
                                       fontSize: 12,
                                       color: Color(0xFF807F7F),
                                       fontFamily: 'Inter',
@@ -507,12 +543,15 @@ class _PlantDetailBodyState extends State<_PlantDetailBody> {
                         ),
                         const SizedBox(height: 24),
 
+                        _RemindersMutedTile(plant: plant),
+                        const SizedBox(height: 24),
+
                         // ── Section: Cuidados de la especie ──
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text(
-                              'Cuidados de la especie',
+                            Text(
+                              AppLocalizations.of(context)!.speciesCare,
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16,
@@ -526,11 +565,10 @@ class _PlantDetailBodyState extends State<_PlantDetailBody> {
                                 AppRoutes.speciesDetail,
                                 arguments: plant.species ?? _resolveRealSpecies(context, plant.speciesId),
                               ),
-                              child: const Row(
+                              child: Row(
                                 children: [
-                                  Text(
-                                    'ver ficha completa',
-                                    style: TextStyle(
+                                  Text(AppLocalizations.of(context)!.viewFullSheet,
+                                    style: const TextStyle(
                                       fontSize: 12,
                                       color: Color(0xFF807F7F),
                                       fontFamily: 'Inter',
@@ -551,16 +589,14 @@ class _PlantDetailBodyState extends State<_PlantDetailBody> {
 
                         wrapWithTourStep(
                           key: _tourKeys.speciesGrid,
-                          title: 'Ficha técnica de la especie',
-                          description:
-                              'Riego, luz, temperatura y humedad ideales para esta especie en particular.',
+                          title: AppLocalizations.of(context)!.speciesSpecSheet,
+                          description: AppLocalizations.of(context)!.tourSpeciesGridDesc,
                           child: SpeciesCareGrid(sp: sp),
                         ),
                         const SizedBox(height: 24),
 
                         // ── Section: Mi nota personal ──
-                        const Text(
-                          'Mi nota personal',
+                        Text(AppLocalizations.of(context)!.myPersonalNote,
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
@@ -637,10 +673,10 @@ class _PlantDetailBodyState extends State<_PlantDetailBody> {
                         ),
                       ),
                       const SizedBox(width: 12),
-                      const Expanded(
+                      Expanded(
                         child: Text(
-                          'Mi Jardín',
-                          style: TextStyle(
+                          AppLocalizations.of(context)!.myGarden,
+                          style: const TextStyle(
                             fontFamily: 'DM Sans',
                             fontWeight: FontWeight.bold,
                             fontSize: 24,
@@ -654,7 +690,7 @@ class _PlantDetailBodyState extends State<_PlantDetailBody> {
                           color: Color(0xFF0D2B31),
                           size: 24,
                         ),
-                        tooltip: 'Cómo cuidar esta planta',
+                        tooltip: AppLocalizations.of(context)!.howToCareForThisPlant,
                         onPressed: _restartTour,
                       ),
                       IconButton(
@@ -699,21 +735,21 @@ class _PlantDetailBodyState extends State<_PlantDetailBody> {
     final newNickname = await showDialog<String>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Editar apodo'),
+        title: Text(AppLocalizations.of(context)!.editNickname),
         content: TextField(
           controller: controller,
           autofocus: true,
           maxLength: 40,
-          decoration: const InputDecoration(hintText: 'Apodo de la planta'),
+          decoration: InputDecoration(hintText: AppLocalizations.of(context)!.plantNicknameHint),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Cancelar'),
+            child: Text(AppLocalizations.of(context)!.cancel),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(dialogContext, controller.text),
-            child: const Text('Guardar'),
+            child: Text(AppLocalizations.of(context)!.save),
           ),
         ],
       ),
@@ -725,7 +761,10 @@ class _PlantDetailBodyState extends State<_PlantDetailBody> {
     if (!context.mounted) return;
     showAppToast(
       context,
-      ok ? 'Apodo actualizado.' : (plantsProvider.errorMessage ?? 'No se pudo actualizar el apodo.'),
+      ok
+          ? AppLocalizations.of(context)!.nicknameUpdated
+          : (plantsProvider.errorText(context) ??
+              AppLocalizations.of(context)!.nicknameUpdateFailed),
       type: ok ? ToastType.success : ToastType.error,
     );
   }
@@ -747,7 +786,7 @@ class _PlantDetailBodyState extends State<_PlantDetailBody> {
             const SizedBox(height: 8),
             ListTile(
               leading: const Icon(Icons.photo_camera_rounded, color: Color(0xFF0D2B31)),
-              title: const Text('Tomar foto'),
+              title: Text(AppLocalizations.of(context)!.takePhoto),
               onTap: () => Navigator.pop(sheetContext, 'camera'),
             ),
             ListTile(
@@ -758,7 +797,8 @@ class _PlantDetailBodyState extends State<_PlantDetailBody> {
             if (hasCustomPhoto)
               ListTile(
                 leading: const Icon(Icons.delete_outline_rounded, color: Colors.red),
-                title: const Text('Quitar foto', style: TextStyle(color: Colors.red)),
+                title: Text(AppLocalizations.of(context)!.removePhoto,
+                    style: const TextStyle(color: Colors.red)),
                 onTap: () => Navigator.pop(sheetContext, 'remove'),
               ),
             const SizedBox(height: 8),
@@ -772,7 +812,7 @@ class _PlantDetailBodyState extends State<_PlantDetailBody> {
     if (choice == 'remove') {
       await plantsProvider.removeCustomPhoto(plantId);
       if (context.mounted) {
-        showAppToast(context, 'Foto eliminada.', type: ToastType.success);
+        showAppToast(context, AppLocalizations.of(context)!.photoRemoved, type: ToastType.success);
       }
       return;
     }
@@ -788,7 +828,7 @@ class _PlantDetailBodyState extends State<_PlantDetailBody> {
 
       await plantsProvider.setCustomPhoto(plantId, picked.path);
       if (context.mounted) {
-        showAppToast(context, 'Foto actualizada.', type: ToastType.success);
+        showAppToast(context, AppLocalizations.of(context)!.photoUpdated, type: ToastType.success);
       }
     } catch (_) {
       // Permiso de cámara/galería denegado, u otro fallo del selector.
@@ -814,22 +854,91 @@ class _PlantDetailBodyState extends State<_PlantDetailBody> {
     );
   }
 
-  String _formatAcquisitionDate(DateTime? dt) {
-    if (dt == null) return '15 Feb 2026';
-    final months = [
-      'Ene',
-      'Feb',
-      'Mar',
-      'Abr',
-      'May',
-      'Jun',
-      'Jul',
-      'Ago',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dic',
-    ];
-    return '${dt.day} ${months[dt.month - 1]} ${dt.year}';
+}
+
+/// Interruptor para silenciar los recordatorios de una sola planta.
+///
+/// Es distinto del interruptor global de Ajustes: aquí se apagan los avisos de
+/// ESTA planta y el resto del jardín sigue avisando. El backend excluye las
+/// plantas silenciadas al buscar tareas vencidas, así que no se envía nada —
+/// no es un filtro cosmético en la app.
+class _RemindersMutedTile extends StatelessWidget {
+  final UserPlant plant;
+
+  const _RemindersMutedTile({required this.plant});
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
+    final plantsProvider = Provider.of<PlantsProvider>(context, listen: false);
+    final muted = plant.remindersMuted;
+    final name = plant.nickname.isNotEmpty ? plant.nickname : plant.name;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8FAF9),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0xFFE2E7E4)),
+      ),
+      padding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
+      child: Row(
+        children: [
+          Icon(
+            muted
+                ? Icons.notifications_off_rounded
+                : Icons.notifications_active_rounded,
+            size: 20,
+            color: muted ? const Color(0xFF807F7F) : const Color(0xFF0D2B31),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l.muteReminders,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                    color: Color(0xFF0D2B31),
+                    fontFamily: 'Inter',
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  muted ? l.muteRemindersOn : l.muteRemindersOff,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Color(0xFF807F7F),
+                    fontFamily: 'Inter',
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Switch(
+            value: muted,
+            activeThumbColor: Colors.white,
+            activeTrackColor: AppColors.primary,
+            inactiveThumbColor: Colors.white,
+            inactiveTrackColor: const Color(0xFFE2E7E4),
+            onChanged: (value) async {
+              final ok =
+                  await plantsProvider.setRemindersMuted(plant.id, value);
+              if (!context.mounted) return;
+              showAppToast(
+                context,
+                ok
+                    ? (value
+                        ? l.remindersMuted(name)
+                        : l.remindersUnmuted(name))
+                    : (plantsProvider.errorText(context) ?? l.connectionError),
+                type: ok ? ToastType.success : ToastType.error,
+              );
+            },
+          ),
+        ],
+      ),
+    );
   }
 }

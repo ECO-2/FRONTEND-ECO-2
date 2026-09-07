@@ -7,6 +7,7 @@ import 'package:frontend_eco_2/services/services.dart';
 import 'package:frontend_eco_2/routing/app_routes.dart';
 import 'package:frontend_eco_2/theme/app_colors.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:frontend_eco_2/screens/auth/app_lock_screen.dart';
 import 'firebase_options.dart';
 
 
@@ -129,7 +130,9 @@ class MyApp extends StatelessWidget {
               foregroundColor: AppColors.textPrimary,
             ),
           ),
-          initialRoute: AppRoutes.welcome,
+          // Arranca en la pantalla de carga, no en la de bienvenida: si hay
+          // sesion guardada nunca llega a verse el "Crear cuenta".
+          initialRoute: AppRoutes.splash,
           onGenerateRoute: AppRoutes.onGenerateRoute,
         ),
         ),
@@ -163,6 +166,20 @@ class _AppLoaderState extends State<_AppLoader> {
     if (!mounted) return;
 
     if (userProvider.isAuthenticated) {
+      // Bloqueo biométrico: la sesión ya está restaurada, así que la huella no
+      // autentica contra el servidor — solo decide si se deja ver lo que ya
+      // hay. Si no pasa, se cierra la sesión y se vuelve al inicio.
+      if (!await _passesBiometricGate()) {
+        await userProvider.logout();
+        if (!mounted) return;
+        navigatorKey.currentState?.pushNamedAndRemoveUntil(
+          AppRoutes.welcome,
+          (route) => false,
+        );
+        return;
+      }
+      if (!mounted) return;
+
       final user = userProvider.currentUser!;
 
       if (!user.onboardingCompleted) {
@@ -188,7 +205,30 @@ class _AppLoaderState extends State<_AppLoader> {
         AppRoutes.dashboard,
         (route) => false,
       );
+      return;
     }
+
+    // Sin sesion valida: recien aqui se muestra la bienvenida.
+    navigatorKey.currentState?.pushNamedAndRemoveUntil(
+      AppRoutes.welcome,
+      (route) => false,
+    );
+  }
+
+  /// Muestra la pantalla de bloqueo si la preferencia está activada.
+  /// Devuelve true cuando no hay bloqueo o cuando el sistema confirmó la
+  /// identidad.
+  Future<bool> _passesBiometricGate() async {
+    final storage = context.read<SecureStorage>();
+    if (!await storage.isBiometricLockEnabled()) return true;
+
+    final unlocked = await navigatorKey.currentState?.push<bool>(
+      MaterialPageRoute(
+        builder: (_) => const AppLockScreen(),
+        fullscreenDialog: true,
+      ),
+    );
+    return unlocked == true;
   }
 
   @override

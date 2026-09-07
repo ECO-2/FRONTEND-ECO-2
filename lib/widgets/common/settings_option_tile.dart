@@ -63,6 +63,11 @@ class SettingsOptionTile extends StatelessWidget {
       leading: leadingWidget,
       title: Text(
         title,
+        // Sin esto, un subtitulo largo en el trailing dejaba al titulo sin
+        // ancho y lo partia a la mitad. Ahora el titulo se recorta antes de
+        // deformar la fila.
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
         style: TextStyle(
           fontWeight: FontWeight.bold,
           fontSize: useIconContainer ? 15 : 16,
@@ -84,12 +89,23 @@ class SettingsOptionTile extends StatelessWidget {
           ? Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  subtitle!,
-                  style: const TextStyle(
-                    color: AppColors.textSecondary,
-                    fontSize: 12,
-                    fontFamily: 'Inter',
+                // El trailing del ListTile toma el ancho que pida, asi que se
+                // le pone techo: por encima de un tercio de la pantalla dejaba
+                // al titulo sin sitio.
+                ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxWidth: MediaQuery.sizeOf(context).width * 0.34,
+                  ),
+                  child: Text(
+                    subtitle!,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.end,
+                    style: const TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 12,
+                      fontFamily: 'Inter',
+                    ),
                   ),
                 ),
                 const SizedBox(width: 8),

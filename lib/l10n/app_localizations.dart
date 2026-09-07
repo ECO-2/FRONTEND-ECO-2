@@ -425,7 +425,7 @@ abstract class AppLocalizations {
   /// No description provided for @editProfileSubtitle.
   ///
   /// In es, this message translates to:
-  /// **'Nombre, bio, foto'**
+  /// **'Nombre de usuario'**
   String get editProfileSubtitle;
 
   /// No description provided for @changePassword.
@@ -503,7 +503,7 @@ abstract class AppLocalizations {
   /// No description provided for @privacySubtitle.
   ///
   /// In es, this message translates to:
-  /// **'Control de datos personales'**
+  /// **'Qué datos guarda ECO2'**
   String get privacySubtitle;
 
   /// No description provided for @exportMyData.
@@ -995,14 +995,14 @@ abstract class AppLocalizations {
   /// No description provided for @achievementUnlocked.
   ///
   /// In es, this message translates to:
-  /// **'¡Logro desbloqueado!'**
-  String get achievementUnlocked;
+  /// **'¡Logro desbloqueado!: {title}'**
+  String achievementUnlocked(String title);
 
   /// No description provided for @newPlantAdded.
   ///
   /// In es, this message translates to:
-  /// **'Nueva planta agregada'**
-  String get newPlantAdded;
+  /// **'Nueva planta agregada: Agregaste {name} a tu colección.'**
+  String newPlantAdded(String name);
 
   /// No description provided for @seedbed.
   ///
@@ -1067,7 +1067,7 @@ abstract class AppLocalizations {
   /// No description provided for @allAchievementsDone.
   ///
   /// In es, this message translates to:
-  /// **'¡Ya desbloqueaste todos los logros!'**
+  /// **'¡Completaste todos los logros disponibles!'**
   String get allAchievementsDone;
 
   /// No description provided for @noAchievementsConfigured.
@@ -1103,13 +1103,13 @@ abstract class AppLocalizations {
   /// No description provided for @activeMissions.
   ///
   /// In es, this message translates to:
-  /// **'Misiones Activas'**
+  /// **'Misiones activas'**
   String get activeMissions;
 
   /// No description provided for @plantCatalog.
   ///
   /// In es, this message translates to:
-  /// **'Catálogo de Plantas'**
+  /// **'Catálogo de plantas'**
   String get plantCatalog;
 
   /// No description provided for @seedStore.
@@ -1537,6 +1537,2203 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Especie no encontrada'**
   String get speciesNotFound;
+
+  /// No description provided for @forgotPasswordTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Recuperar contraseña'**
+  String get forgotPasswordTitle;
+
+  /// No description provided for @forgotPasswordBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Escribe tu correo y te enviaremos un código para restablecer la contraseña.'**
+  String get forgotPasswordBody;
+
+  /// No description provided for @forgotPasswordSent.
+  ///
+  /// In es, this message translates to:
+  /// **'Si existe una cuenta con ese correo, te hemos enviado un código.'**
+  String get forgotPasswordSent;
+
+  /// No description provided for @send.
+  ///
+  /// In es, this message translates to:
+  /// **'Enviar'**
+  String get send;
+
+  /// No description provided for @emailRequired.
+  ///
+  /// In es, this message translates to:
+  /// **'Escribe tu correo primero'**
+  String get emailRequired;
+
+  /// No description provided for @resetPasswordTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Restablecer contraseña'**
+  String get resetPasswordTitle;
+
+  /// No description provided for @resetPasswordIntro.
+  ///
+  /// In es, this message translates to:
+  /// **'Pega aquí el código que te enviamos por correo y elige tu nueva contraseña.'**
+  String get resetPasswordIntro;
+
+  /// No description provided for @resetCodeLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Código de recuperación'**
+  String get resetCodeLabel;
+
+  /// No description provided for @resetCodeHint.
+  ///
+  /// In es, this message translates to:
+  /// **'ABCD-2345'**
+  String get resetCodeHint;
+
+  /// No description provided for @resetCodeRequired.
+  ///
+  /// In es, this message translates to:
+  /// **'Escribe el código que recibiste'**
+  String get resetCodeRequired;
+
+  /// No description provided for @newPassword.
+  ///
+  /// In es, this message translates to:
+  /// **'Nueva contraseña'**
+  String get newPassword;
+
+  /// No description provided for @passwordsDoNotMatch.
+  ///
+  /// In es, this message translates to:
+  /// **'Las contraseñas no coinciden'**
+  String get passwordsDoNotMatch;
+
+  /// No description provided for @resetPasswordSubmit.
+  ///
+  /// In es, this message translates to:
+  /// **'Cambiar contraseña'**
+  String get resetPasswordSubmit;
+
+  /// No description provided for @resetPasswordSuccess.
+  ///
+  /// In es, this message translates to:
+  /// **'Contraseña actualizada. Ya puedes iniciar sesión.'**
+  String get resetPasswordSuccess;
+
+  /// No description provided for @resetCodeExpiredHint.
+  ///
+  /// In es, this message translates to:
+  /// **'El código vence a los 30 minutos. Pide uno nuevo si ya caducó.'**
+  String get resetCodeExpiredHint;
+
+  /// No description provided for @changePasswordIntro.
+  ///
+  /// In es, this message translates to:
+  /// **'Escribe tu contraseña actual y elige una nueva.'**
+  String get changePasswordIntro;
+
+  /// No description provided for @changePasswordSubmit.
+  ///
+  /// In es, this message translates to:
+  /// **'Guardar contraseña'**
+  String get changePasswordSubmit;
+
+  /// No description provided for @changePasswordSuccess.
+  ///
+  /// In es, this message translates to:
+  /// **'Contraseña actualizada.'**
+  String get changePasswordSuccess;
+
+  /// No description provided for @currentPassword.
+  ///
+  /// In es, this message translates to:
+  /// **'Contraseña actual'**
+  String get currentPassword;
+
+  /// No description provided for @currentPasswordRequired.
+  ///
+  /// In es, this message translates to:
+  /// **'Escribe tu contraseña actual'**
+  String get currentPasswordRequired;
+
+  /// No description provided for @passwordMustDiffer.
+  ///
+  /// In es, this message translates to:
+  /// **'La nueva contraseña debe ser distinta de la actual'**
+  String get passwordMustDiffer;
+
+  /// No description provided for @biometricLock.
+  ///
+  /// In es, this message translates to:
+  /// **'Bloqueo con huella'**
+  String get biometricLock;
+
+  /// No description provided for @biometricLockSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Pide tu huella al abrir la app'**
+  String get biometricLockSubtitle;
+
+  /// No description provided for @biometricUnavailable.
+  ///
+  /// In es, this message translates to:
+  /// **'Este dispositivo no tiene huella registrada'**
+  String get biometricUnavailable;
+
+  /// No description provided for @biometricPromptReason.
+  ///
+  /// In es, this message translates to:
+  /// **'Confirma tu identidad para abrir ECO2'**
+  String get biometricPromptReason;
+
+  /// No description provided for @biometricEnabled.
+  ///
+  /// In es, this message translates to:
+  /// **'Bloqueo con huella activado'**
+  String get biometricEnabled;
+
+  /// No description provided for @biometricDisabled.
+  ///
+  /// In es, this message translates to:
+  /// **'Bloqueo con huella desactivado'**
+  String get biometricDisabled;
+
+  /// No description provided for @appLockTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'ECO2 está bloqueado'**
+  String get appLockTitle;
+
+  /// No description provided for @appLockSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Usa tu huella para continuar.'**
+  String get appLockSubtitle;
+
+  /// No description provided for @appLockFailed.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo confirmar tu identidad.'**
+  String get appLockFailed;
+
+  /// No description provided for @appLockRetry.
+  ///
+  /// In es, this message translates to:
+  /// **'Reintentar'**
+  String get appLockRetry;
+
+  /// No description provided for @appLockSignOut.
+  ///
+  /// In es, this message translates to:
+  /// **'Cerrar sesión'**
+  String get appLockSignOut;
+
+  /// No description provided for @managePlus.
+  ///
+  /// In es, this message translates to:
+  /// **'Gestionar ECO2 Plus'**
+  String get managePlus;
+
+  /// No description provided for @managePlusFree.
+  ///
+  /// In es, this message translates to:
+  /// **'Plan gratuito activo'**
+  String get managePlusFree;
+
+  /// No description provided for @pushNotificationsSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Avisos de riego y logros'**
+  String get pushNotificationsSubtitle;
+
+  /// No description provided for @reminderWindow.
+  ///
+  /// In es, this message translates to:
+  /// **'Horario de recordatorios'**
+  String get reminderWindow;
+
+  /// No description provided for @reminderWindowValue.
+  ///
+  /// In es, this message translates to:
+  /// **'De {start}:00 a {end}:00'**
+  String reminderWindowValue(int start, int end);
+
+  /// No description provided for @reminderWindowSheetTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Cuándo quieres los avisos?'**
+  String get reminderWindowSheetTitle;
+
+  /// No description provided for @reminderWindowIntro.
+  ///
+  /// In es, this message translates to:
+  /// **'Los recordatorios solo se envían dentro de esta franja.'**
+  String get reminderWindowIntro;
+
+  /// No description provided for @reminderStart.
+  ///
+  /// In es, this message translates to:
+  /// **'Desde'**
+  String get reminderStart;
+
+  /// No description provided for @reminderEnd.
+  ///
+  /// In es, this message translates to:
+  /// **'Hasta'**
+  String get reminderEnd;
+
+  /// No description provided for @reminderWindowInvalid.
+  ///
+  /// In es, this message translates to:
+  /// **'La hora de inicio debe ser anterior a la de fin'**
+  String get reminderWindowInvalid;
+
+  /// No description provided for @reminderWindowSaved.
+  ///
+  /// In es, this message translates to:
+  /// **'Horario de recordatorios actualizado'**
+  String get reminderWindowSaved;
+
+  /// No description provided for @privacySheetTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Tus datos en ECO2'**
+  String get privacySheetTitle;
+
+  /// No description provided for @privacySheetBody.
+  ///
+  /// In es, this message translates to:
+  /// **'ECO2 guarda tu correo, tu nombre de usuario, las plantas de tu jardín y su historial de cuidados. Las fotos que tomas se guardan solo en este dispositivo. Puedes exportar todo o borrar la cuenta cuando quieras.'**
+  String get privacySheetBody;
+
+  /// No description provided for @exportDataSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Copia un resumen al portapapeles'**
+  String get exportDataSubtitle;
+
+  /// No description provided for @exportDataCopied.
+  ///
+  /// In es, this message translates to:
+  /// **'Datos copiados al portapapeles'**
+  String get exportDataCopied;
+
+  /// No description provided for @exportDataFailed.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudieron reunir tus datos'**
+  String get exportDataFailed;
+
+  /// No description provided for @helpSupportSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Escríbenos si algo falla'**
+  String get helpSupportSubtitle;
+
+  /// No description provided for @helpSheetTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Necesitas ayuda?'**
+  String get helpSheetTitle;
+
+  /// No description provided for @helpSheetBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Escríbenos contando qué ocurrió y desde qué pantalla. Copia el correo y mándanos un mensaje.'**
+  String get helpSheetBody;
+
+  /// No description provided for @copyEmail.
+  ///
+  /// In es, this message translates to:
+  /// **'Copiar correo'**
+  String get copyEmail;
+
+  /// No description provided for @emailCopied.
+  ///
+  /// In es, this message translates to:
+  /// **'Correo copiado'**
+  String get emailCopied;
+
+  /// No description provided for @appVersion.
+  ///
+  /// In es, this message translates to:
+  /// **'Versión {version}'**
+  String appVersion(String version);
+
+  /// No description provided for @aboutSheetBody.
+  ///
+  /// In es, this message translates to:
+  /// **'ECO2 te ayuda a cuidar tus plantas y a ver cuánto CO₂ absorben.'**
+  String get aboutSheetBody;
+
+  /// No description provided for @deleteAccountTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Eliminar tu cuenta?'**
+  String get deleteAccountTitle;
+
+  /// No description provided for @deleteAccountBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Se borrarán tu perfil, tus plantas y todo su historial de cuidados. No se puede deshacer.'**
+  String get deleteAccountBody;
+
+  /// No description provided for @deleteAccountConfirmHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Escribe ELIMINAR para confirmar'**
+  String get deleteAccountConfirmHint;
+
+  /// No description provided for @deleteAccountConfirmWord.
+  ///
+  /// In es, this message translates to:
+  /// **'ELIMINAR'**
+  String get deleteAccountConfirmWord;
+
+  /// No description provided for @deleteAccountSuccess.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu cuenta ha sido eliminada.'**
+  String get deleteAccountSuccess;
+
+  /// No description provided for @usernameTaken.
+  ///
+  /// In es, this message translates to:
+  /// **'Ese nombre de usuario ya está en uso.'**
+  String get usernameTaken;
+
+  /// No description provided for @currentPasswordWrong.
+  ///
+  /// In es, this message translates to:
+  /// **'La contraseña actual no es correcta.'**
+  String get currentPasswordWrong;
+
+  /// No description provided for @profileUpdateFailed.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo actualizar el perfil. Inténtalo nuevamente.'**
+  String get profileUpdateFailed;
+
+  /// No description provided for @plantsLoadFailed.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudieron cargar tus plantas.'**
+  String get plantsLoadFailed;
+
+  /// No description provided for @plantAddFailed.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo añadir la planta.'**
+  String get plantAddFailed;
+
+  /// No description provided for @plantDeleteFailed.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo eliminar la planta.'**
+  String get plantDeleteFailed;
+
+  /// No description provided for @nicknameEmpty.
+  ///
+  /// In es, this message translates to:
+  /// **'El apodo no puede estar vacío.'**
+  String get nicknameEmpty;
+
+  /// No description provided for @nicknameUpdateFailed.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo actualizar el apodo.'**
+  String get nicknameUpdateFailed;
+
+  /// No description provided for @missionsLoadFailed.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudieron cargar las misiones.'**
+  String get missionsLoadFailed;
+
+  /// No description provided for @careLogFailed.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo registrar el cuidado.'**
+  String get careLogFailed;
+
+  /// No description provided for @nicknameUpdated.
+  ///
+  /// In es, this message translates to:
+  /// **'Apodo actualizado.'**
+  String get nicknameUpdated;
+
+  /// No description provided for @noSpeciesMatchFilters.
+  ///
+  /// In es, this message translates to:
+  /// **'No se encontraron especies con estos filtros'**
+  String get noSpeciesMatchFilters;
+
+  /// No description provided for @noPlantsInCategory.
+  ///
+  /// In es, this message translates to:
+  /// **'No tienes plantas en esta categoría todavía'**
+  String get noPlantsInCategory;
+
+  /// No description provided for @daysOverdueLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'{count, plural, =1{1 día de retraso} other{{count} días de retraso}}'**
+  String daysOverdueLabel(int count);
+
+  /// No description provided for @noWateringLoggedEvery.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin riego registrado · c/{days}d'**
+  String noWateringLoggedEvery(int days);
+
+  /// No description provided for @daysWithoutWaterEvery.
+  ///
+  /// In es, this message translates to:
+  /// **'{days}d sin riego · c/{freq}d'**
+  String daysWithoutWaterEvery(int days, int freq);
+
+  /// No description provided for @identifyConnectionError.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo conectar para identificar la planta. Verifica tu conexión e inténtalo de nuevo.'**
+  String get identifyConnectionError;
+
+  /// No description provided for @plantAlreadyRegistered.
+  ///
+  /// In es, this message translates to:
+  /// **'Planta ya registrada'**
+  String get plantAlreadyRegistered;
+
+  /// No description provided for @plantAlreadyRegisteredBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Ya tienes esta planta registrada en tu jardín. Te sugerimos ponerle un apodo (diferenciador) para no confundirla.'**
+  String get plantAlreadyRegisteredBody;
+
+  /// No description provided for @addThisPlantQuestion.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Desea añadir esta planta a su jardín?'**
+  String get addThisPlantQuestion;
+
+  /// No description provided for @addThisPlantBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Se añadirá a tu colección de plantas.'**
+  String get addThisPlantBody;
+
+  /// No description provided for @redeemMore.
+  ///
+  /// In es, this message translates to:
+  /// **'Canjear más'**
+  String get redeemMore;
+
+  /// No description provided for @plantAddedSuccess.
+  ///
+  /// In es, this message translates to:
+  /// **'Planta añadida con éxito'**
+  String get plantAddedSuccess;
+
+  /// No description provided for @historyLoadFailed.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo cargar el historial.'**
+  String get historyLoadFailed;
+
+  /// No description provided for @noScansYet.
+  ///
+  /// In es, this message translates to:
+  /// **'Todavía no has escaneado ninguna planta.'**
+  String get noScansYet;
+
+  /// No description provided for @toMyGarden.
+  ///
+  /// In es, this message translates to:
+  /// **'A mi jardín'**
+  String get toMyGarden;
+
+  /// No description provided for @aiNotAvailable.
+  ///
+  /// In es, this message translates to:
+  /// **'La identificación por IA todavía no está disponible en esta versión.'**
+  String get aiNotAvailable;
+
+  /// No description provided for @tourGalleryDescription.
+  ///
+  /// In es, this message translates to:
+  /// **'Sube una foto de tu galería para analizar.'**
+  String get tourGalleryDescription;
+
+  /// No description provided for @shutter.
+  ///
+  /// In es, this message translates to:
+  /// **'Obturador'**
+  String get shutter;
+
+  /// No description provided for @tourShutterDescription.
+  ///
+  /// In es, this message translates to:
+  /// **'Presiona aquí para escanear una planta y continuar.'**
+  String get tourShutterDescription;
+
+  /// No description provided for @enterUsername.
+  ///
+  /// In es, this message translates to:
+  /// **'Por favor ingresa tu nombre de usuario'**
+  String get enterUsername;
+
+  /// No description provided for @usernameTooShort.
+  ///
+  /// In es, this message translates to:
+  /// **'El nombre de usuario debe tener al menos 3 caracteres'**
+  String get usernameTooShort;
+
+  /// No description provided for @enterValidEmail.
+  ///
+  /// In es, this message translates to:
+  /// **'Por favor ingresa un correo válido'**
+  String get enterValidEmail;
+
+  /// No description provided for @confirmYourPassword.
+  ///
+  /// In es, this message translates to:
+  /// **'Por favor confirma tu contraseña'**
+  String get confirmYourPassword;
+
+  /// No description provided for @estimatedValueNote.
+  ///
+  /// In es, this message translates to:
+  /// **'{measured, plural, other{Valor estimado: {measured} de {total} plantas se apoyan en una medición publicada.}}'**
+  String estimatedValueNote(int measured, int total);
+
+  /// No description provided for @footprintShareEmpty.
+  ///
+  /// In es, this message translates to:
+  /// **'Todavía no tengo plantas en mi jardín ECO2.'**
+  String get footprintShareEmpty;
+
+  /// No description provided for @footprintShareSummary.
+  ///
+  /// In es, this message translates to:
+  /// **'Mi jardín ECO2: {plants} plantas y {perDay} g de CO₂ al día ({total} g acumulados).'**
+  String footprintShareSummary(int plants, String perDay, String total);
+
+  /// No description provided for @addPlantsToSeeContribution.
+  ///
+  /// In es, this message translates to:
+  /// **'Añade plantas a tu jardín para ver cuánto aporta cada una.'**
+  String get addPlantsToSeeContribution;
+
+  /// No description provided for @storeBestsellers.
+  ///
+  /// In es, this message translates to:
+  /// **'Más vendidos'**
+  String get storeBestsellers;
+
+  /// No description provided for @storeAvatars.
+  ///
+  /// In es, this message translates to:
+  /// **'Avatares'**
+  String get storeAvatars;
+
+  /// No description provided for @storePots.
+  ///
+  /// In es, this message translates to:
+  /// **'Macetas'**
+  String get storePots;
+
+  /// No description provided for @storeO2Plus2wTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Cosecha tu jardín pro'**
+  String get storeO2Plus2wTitle;
+
+  /// No description provided for @storeO2Plus2wSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'2 semanas de O2 Plus'**
+  String get storeO2Plus2wSubtitle;
+
+  /// No description provided for @storePotRentalTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Alquila una maceta'**
+  String get storePotRentalTitle;
+
+  /// No description provided for @storePotRentalSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Espacio temporal · 2 semanas'**
+  String get storePotRentalSubtitle;
+
+  /// No description provided for @storeAvatarExplorerTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Avatar Explorador Verde'**
+  String get storeAvatarExplorerTitle;
+
+  /// No description provided for @storeAvatarGuardianTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Avatar Guardián del Bosque'**
+  String get storeAvatarGuardianTitle;
+
+  /// No description provided for @storePermanentUnlock.
+  ///
+  /// In es, this message translates to:
+  /// **'Desbloqueo permanente'**
+  String get storePermanentUnlock;
+
+  /// No description provided for @storePotPack3Title.
+  ///
+  /// In es, this message translates to:
+  /// **'Pack de 3 macetas'**
+  String get storePotPack3Title;
+
+  /// No description provided for @storePotPack3Subtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'+3 espacios permanentes'**
+  String get storePotPack3Subtitle;
+
+  /// No description provided for @storeO2Plus4wTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'O2 Plus mensual'**
+  String get storeO2Plus4wTitle;
+
+  /// No description provided for @storeO2Plus4wSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'4 semanas de O2 Plus'**
+  String get storeO2Plus4wSubtitle;
+
+  /// No description provided for @newBadgeLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Nuevo'**
+  String get newBadgeLabel;
+
+  /// No description provided for @noItemsFound.
+  ///
+  /// In es, this message translates to:
+  /// **'No se encontraron artículos'**
+  String get noItemsFound;
+
+  /// No description provided for @confirmPurchaseTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Confirmar compra?'**
+  String get confirmPurchaseTitle;
+
+  /// No description provided for @confirmPurchaseBody.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Deseas canjear \"{item}\" por {cost} semillas?'**
+  String confirmPurchaseBody(String item, int cost);
+
+  /// No description provided for @confirm.
+  ///
+  /// In es, this message translates to:
+  /// **'Confirmar'**
+  String get confirm;
+
+  /// No description provided for @purchaseFailed.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo completar la compra.'**
+  String get purchaseFailed;
+
+  /// No description provided for @boostGardenPremium.
+  ///
+  /// In es, this message translates to:
+  /// **'Impulsa tu jardín con beneficios premium'**
+  String get boostGardenPremium;
+
+  /// No description provided for @moreSpaceForPlants.
+  ///
+  /// In es, this message translates to:
+  /// **'Consigue más espacio para tus plantas'**
+  String get moreSpaceForPlants;
+
+  /// No description provided for @customizeYourProfile.
+  ///
+  /// In es, this message translates to:
+  /// **'Personaliza tu perfil'**
+  String get customizeYourProfile;
+
+  /// No description provided for @speciesDescription.
+  ///
+  /// In es, this message translates to:
+  /// **'Especie {category} que prefiere luz {light} y humedad {humidity}. Riega aproximadamente cada {days} días, dejando secar el sustrato entre riegos, y se adapta bien a temperaturas entre {minTemp}°C y {maxTemp}°C.'**
+  String speciesDescription(
+    String category,
+    String light,
+    String humidity,
+    int days,
+    int minTemp,
+    int maxTemp,
+  );
+
+  /// No description provided for @purifierExcellent.
+  ///
+  /// In es, this message translates to:
+  /// **'Es una excelente purificadora de aire.'**
+  String get purifierExcellent;
+
+  /// No description provided for @purifierGood.
+  ///
+  /// In es, this message translates to:
+  /// **'Ayuda a mejorar la calidad del aire de tu hogar.'**
+  String get purifierGood;
+
+  /// No description provided for @humidityRangeLow.
+  ///
+  /// In es, this message translates to:
+  /// **'30-40%'**
+  String get humidityRangeLow;
+
+  /// No description provided for @humidityRangeMedium.
+  ///
+  /// In es, this message translates to:
+  /// **'40-60%'**
+  String get humidityRangeMedium;
+
+  /// No description provided for @humidityRangeHigh.
+  ///
+  /// In es, this message translates to:
+  /// **'60-80%'**
+  String get humidityRangeHigh;
+
+  /// No description provided for @airPurification.
+  ///
+  /// In es, this message translates to:
+  /// **'Purificación de aire'**
+  String get airPurification;
+
+  /// No description provided for @purificationLevel.
+  ///
+  /// In es, this message translates to:
+  /// **'Nivel de purificación'**
+  String get purificationLevel;
+
+  /// No description provided for @idealRequirements.
+  ///
+  /// In es, this message translates to:
+  /// **'Requisitos ideales para esta especie'**
+  String get idealRequirements;
+
+  /// No description provided for @everyNDaysShort.
+  ///
+  /// In es, this message translates to:
+  /// **'c/{days} días'**
+  String everyNDaysShort(int days);
+
+  /// No description provided for @absorbsPerDay.
+  ///
+  /// In es, this message translates to:
+  /// **'Absorbe ~{grams}g de CO₂/día'**
+  String absorbsPerDay(String grams);
+
+  /// No description provided for @addToMyGarden.
+  ///
+  /// In es, this message translates to:
+  /// **'Añadir a mi jardín'**
+  String get addToMyGarden;
+
+  /// No description provided for @gramsPerDayValue.
+  ///
+  /// In es, this message translates to:
+  /// **'{grams} g/día'**
+  String gramsPerDayValue(String grams);
+
+  /// No description provided for @noNotesYet.
+  ///
+  /// In es, this message translates to:
+  /// **'Aún no has agregado notas para esta planta.'**
+  String get noNotesYet;
+
+  /// No description provided for @airPurifierTag.
+  ///
+  /// In es, this message translates to:
+  /// **'Aire purificador'**
+  String get airPurifierTag;
+
+  /// No description provided for @humidityWithPrefix.
+  ///
+  /// In es, this message translates to:
+  /// **'Humedad {level}'**
+  String humidityWithPrefix(String level);
+
+  /// No description provided for @watering.
+  ///
+  /// In es, this message translates to:
+  /// **'Riego'**
+  String get watering;
+
+  /// No description provided for @lightLabelShort.
+  ///
+  /// In es, this message translates to:
+  /// **'Luz'**
+  String get lightLabelShort;
+
+  /// No description provided for @temperature.
+  ///
+  /// In es, this message translates to:
+  /// **'Temperatura'**
+  String get temperature;
+
+  /// No description provided for @humidityLabelShort.
+  ///
+  /// In es, this message translates to:
+  /// **'Humedad'**
+  String get humidityLabelShort;
+
+  /// No description provided for @whenSoilDry.
+  ///
+  /// In es, this message translates to:
+  /// **'Cuando la tierra esté seca'**
+  String get whenSoilDry;
+
+  /// No description provided for @redeemSeedsOrSubscribe.
+  ///
+  /// In es, this message translates to:
+  /// **'Canjea tus semillas o suscríbete a O₂₊'**
+  String get redeemSeedsOrSubscribe;
+
+  /// No description provided for @viewMyAchievements.
+  ///
+  /// In es, this message translates to:
+  /// **'Ver mis logros y misiones'**
+  String get viewMyAchievements;
+
+  /// No description provided for @exploreBotanicalSpecies.
+  ///
+  /// In es, this message translates to:
+  /// **'Ver especies'**
+  String get exploreBotanicalSpecies;
+
+  /// No description provided for @appTour.
+  ///
+  /// In es, this message translates to:
+  /// **'Recorrido de la app'**
+  String get appTour;
+
+  /// No description provided for @appTourSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Ver de nuevo'**
+  String get appTourSubtitle;
+
+  /// No description provided for @rewardDiscountTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Dto. 15% Vivero El Helecho'**
+  String get rewardDiscountTitle;
+
+  /// No description provided for @rewardDiscountDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'Cupón aplicable a tu próxima compra.'**
+  String get rewardDiscountDesc;
+
+  /// No description provided for @rewardBadgeTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Insignia \"Guardián de la Tierra\"'**
+  String get rewardBadgeTitle;
+
+  /// No description provided for @rewardBadgeDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'Muestra tu compromiso en tu perfil.'**
+  String get rewardBadgeDesc;
+
+  /// No description provided for @rewardPotsTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Macetas personalizadas (3D)'**
+  String get rewardPotsTitle;
+
+  /// No description provided for @rewardPotsDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'Desbloquea diseños interactivos.'**
+  String get rewardPotsDesc;
+
+  /// No description provided for @redeemRewardTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Canjear premio?'**
+  String get redeemRewardTitle;
+
+  /// No description provided for @redeemRewardBody.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Seguro que quieres canjear \"{reward}\" por {cost} semillas?'**
+  String redeemRewardBody(String reward, int cost);
+
+  /// No description provided for @redeemSuccess.
+  ///
+  /// In es, this message translates to:
+  /// **'¡Canje exitoso!: {reward} 🎁'**
+  String redeemSuccess(String reward);
+
+  /// No description provided for @tourWateringStatusDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'Aquí ves si ya toca regarla, cuántos días lleva sin riego y cuántos días faltan (o cuántos de retraso lleva) según la frecuencia de la especie.'**
+  String get tourWateringStatusDesc;
+
+  /// No description provided for @tourLogCareDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'Cada vez que la riegues, fertilices, podes o trasplantes, regístralo aquí — así el estado de riego y tu historial quedan al día de verdad.'**
+  String get tourLogCareDesc;
+
+  /// No description provided for @speciesCare.
+  ///
+  /// In es, this message translates to:
+  /// **'Cuidados de la especie'**
+  String get speciesCare;
+
+  /// No description provided for @speciesSpecSheet.
+  ///
+  /// In es, this message translates to:
+  /// **'Ficha técnica de la especie'**
+  String get speciesSpecSheet;
+
+  /// No description provided for @tourSpeciesGridDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'Riego, luz, temperatura y humedad ideales para esta especie en particular.'**
+  String get tourSpeciesGridDesc;
+
+  /// No description provided for @howToCareForThisPlant.
+  ///
+  /// In es, this message translates to:
+  /// **'Cómo cuidar esta planta'**
+  String get howToCareForThisPlant;
+
+  /// No description provided for @plantNicknameHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Apodo de la planta'**
+  String get plantNicknameHint;
+
+  /// No description provided for @howToCareForYourPlant.
+  ///
+  /// In es, this message translates to:
+  /// **'Cómo cuidar tu planta'**
+  String get howToCareForYourPlant;
+
+  /// No description provided for @careCalendar.
+  ///
+  /// In es, this message translates to:
+  /// **'Calendario de cuidados'**
+  String get careCalendar;
+
+  /// No description provided for @tourCareCalendarDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'La frecuencia de riego es real, según la especie. Fertilización, poda y trasplante son buenas prácticas generales — la app aún no calcula una frecuencia exacta para esas.'**
+  String get tourCareCalendarDesc;
+
+  /// No description provided for @whenToDoEachCare.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Cuándo hacer cada cuidado?'**
+  String get whenToDoEachCare;
+
+  /// No description provided for @scheduleFertilizing.
+  ///
+  /// In es, this message translates to:
+  /// **'Cada 4-6 semanas, en primavera y verano'**
+  String get scheduleFertilizing;
+
+  /// No description provided for @schedulePruning.
+  ///
+  /// In es, this message translates to:
+  /// **'Retira hojas secas, amarillas o dañadas en cuanto las notes'**
+  String get schedulePruning;
+
+  /// No description provided for @scheduleRepotting.
+  ///
+  /// In es, this message translates to:
+  /// **'Cada 1-2 años, o cuando las raíces llenen la maceta'**
+  String get scheduleRepotting;
+
+  /// No description provided for @tourStoreDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'Canjea tus semillas por macetas extra y funciones especiales.'**
+  String get tourStoreDesc;
+
+  /// No description provided for @yourGarden.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu Jardín'**
+  String get yourGarden;
+
+  /// No description provided for @tourGardenDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'Explora el catálogo de especies o gestiona las plantas que ya tienes.'**
+  String get tourGardenDesc;
+
+  /// No description provided for @aiScanner.
+  ///
+  /// In es, this message translates to:
+  /// **'Escáner IA'**
+  String get aiScanner;
+
+  /// No description provided for @tourScannerDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'Identifica una planta apuntando la cámara — la IA reconoce la especie.'**
+  String get tourScannerDesc;
+
+  /// No description provided for @yourProfile.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu Perfil'**
+  String get yourProfile;
+
+  /// No description provided for @tourProfileDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'Revisa tu progreso, ajustes de la cuenta y más.'**
+  String get tourProfileDesc;
+
+  /// No description provided for @premiumTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Potencia tu jardín'**
+  String get premiumTitle;
+
+  /// No description provided for @premiumSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Desbloquea el potencial completo de ECO2 y lleva tu experiencia botánica al siguiente nivel.'**
+  String get premiumSubtitle;
+
+  /// No description provided for @premiumIncludes.
+  ///
+  /// In es, this message translates to:
+  /// **'Todo lo que incluye'**
+  String get premiumIncludes;
+
+  /// No description provided for @premiumUnlimitedPots.
+  ///
+  /// In es, this message translates to:
+  /// **'Macetas ilimitadas'**
+  String get premiumUnlimitedPots;
+
+  /// No description provided for @premiumUnlimitedPotsDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'Añade todas las plantas que quieras sin límites.'**
+  String get premiumUnlimitedPotsDesc;
+
+  /// No description provided for @premiumBetterSearch.
+  ///
+  /// In es, this message translates to:
+  /// **'Búsqueda mejorada por descripción'**
+  String get premiumBetterSearch;
+
+  /// No description provided for @premiumBetterSearchDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'Encuentra plantas describiendo su aspecto con IA.'**
+  String get premiumBetterSearchDesc;
+
+  /// No description provided for @premiumUnlimitedScans.
+  ///
+  /// In es, this message translates to:
+  /// **'Escaneos ilimitados'**
+  String get premiumUnlimitedScans;
+
+  /// No description provided for @premiumUnlimitedScansDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'Identifica cualquier planta, cuando quieras.'**
+  String get premiumUnlimitedScansDesc;
+
+  /// No description provided for @premiumAiTreatment.
+  ///
+  /// In es, this message translates to:
+  /// **'Tratamiento asistido con IA'**
+  String get premiumAiTreatment;
+
+  /// No description provided for @premiumAiTreatmentDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'Diagnóstico personalizado de plagas y cuidados.'**
+  String get premiumAiTreatmentDesc;
+
+  /// No description provided for @premiumNurseryDiscounts.
+  ///
+  /// In es, this message translates to:
+  /// **'Descuentos en viveros aliados'**
+  String get premiumNurseryDiscounts;
+
+  /// No description provided for @premiumNurseryDiscountsDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'Hasta 20% off en especies de aliados selectos.'**
+  String get premiumNurseryDiscountsDesc;
+
+  /// No description provided for @noCompletedAchievements.
+  ///
+  /// In es, this message translates to:
+  /// **'No hay logros completados aún'**
+  String get noCompletedAchievements;
+
+  /// No description provided for @noLockedAchievements.
+  ///
+  /// In es, this message translates to:
+  /// **'No hay logros bloqueados por ahora'**
+  String get noLockedAchievements;
+
+  /// No description provided for @lockedAchievementsNote.
+  ///
+  /// In es, this message translates to:
+  /// **'Estos logros dependen de funciones que todavía no están disponibles en la app.'**
+  String get lockedAchievementsNote;
+
+  /// No description provided for @plantIdentification.
+  ///
+  /// In es, this message translates to:
+  /// **'Identificación de plantas'**
+  String get plantIdentification;
+
+  /// No description provided for @scannerTabHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Apunta con la cámara a la planta o sube una foto de tu galería.'**
+  String get scannerTabHint;
+
+  /// No description provided for @recentAnalyses.
+  ///
+  /// In es, this message translates to:
+  /// **'Análisis recientes'**
+  String get recentAnalyses;
+
+  /// No description provided for @careTypeWatering.
+  ///
+  /// In es, this message translates to:
+  /// **'Riego'**
+  String get careTypeWatering;
+
+  /// No description provided for @careTypeFertilizing.
+  ///
+  /// In es, this message translates to:
+  /// **'Fertilización'**
+  String get careTypeFertilizing;
+
+  /// No description provided for @careTypePruning.
+  ///
+  /// In es, this message translates to:
+  /// **'Poda'**
+  String get careTypePruning;
+
+  /// No description provided for @careTypeRepotting.
+  ///
+  /// In es, this message translates to:
+  /// **'Trasplante'**
+  String get careTypeRepotting;
+
+  /// No description provided for @careLoggedToast.
+  ///
+  /// In es, this message translates to:
+  /// **'Cuidado registrado: {type} 🌿'**
+  String careLoggedToast(String type);
+
+  /// No description provided for @inOneDay.
+  ///
+  /// In es, this message translates to:
+  /// **'en 1 día'**
+  String get inOneDay;
+
+  /// No description provided for @daysAgoShort.
+  ///
+  /// In es, this message translates to:
+  /// **'hace {count} días'**
+  String daysAgoShort(int count);
+
+  /// No description provided for @inNDays.
+  ///
+  /// In es, this message translates to:
+  /// **'en {count} días'**
+  String inNDays(int count);
+
+  /// No description provided for @noCareLoggedForPlant.
+  ///
+  /// In es, this message translates to:
+  /// **'Aún no has registrado cuidados para esta planta.'**
+  String get noCareLoggedForPlant;
+
+  /// No description provided for @noEventsForFilter.
+  ///
+  /// In es, this message translates to:
+  /// **'No hay eventos para este filtro.'**
+  String get noEventsForFilter;
+
+  /// No description provided for @featureComingSoon.
+  ///
+  /// In es, this message translates to:
+  /// **'Esta función estará disponible próximamente.'**
+  String get featureComingSoon;
+
+  /// No description provided for @thisPlant.
+  ///
+  /// In es, this message translates to:
+  /// **'esta planta'**
+  String get thisPlant;
+
+  /// No description provided for @careTypeGeneric.
+  ///
+  /// In es, this message translates to:
+  /// **'Cuidado'**
+  String get careTypeGeneric;
+
+  /// No description provided for @changePhotoComingSoon.
+  ///
+  /// In es, this message translates to:
+  /// **'Cambiar la foto de perfil estará disponible próximamente 📸'**
+  String get changePhotoComingSoon;
+
+  /// No description provided for @changeProfilePhoto.
+  ///
+  /// In es, this message translates to:
+  /// **'Cambiar foto de perfil'**
+  String get changeProfilePhoto;
+
+  /// No description provided for @personalInformation.
+  ///
+  /// In es, this message translates to:
+  /// **'Información personal'**
+  String get personalInformation;
+
+  /// No description provided for @pickSpeciesToContinue.
+  ///
+  /// In es, this message translates to:
+  /// **'Elige una especie de la lista para continuar.'**
+  String get pickSpeciesToContinue;
+
+  /// No description provided for @nameYourPlantToContinue.
+  ///
+  /// In es, this message translates to:
+  /// **'Ponle un nombre a tu planta para continuar.'**
+  String get nameYourPlantToContinue;
+
+  /// No description provided for @noSpeciesAvailable.
+  ///
+  /// In es, this message translates to:
+  /// **'No hay especies disponibles todavía.'**
+  String get noSpeciesAvailable;
+
+  /// No description provided for @noSpeciesFoundFor.
+  ///
+  /// In es, this message translates to:
+  /// **'No se encontraron especies para \"{query}\".'**
+  String noSpeciesFoundFor(String query);
+
+  /// No description provided for @tellUsAboutYou.
+  ///
+  /// In es, this message translates to:
+  /// **'Cuéntanos sobre ti'**
+  String get tellUsAboutYou;
+
+  /// No description provided for @usernameRequired.
+  ///
+  /// In es, this message translates to:
+  /// **'El nombre de usuario es obligatorio'**
+  String get usernameRequired;
+
+  /// No description provided for @minThreeChars.
+  ///
+  /// In es, this message translates to:
+  /// **'Mínimo 3 caracteres'**
+  String get minThreeChars;
+
+  /// No description provided for @gender.
+  ///
+  /// In es, this message translates to:
+  /// **'Género'**
+  String get gender;
+
+  /// No description provided for @activeMissionCard.
+  ///
+  /// In es, this message translates to:
+  /// **'Misión activa'**
+  String get activeMissionCard;
+
+  /// No description provided for @redeemSeedsOrSubscribeShort.
+  ///
+  /// In es, this message translates to:
+  /// **'Canjea tus semillas o suscríbete'**
+  String get redeemSeedsOrSubscribeShort;
+
+  /// No description provided for @welcomeToEco2Plus.
+  ///
+  /// In es, this message translates to:
+  /// **'¡Bienvenido a ECO2\nPlus!'**
+  String get welcomeToEco2Plus;
+
+  /// No description provided for @subscriptionActive.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu suscripción anual está activa. Disfruta de todas las funciones Plus desde ahora.'**
+  String get subscriptionActive;
+
+  /// No description provided for @addPlantsWithoutLimit.
+  ///
+  /// In es, this message translates to:
+  /// **'Añade plantas sin límite'**
+  String get addPlantsWithoutLimit;
+
+  /// No description provided for @gardenCanGrow.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu jardín puede crecer todo lo que quieras'**
+  String get gardenCanGrow;
+
+  /// No description provided for @sessionExpired.
+  ///
+  /// In es, this message translates to:
+  /// **'Sesión expirada. Inicia sesión nuevamente.'**
+  String get sessionExpired;
+
+  /// No description provided for @noNotificationsYet.
+  ///
+  /// In es, this message translates to:
+  /// **'No tienes notificaciones por ahora.'**
+  String get noNotificationsYet;
+
+  /// No description provided for @needsAttention.
+  ///
+  /// In es, this message translates to:
+  /// **'Necesitan atención'**
+  String get needsAttention;
+
+  /// No description provided for @overdueByDays.
+  ///
+  /// In es, this message translates to:
+  /// **'{count, plural, =1{Vencido hace 1 día} other{Vencido hace {count} días}}'**
+  String overdueByDays(int count);
+
+  /// No description provided for @passwordMinSixChars.
+  ///
+  /// In es, this message translates to:
+  /// **'La contraseña debe tener al menos 6 caracteres'**
+  String get passwordMinSixChars;
+
+  /// No description provided for @achievementUnlockedTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'¡Logro desbloqueado!'**
+  String get achievementUnlockedTitle;
+
+  /// No description provided for @newPlantAddedTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Nueva planta agregada'**
+  String get newPlantAddedTitle;
+
+  /// No description provided for @newPlantAddedBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Agregaste {name} a tu colección.'**
+  String newPlantAddedBody(String name);
+
+  /// No description provided for @lastWateredHelpShort.
+  ///
+  /// In es, this message translates to:
+  /// **'Así calculamos cuándo toca el próximo riego. Si no lo sabes, empezamos a contar desde hoy.'**
+  String get lastWateredHelpShort;
+
+  /// No description provided for @conditionNotTracked.
+  ///
+  /// In es, this message translates to:
+  /// **'Esta condición todavía no se rastrea en la app.'**
+  String get conditionNotTracked;
+
+  /// No description provided for @tourSeedsDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'Ganas semillas cuidando tus plantas y cumpliendo misiones. Úsalas en la Tienda.'**
+  String get tourSeedsDesc;
+
+  /// No description provided for @achievementsAndMissionsTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Logros y misiones'**
+  String get achievementsAndMissionsTitle;
+
+  /// No description provided for @tourTrophyDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'Aquí ves tus trofeos, el progreso de tus misiones y cuánto XP llevas.'**
+  String get tourTrophyDesc;
+
+  /// No description provided for @allNotificationsRead.
+  ///
+  /// In es, this message translates to:
+  /// **'Todas las notificaciones marcadas como leídas.'**
+  String get allNotificationsRead;
+
+  /// No description provided for @aiSearch.
+  ///
+  /// In es, this message translates to:
+  /// **'Búsqueda con IA'**
+  String get aiSearch;
+
+  /// No description provided for @achievementUnlockedToast.
+  ///
+  /// In es, this message translates to:
+  /// **'🏆 ¡Logro desbloqueado! {name} ({reward})'**
+  String achievementUnlockedToast(String name, String reward);
+
+  /// No description provided for @xpAndSeedsReward.
+  ///
+  /// In es, this message translates to:
+  /// **'+{xp} XP · +{seeds} semillas'**
+  String xpAndSeedsReward(int xp, int seeds);
+
+  /// No description provided for @xpReward.
+  ///
+  /// In es, this message translates to:
+  /// **'+{xp} XP'**
+  String xpReward(int xp);
+
+  /// No description provided for @progressOfPlants.
+  ///
+  /// In es, this message translates to:
+  /// **'{current} de {total} plantas'**
+  String progressOfPlants(int current, int total);
+
+  /// No description provided for @progressOfCares.
+  ///
+  /// In es, this message translates to:
+  /// **'{current} de {total} cuidados'**
+  String progressOfCares(int current, int total);
+
+  /// No description provided for @completed.
+  ///
+  /// In es, this message translates to:
+  /// **'Completado'**
+  String get completed;
+
+  /// No description provided for @pending.
+  ///
+  /// In es, this message translates to:
+  /// **'Pendiente'**
+  String get pending;
+
+  /// No description provided for @gotIt.
+  ///
+  /// In es, this message translates to:
+  /// **'Entendido'**
+  String get gotIt;
+
+  /// No description provided for @accept.
+  ///
+  /// In es, this message translates to:
+  /// **'Aceptar'**
+  String get accept;
+
+  /// No description provided for @viewSpecSheet.
+  ///
+  /// In es, this message translates to:
+  /// **'Ver ficha'**
+  String get viewSpecSheet;
+
+  /// No description provided for @history.
+  ///
+  /// In es, this message translates to:
+  /// **'Historial'**
+  String get history;
+
+  /// No description provided for @tourHistoryDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'Consulta tus escaneos anteriores.'**
+  String get tourHistoryDesc;
+
+  /// No description provided for @plantNotFound.
+  ///
+  /// In es, this message translates to:
+  /// **'Planta no encontrada'**
+  String get plantNotFound;
+
+  /// No description provided for @editNickname.
+  ///
+  /// In es, this message translates to:
+  /// **'Editar apodo'**
+  String get editNickname;
+
+  /// No description provided for @takePhoto.
+  ///
+  /// In es, this message translates to:
+  /// **'Tomar foto'**
+  String get takePhoto;
+
+  /// No description provided for @removePhoto.
+  ///
+  /// In es, this message translates to:
+  /// **'Quitar foto'**
+  String get removePhoto;
+
+  /// No description provided for @photoRemoved.
+  ///
+  /// In es, this message translates to:
+  /// **'Foto eliminada.'**
+  String get photoRemoved;
+
+  /// No description provided for @photoUpdated.
+  ///
+  /// In es, this message translates to:
+  /// **'Foto actualizada.'**
+  String get photoUpdated;
+
+  /// No description provided for @genderMale.
+  ///
+  /// In es, this message translates to:
+  /// **'Hombre'**
+  String get genderMale;
+
+  /// No description provided for @genderFemale.
+  ///
+  /// In es, this message translates to:
+  /// **'Mujer'**
+  String get genderFemale;
+
+  /// No description provided for @genderOther.
+  ///
+  /// In es, this message translates to:
+  /// **'Otro'**
+  String get genderOther;
+
+  /// No description provided for @genderPreferNotToSay.
+  ///
+  /// In es, this message translates to:
+  /// **'Prefiero no decir'**
+  String get genderPreferNotToSay;
+
+  /// No description provided for @birthDate.
+  ///
+  /// In es, this message translates to:
+  /// **'Fecha de nacimiento'**
+  String get birthDate;
+
+  /// No description provided for @tempShort.
+  ///
+  /// In es, this message translates to:
+  /// **'Temp.'**
+  String get tempShort;
+
+  /// No description provided for @o2co2.
+  ///
+  /// In es, this message translates to:
+  /// **'O₂ CO₂'**
+  String get o2co2;
+
+  /// No description provided for @confirmPayment.
+  ///
+  /// In es, this message translates to:
+  /// **'Confirmar pago'**
+  String get confirmPayment;
+
+  /// No description provided for @card.
+  ///
+  /// In es, this message translates to:
+  /// **'Tarjeta'**
+  String get card;
+
+  /// No description provided for @tourScanFavourite.
+  ///
+  /// In es, this message translates to:
+  /// **'Escanea tu planta favorita'**
+  String get tourScanFavourite;
+
+  /// No description provided for @tourScanFavouriteDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'Identifica cualquier especie con IA'**
+  String get tourScanFavouriteDesc;
+
+  /// No description provided for @exploreDiscounts.
+  ///
+  /// In es, this message translates to:
+  /// **'Explora descuentos exclusivos'**
+  String get exploreDiscounts;
+
+  /// No description provided for @exploreDiscountsDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'Hasta 20% off en viveros aliados'**
+  String get exploreDiscountsDesc;
+
+  /// No description provided for @redeemSeedsCount.
+  ///
+  /// In es, this message translates to:
+  /// **'Canjear {count} semillas'**
+  String redeemSeedsCount(int count);
+
+  /// No description provided for @waterings.
+  ///
+  /// In es, this message translates to:
+  /// **'Riegos'**
+  String get waterings;
+
+  /// No description provided for @prunings.
+  ///
+  /// In es, this message translates to:
+  /// **'Podas'**
+  String get prunings;
+
+  /// No description provided for @routeNotFound.
+  ///
+  /// In es, this message translates to:
+  /// **'Ruta no encontrada: {route}'**
+  String routeNotFound(String route);
+
+  /// No description provided for @careNoteHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Agua tibia · ~200ml · tierra ya estaba seca'**
+  String get careNoteHint;
+
+  /// No description provided for @tourNotificationsDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'Avisos reales: riegos pendientes, logros desbloqueados y plantas nuevas.'**
+  String get tourNotificationsDesc;
+
+  /// No description provided for @wateringDueNotification.
+  ///
+  /// In es, this message translates to:
+  /// **'Riego pendiente: {name} necesita agua ahora.'**
+  String wateringDueNotification(String name);
+
+  /// No description provided for @fullName.
+  ///
+  /// In es, this message translates to:
+  /// **'Nombre completo'**
+  String get fullName;
+
+  /// No description provided for @plantWatered.
+  ///
+  /// In es, this message translates to:
+  /// **'{name} regada 💧'**
+  String plantWatered(String name);
+
+  /// No description provided for @nicknameExample.
+  ///
+  /// In es, this message translates to:
+  /// **'ej. jardinero_verde'**
+  String get nicknameExample;
+
+  /// No description provided for @plantNameExample.
+  ///
+  /// In es, this message translates to:
+  /// **'ej. Mi Monstera'**
+  String get plantNameExample;
+
+  /// No description provided for @unlockedOn.
+  ///
+  /// In es, this message translates to:
+  /// **'Desbloqueado el {date}'**
+  String unlockedOn(String date);
+
+  /// No description provided for @agoMinutes.
+  ///
+  /// In es, this message translates to:
+  /// **'Hace {n}m'**
+  String agoMinutes(int n);
+
+  /// No description provided for @agoHours.
+  ///
+  /// In es, this message translates to:
+  /// **'Hace {n}h'**
+  String agoHours(int n);
+
+  /// No description provided for @agoDays.
+  ///
+  /// In es, this message translates to:
+  /// **'Hace {n}d'**
+  String agoDays(int n);
+
+  /// No description provided for @wateringDueTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Riego pendiente'**
+  String get wateringDueTitle;
+
+  /// No description provided for @muteReminders.
+  ///
+  /// In es, this message translates to:
+  /// **'Silenciar recordatorios'**
+  String get muteReminders;
+
+  /// No description provided for @muteRemindersOn.
+  ///
+  /// In es, this message translates to:
+  /// **'No recibirás avisos de riego de esta planta'**
+  String get muteRemindersOn;
+
+  /// No description provided for @muteRemindersOff.
+  ///
+  /// In es, this message translates to:
+  /// **'Recibirás avisos cuando toque regarla'**
+  String get muteRemindersOff;
+
+  /// No description provided for @remindersMuted.
+  ///
+  /// In es, this message translates to:
+  /// **'Recordatorios silenciados para {name}'**
+  String remindersMuted(String name);
+
+  /// No description provided for @remindersUnmuted.
+  ///
+  /// In es, this message translates to:
+  /// **'Recordatorios reactivados para {name}'**
+  String remindersUnmuted(String name);
+
+  /// No description provided for @logCare.
+  ///
+  /// In es, this message translates to:
+  /// **'Registrar cuidado'**
+  String get logCare;
+
+  /// No description provided for @achFirstSteps.
+  ///
+  /// In es, this message translates to:
+  /// **'Primeros Pasos'**
+  String get achFirstSteps;
+
+  /// No description provided for @achBotanicalEye.
+  ///
+  /// In es, this message translates to:
+  /// **'Ojo Botánico'**
+  String get achBotanicalEye;
+
+  /// No description provided for @achFirstRoom.
+  ///
+  /// In es, this message translates to:
+  /// **'Mi Primer Espacio'**
+  String get achFirstRoom;
+
+  /// No description provided for @achHandsOn.
+  ///
+  /// In es, this message translates to:
+  /// **'Manos a la Obra'**
+  String get achHandsOn;
+
+  /// No description provided for @achSteadyCarer.
+  ///
+  /// In es, this message translates to:
+  /// **'Cuidador Constante'**
+  String get achSteadyCarer;
+
+  /// No description provided for @achGreenGuardian.
+  ///
+  /// In es, this message translates to:
+  /// **'Guardián Verde'**
+  String get achGreenGuardian;
+
+  /// No description provided for @achCareMaster.
+  ///
+  /// In es, this message translates to:
+  /// **'Maestro del Cuidado'**
+  String get achCareMaster;
+
+  /// No description provided for @achBotanicalLegend.
+  ///
+  /// In es, this message translates to:
+  /// **'Leyenda Botánica'**
+  String get achBotanicalLegend;
+
+  /// No description provided for @achMyLittleGarden.
+  ///
+  /// In es, this message translates to:
+  /// **'Mi Pequeño Jardín'**
+  String get achMyLittleGarden;
+
+  /// No description provided for @achCollector.
+  ///
+  /// In es, this message translates to:
+  /// **'Coleccionista'**
+  String get achCollector;
+
+  /// No description provided for @achDescOnboarding.
+  ///
+  /// In es, this message translates to:
+  /// **'Completa el onboarding de ECO2'**
+  String get achDescOnboarding;
+
+  /// No description provided for @achDescFirstScan.
+  ///
+  /// In es, this message translates to:
+  /// **'Escanea tu primera planta con IA'**
+  String get achDescFirstScan;
+
+  /// No description provided for @achDescFirstRoom.
+  ///
+  /// In es, this message translates to:
+  /// **'Crea tu primera habitación'**
+  String get achDescFirstRoom;
+
+  /// No description provided for @achDescFirstCare.
+  ///
+  /// In es, this message translates to:
+  /// **'Realiza tu primer cuidado'**
+  String get achDescFirstCare;
+
+  /// No description provided for @achDescNCares.
+  ///
+  /// In es, this message translates to:
+  /// **'Realiza {count} cuidados'**
+  String achDescNCares(int count);
+
+  /// No description provided for @achDescNPlants.
+  ///
+  /// In es, this message translates to:
+  /// **'Registra {count} plantas en tu colección'**
+  String achDescNPlants(int count);
+
+  /// No description provided for @aboutThisPlant.
+  ///
+  /// In es, this message translates to:
+  /// **'Sobre esta planta'**
+  String get aboutThisPlant;
+
+  /// No description provided for @difficulty.
+  ///
+  /// In es, this message translates to:
+  /// **'Dificultad'**
+  String get difficulty;
+
+  /// No description provided for @beginner.
+  ///
+  /// In es, this message translates to:
+  /// **'Principiante'**
+  String get beginner;
+
+  /// No description provided for @expert.
+  ///
+  /// In es, this message translates to:
+  /// **'Experto'**
+  String get expert;
+
+  /// No description provided for @care.
+  ///
+  /// In es, this message translates to:
+  /// **'Cuidados'**
+  String get care;
+
+  /// No description provided for @carEquivalent.
+  ///
+  /// In es, this message translates to:
+  /// **'Equivalente a un auto recorriendo {meters}m'**
+  String carEquivalent(String meters);
+
+  /// No description provided for @securePayments.
+  ///
+  /// In es, this message translates to:
+  /// **'Pagos seguros con cifrado SSL de 256 bits'**
+  String get securePayments;
+
+  /// No description provided for @selectedPlan.
+  ///
+  /// In es, this message translates to:
+  /// **'★ PLAN SELECCIONADO'**
+  String get selectedPlan;
+
+  /// No description provided for @eco2PlusAnnual.
+  ///
+  /// In es, this message translates to:
+  /// **'ECO2 Plus Anual'**
+  String get eco2PlusAnnual;
+
+  /// No description provided for @cancelAnytime.
+  ///
+  /// In es, this message translates to:
+  /// **'Cancela en cualquier momento'**
+  String get cancelAnytime;
+
+  /// No description provided for @totalToPay.
+  ///
+  /// In es, this message translates to:
+  /// **'Total a pagar'**
+  String get totalToPay;
+
+  /// No description provided for @payAmount.
+  ///
+  /// In es, this message translates to:
+  /// **'Pagar {amount}'**
+  String payAmount(String amount);
+
+  /// No description provided for @perMonthPrice.
+  ///
+  /// In es, this message translates to:
+  /// **'{amount}/mes'**
+  String perMonthPrice(String amount);
+
+  /// No description provided for @filters.
+  ///
+  /// In es, this message translates to:
+  /// **'Filtros'**
+  String get filters;
+
+  /// No description provided for @clear.
+  ///
+  /// In es, this message translates to:
+  /// **'Limpiar'**
+  String get clear;
+
+  /// No description provided for @applyFilters.
+  ///
+  /// In es, this message translates to:
+  /// **'Aplicar filtros'**
+  String get applyFilters;
+
+  /// No description provided for @unlockO2Features.
+  ///
+  /// In es, this message translates to:
+  /// **'Desbloquea funciones O₂₊'**
+  String get unlockO2Features;
+
+  /// No description provided for @freePotsOf.
+  ///
+  /// In es, this message translates to:
+  /// **'[{count} macetas de 10\ngratis]'**
+  String freePotsOf(int count);
+
+  /// No description provided for @done.
+  ///
+  /// In es, this message translates to:
+  /// **'Listo'**
+  String get done;
+
+  /// No description provided for @customizeYourEco2.
+  ///
+  /// In es, this message translates to:
+  /// **'Personaliza tu experiencia ECO2'**
+  String get customizeYourEco2;
+
+  /// No description provided for @skipForNow.
+  ///
+  /// In es, this message translates to:
+  /// **'Omitir por ahora'**
+  String get skipForNow;
+
+  /// No description provided for @optional.
+  ///
+  /// In es, this message translates to:
+  /// **'(opcional)'**
+  String get optional;
+
+  /// No description provided for @continueAction.
+  ///
+  /// In es, this message translates to:
+  /// **'Continuar'**
+  String get continueAction;
+
+  /// No description provided for @newScan.
+  ///
+  /// In es, this message translates to:
+  /// **'Nuevo escaneo'**
+  String get newScan;
+
+  /// No description provided for @matchPercent.
+  ///
+  /// In es, this message translates to:
+  /// **'{pct}% coincidencia'**
+  String matchPercent(int pct);
+
+  /// No description provided for @takePhotoAction.
+  ///
+  /// In es, this message translates to:
+  /// **'Hacer foto'**
+  String get takePhotoAction;
+
+  /// No description provided for @date.
+  ///
+  /// In es, this message translates to:
+  /// **'Fecha'**
+  String get date;
+
+  /// No description provided for @noteOptional.
+  ///
+  /// In es, this message translates to:
+  /// **'Nota (opcional)'**
+  String get noteOptional;
+
+  /// No description provided for @scanHistory.
+  ///
+  /// In es, this message translates to:
+  /// **'Historial de escaneos'**
+  String get scanHistory;
+
+  /// No description provided for @otherPossibilities.
+  ///
+  /// In es, this message translates to:
+  /// **'Otras posibilidades'**
+  String get otherPossibilities;
+
+  /// No description provided for @viewO2Plus.
+  ///
+  /// In es, this message translates to:
+  /// **'Ver O₂₊'**
+  String get viewO2Plus;
+
+  /// No description provided for @exportToCalendar.
+  ///
+  /// In es, this message translates to:
+  /// **'Exportar a calendario'**
+  String get exportToCalendar;
+
+  /// No description provided for @eventsCount.
+  ///
+  /// In es, this message translates to:
+  /// **'{count, plural, =1{1 evento} other{{count} eventos}}'**
+  String eventsCount(int count);
+
+  /// No description provided for @viewFullSheet.
+  ///
+  /// In es, this message translates to:
+  /// **'ver ficha completa'**
+  String get viewFullSheet;
+
+  /// No description provided for @myPersonalNote.
+  ///
+  /// In es, this message translates to:
+  /// **'Mi nota personal'**
+  String get myPersonalNote;
+
+  /// No description provided for @noPlantNeedsWater.
+  ///
+  /// In es, this message translates to:
+  /// **'Ninguna planta necesita riego ahora mismo.'**
+  String get noPlantNeedsWater;
+
+  /// No description provided for @waterAction.
+  ///
+  /// In es, this message translates to:
+  /// **'Regar'**
+  String get waterAction;
+
+  /// No description provided for @o2PlusLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'O₂ PLUS'**
+  String get o2PlusLabel;
+
+  /// No description provided for @subscribeToO2Plus.
+  ///
+  /// In es, this message translates to:
+  /// **'Suscribirse a O₂₊'**
+  String get subscribeToO2Plus;
+
+  /// No description provided for @minCharsSuffix.
+  ///
+  /// In es, this message translates to:
+  /// **' · mín. 8 caracteres'**
+  String get minCharsSuffix;
+
+  /// No description provided for @startUsingPlus.
+  ///
+  /// In es, this message translates to:
+  /// **'Empezar a usar Plus'**
+  String get startUsingPlus;
+
+  /// No description provided for @seedsCost.
+  ///
+  /// In es, this message translates to:
+  /// **'{count} semillas'**
+  String seedsCost(int count);
+
+  /// No description provided for @seedsShort.
+  ///
+  /// In es, this message translates to:
+  /// **'{count} sem.'**
+  String seedsShort(int count);
+
+  /// No description provided for @species.
+  ///
+  /// In es, this message translates to:
+  /// **'Especie'**
+  String get species;
+
+  /// No description provided for @gramsPerDayUnit.
+  ///
+  /// In es, this message translates to:
+  /// **'g/día'**
+  String get gramsPerDayUnit;
+
+  /// No description provided for @everyNDaysCompact.
+  ///
+  /// In es, this message translates to:
+  /// **'c/{days}d'**
+  String everyNDaysCompact(int days);
+
+  /// No description provided for @pendingMissionsCount.
+  ///
+  /// In es, this message translates to:
+  /// **'{count, plural, =0{Todo completado} =1{1 pendiente} other{{count} pendientes}}'**
+  String pendingMissionsCount(int count);
+
+  /// No description provided for @seedsCountShort.
+  ///
+  /// In es, this message translates to:
+  /// **'{count} semillas'**
+  String seedsCountShort(int count);
+
+  /// No description provided for @unitCares.
+  ///
+  /// In es, this message translates to:
+  /// **'cuidados'**
+  String get unitCares;
+
+  /// No description provided for @unitPlants.
+  ///
+  /// In es, this message translates to:
+  /// **'plantas'**
+  String get unitPlants;
+
+  /// No description provided for @filterAll.
+  ///
+  /// In es, this message translates to:
+  /// **'Todos'**
+  String get filterAll;
+
+  /// No description provided for @fertilizings.
+  ///
+  /// In es, this message translates to:
+  /// **'Abonos'**
+  String get fertilizings;
+
+  /// No description provided for @tabActive.
+  ///
+  /// In es, this message translates to:
+  /// **'Activa'**
+  String get tabActive;
+
+  /// No description provided for @tabCompleted.
+  ///
+  /// In es, this message translates to:
+  /// **'Completadas'**
+  String get tabCompleted;
+
+  /// No description provided for @tabLocked.
+  ///
+  /// In es, this message translates to:
+  /// **'Bloqueadas'**
+  String get tabLocked;
 }
 
 class _AppLocalizationsDelegate

@@ -47,4 +47,31 @@ class AuthService {
       await _storage.clearTokens();
     }
   }
+
+  /// POST /auth/forgot-password — solicita el correo de recuperación.
+  ///
+  /// El backend responde siempre 200 con un mensaje genérico ("si existe una
+  /// cuenta con ese correo, se ha enviado un enlace"), sin confirmar ni negar
+  /// que el correo exista. La app debe mantener esa ambigüedad: decir "ese
+  /// correo no está registrado" permitiría enumerar usuarios.
+  Future<void> forgotPassword(String email) async {
+    await _client.post(
+      '/auth/forgot-password',
+      body: {'email': email},
+      requiresAuth: false,
+    );
+  }
+
+  /// Cambia la contraseña con el código que llegó por correo. El backend
+  /// normaliza el código, así que da igual si viene con guion o en minúsculas.
+  Future<void> resetPassword({
+    required String code,
+    required String newPassword,
+  }) async {
+    await _client.post(
+      '/auth/reset-password',
+      body: {'token': code, 'new_password': newPassword},
+      requiresAuth: false,
+    );
+  }
 }

@@ -2,6 +2,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:frontend_eco_2/models/models.dart';
 import 'package:frontend_eco_2/services/services.dart';
+import 'app_error.dart';
+import 'package:frontend_eco_2/l10n/app_localizations.dart';
 
 class PlantsProvider with ChangeNotifier {
   final PlantsService _plantsService;
@@ -13,6 +15,7 @@ class PlantsProvider with ChangeNotifier {
   bool _isLoading = false;
   bool _showCatalogTab = true;
   String? _errorMessage;
+  AppError? _errorCode;
 
   PlantsProvider({
     required PlantsService plantsService,
@@ -25,6 +28,17 @@ class PlantsProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
   bool get showCatalogTab => _showCatalogTab;
   String? get errorMessage => _errorMessage;
+
+  /// Texto de error ya traducido. Prefiere el código propio; si el fallo vino
+  /// del backend con un mensaje concreto, devuelve ese. Null si no hay error.
+  String? errorText(BuildContext context) {
+    final code = _errorCode;
+    if (code != null) return code.localize(context);
+    if (_errorMessage == kSessionExpired) {
+      return AppLocalizations.of(context)!.sessionExpired;
+    }
+    return _errorMessage;
+  }
 
   /// Foto que el propio usuario le puso a esta planta (guardada solo en el
   /// dispositivo), o null si todavía usa la foto de la especie / un ícono.
@@ -49,6 +63,7 @@ class PlantsProvider with ChangeNotifier {
   Future<void> init() async {
     _setLoading(true);
     _errorMessage = null;
+    _errorCode = null;
     try {
       final results = await Future.wait([
         _plantsService.getSpecies(),
@@ -59,9 +74,10 @@ class PlantsProvider with ChangeNotifier {
       _userPlants = results[1] as List<UserPlant>;
       _customPhotos = results[2] as Map<String, File>;
     } on ApiException catch (e) {
+      _errorCode = null;
       _errorMessage = e.message;
     } catch (_) {
-      _errorMessage = 'Error al cargar tus plantas.';
+      _errorCode = AppError.plantsLoadFailed;
     } finally {
       _setLoading(false);
     }
@@ -121,11 +137,12 @@ class PlantsProvider with ChangeNotifier {
       notifyListeners();
       return true;
     } on ApiException catch (e) {
+      _errorCode = null;
       _errorMessage = e.message;
       notifyListeners();
       return false;
     } catch (_) {
-      _errorMessage = 'Error al agregar la planta.';
+      _errorCode = AppError.plantAddFailed;
       notifyListeners();
       return false;
     }
@@ -177,12 +194,13 @@ class PlantsProvider with ChangeNotifier {
       return true;
     } on ApiException catch (e) {
       _userPlants.insert(index, removed);
+      _errorCode = null;
       _errorMessage = e.message;
       notifyListeners();
       return false;
     } catch (_) {
       _userPlants.insert(index, removed);
-      _errorMessage = 'No se pudo eliminar la planta.';
+      _errorCode = AppError.plantDeleteFailed;
       notifyListeners();
       return false;
     }
@@ -195,10 +213,33 @@ class PlantsProvider with ChangeNotifier {
   // ---------------------------------------------------------------------------
 
   /// Renombra una planta de la colección. Devuelve true si se guardó bien.
+  /// Silencia o reactiva los recordatorios de UNA planta. El resto del jardín
+  /// sigue avisando; para apagarlo todo está el interruptor de Ajustes.
+  Future<bool> setRemindersMuted(String plantId, bool muted) async {
+    _errorCode = null;
+    _errorMessage = null;
+    try {
+      final updated =
+          await _plantsService.updatePlant(plantId, remindersMuted: muted);
+      final index = _userPlants.indexWhere((p) => p.id == plantId);
+      if (index != -1) _userPlants[index] = updated;
+      notifyListeners();
+      return true;
+    } on ApiException catch (e) {
+      _errorMessage = e.message;
+      notifyListeners();
+      return false;
+    } catch (_) {
+      _errorCode = AppError.connection;
+      notifyListeners();
+      return false;
+    }
+  }
+
   Future<bool> updateNickname(String plantId, String nickname) async {
     final trimmed = nickname.trim();
     if (trimmed.isEmpty) {
-      _errorMessage = 'El apodo no puede estar vacío.';
+      _errorCode = AppError.nicknameEmpty;
       notifyListeners();
       return false;
     }
@@ -209,11 +250,12 @@ class PlantsProvider with ChangeNotifier {
       notifyListeners();
       return true;
     } on ApiException catch (e) {
+      _errorCode = null;
       _errorMessage = e.message;
       notifyListeners();
       return false;
     } catch (_) {
-      _errorMessage = 'No se pudo actualizar el apodo.';
+      _errorCode = AppError.nicknameUpdateFailed;
       notifyListeners();
       return false;
     }

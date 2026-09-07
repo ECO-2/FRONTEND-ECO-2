@@ -75,7 +75,7 @@ class _LastWateredSheet extends StatelessWidget {
               const SizedBox(width: 14),
               Expanded(
                 child: Text(
-                  '¿Cuándo regaste $plantName por última vez?',
+                  AppLocalizations.of(context)!.lastWateredQuestion(plantName),
                   style: const TextStyle(
                     fontSize: 19,
                     fontWeight: FontWeight.bold,
@@ -88,18 +88,17 @@ class _LastWateredSheet extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            'Así calculamos cuándo toca el próximo riego. Si no lo sabes, '
-            'empezamos a contar desde hoy.',
+            AppLocalizations.of(context)!.lastWateredHelpShort,
             style: TextStyle(fontSize: 14, color: Colors.grey[600], height: 1.4),
           ),
           const SizedBox(height: 24),
           _Option(
-            label: 'Hoy',
+            label: AppLocalizations.of(context)!.today,
             icon: Icons.today_rounded,
             onTap: () => Navigator.pop(context, LastWateredAnswer(now)),
           ),
           _Option(
-            label: 'Ayer',
+            label: AppLocalizations.of(context)!.yesterday,
             icon: Icons.history_rounded,
             onTap: () => Navigator.pop(
               context,
@@ -107,7 +106,7 @@ class _LastWateredSheet extends StatelessWidget {
             ),
           ),
           _Option(
-            label: 'Hace unos días…',
+            label: AppLocalizations.of(context)!.someDaysAgo,
             icon: Icons.calendar_month_rounded,
             onTap: () async {
               final picked = await showDatePicker(
@@ -124,7 +123,7 @@ class _LastWateredSheet extends StatelessWidget {
             },
           ),
           _Option(
-            label: 'Nunca / no lo recuerdo',
+            label: AppLocalizations.of(context)!.neverOrDontRemember,
             icon: Icons.help_outline_rounded,
             onTap: () => Navigator.pop(context, const LastWateredAnswer(null)),
           ),

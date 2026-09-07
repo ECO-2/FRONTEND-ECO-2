@@ -104,7 +104,7 @@ class _AddPlantModalState extends State<AddPlantModal> {
       setState(() => _isSubmitting = false);
       showAppToast(
         context,
-        plantsProvider.errorMessage ?? AppLocalizations.of(context)!.couldNotAddPlant,
+        plantsProvider.errorText(context) ?? AppLocalizations.of(context)!.couldNotAddPlant,
         type: ToastType.error,
       );
     }
@@ -215,7 +215,7 @@ class _AddPlantModalState extends State<AddPlantModal> {
                     textCapitalization: TextCapitalization.sentences,
                     textInputAction: TextInputAction.done,
                     decoration: InputDecoration(
-                      hintText: 'ej. Mi Monstera',
+                      hintText: AppLocalizations.of(context)!.plantNameExample,
                       hintStyle: const TextStyle(color: AppColors.textMuted),
                       filled: true,
                       fillColor: const Color(0xFFF5F7F5),
@@ -238,8 +238,7 @@ class _AddPlantModalState extends State<AddPlantModal> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    'Especie',
+                  Text(AppLocalizations.of(context)!.species,
                     style: TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 13,
@@ -320,8 +319,8 @@ class _AddPlantModalState extends State<AddPlantModal> {
                       padding: const EdgeInsets.only(bottom: 10),
                       child: Text(
                         _selectedSpecies == null
-                            ? 'Elige una especie de la lista para continuar.'
-                            : 'Ponle un nombre a tu planta para continuar.',
+                            ? AppLocalizations.of(context)!.pickSpeciesToContinue
+                            : AppLocalizations.of(context)!.nameYourPlantToContinue,
                         style: const TextStyle(
                           fontSize: 12,
                           color: AppColors.textMuted,
@@ -352,9 +351,9 @@ class _AddPlantModalState extends State<AddPlantModal> {
                                 valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                               ),
                             )
-                          : const Text(
-                              'Añadir planta',
-                              style: TextStyle(
+                          : Text(
+                              AppLocalizations.of(context)!.addPlant,
+                              style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 15,
                                 fontFamily: 'Inter',
@@ -390,8 +389,8 @@ class _AddPlantModalState extends State<AddPlantModal> {
               const SizedBox(height: 8),
               Text(
                 _searchQuery.isEmpty
-                    ? 'No hay especies disponibles todavía.'
-                    : 'No se encontraron especies para "$_searchQuery".',
+                    ? AppLocalizations.of(context)!.noSpeciesAvailable
+                    : AppLocalizations.of(context)!.noSpeciesFoundFor(_searchQuery),
                 textAlign: TextAlign.center,
                 style: const TextStyle(fontSize: 13, color: AppColors.textMuted),
               ),

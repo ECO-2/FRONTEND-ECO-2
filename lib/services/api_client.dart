@@ -2,6 +2,10 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'secure_storage.dart';
 
+/// Marca que la sesión caducó. Es un centinela y no un mensaje: el texto
+/// visible se resuelve en la pantalla, que sí sabe en qué idioma está la app.
+const String kSessionExpired = '__session_expired__';
+
 /// Excepción tipada para errores de la API.
 class ApiException implements Exception {
   final int statusCode;
@@ -64,7 +68,7 @@ class ApiClient {
     final refreshToken = await _storage.getRefreshToken();
     if (refreshToken == null) {
       await _storage.clearTokens();
-      throw const ApiException(401, 'Sesión expirada. Inicia sesión nuevamente.');
+      throw const ApiException(401, kSessionExpired);
     }
 
     final response = await _client.post(
@@ -81,7 +85,7 @@ class ApiClient {
       );
     } else {
       await _storage.clearTokens();
-      throw const ApiException(401, 'Sesión expirada. Inicia sesión nuevamente.');
+      throw const ApiException(401, kSessionExpired);
     }
   }
 
@@ -116,7 +120,7 @@ class ApiClient {
         response = await _client.delete(uri, headers: headers);
         break;
       default:
-        throw ArgumentError('Método HTTP no soportado: $method');
+        throw ArgumentError('Unsupported HTTP method: $method');
     }
 
     // Auto-refresh en 401 (solo un intento)

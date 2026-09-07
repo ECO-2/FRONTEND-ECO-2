@@ -177,7 +177,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get editProfile => 'Edit profile';
 
   @override
-  String get editProfileSubtitle => 'Name, bio, photo';
+  String get editProfileSubtitle => 'Username';
 
   @override
   String get changePassword => 'Change password';
@@ -216,7 +216,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get privacy => 'Privacy';
 
   @override
-  String get privacySubtitle => 'Personal data controls';
+  String get privacySubtitle => 'What ECO2 stores';
 
   @override
   String get exportMyData => 'Export my data';
@@ -240,7 +240,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deleteAccount => 'Delete account';
 
   @override
-  String get deleteAccountSubtitle => 'This action is permanent';
+  String get deleteAccountSubtitle => 'This cannot be undone';
 
   @override
   String get spanish => 'Spanish';
@@ -505,10 +505,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get wateringPending => 'Watering due';
 
   @override
-  String get achievementUnlocked => 'Achievement unlocked!';
+  String achievementUnlocked(String title) {
+    return 'Achievement unlocked: $title';
+  }
 
   @override
-  String get newPlantAdded => 'New plant added';
+  String newPlantAdded(String name) {
+    return 'New plant added: you added $name to your collection.';
+  }
 
   @override
   String get seedbed => 'Seedbed';
@@ -548,7 +552,8 @@ class AppLocalizationsEn extends AppLocalizations {
       'You haven\'t completed any achievements yet.';
 
   @override
-  String get allAchievementsDone => 'You\'ve unlocked every achievement!';
+  String get allAchievementsDone =>
+      'You completed every available achievement!';
 
   @override
   String get noAchievementsConfigured => 'No achievements configured yet.';
@@ -566,13 +571,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get achievementLockedLabel => 'Achievement locked';
 
   @override
-  String get activeMissions => 'Active Missions';
+  String get activeMissions => 'Active missions';
 
   @override
-  String get plantCatalog => 'Plant Catalogue';
+  String get plantCatalog => 'Plant catalog';
 
   @override
-  String get seedStore => 'Seed Store';
+  String get seedStore => 'Seed store';
 
   @override
   String get freePlanActive => 'Free plan active';
@@ -828,4 +833,1283 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get speciesNotFound => 'Species not found';
+
+  @override
+  String get forgotPasswordTitle => 'Reset password';
+
+  @override
+  String get forgotPasswordBody =>
+      'Enter your email and we\'ll send you a code to reset your password.';
+
+  @override
+  String get forgotPasswordSent =>
+      'If an account exists with that email, we\'ve sent you a code.';
+
+  @override
+  String get send => 'Send';
+
+  @override
+  String get emailRequired => 'Enter your email first';
+
+  @override
+  String get resetPasswordTitle => 'Reset password';
+
+  @override
+  String get resetPasswordIntro =>
+      'Paste the code we emailed you and choose your new password.';
+
+  @override
+  String get resetCodeLabel => 'Recovery code';
+
+  @override
+  String get resetCodeHint => 'ABCD-2345';
+
+  @override
+  String get resetCodeRequired => 'Enter the code you received';
+
+  @override
+  String get newPassword => 'New password';
+
+  @override
+  String get passwordsDoNotMatch => 'Passwords don\'t match';
+
+  @override
+  String get resetPasswordSubmit => 'Change password';
+
+  @override
+  String get resetPasswordSuccess => 'Password updated. You can sign in now.';
+
+  @override
+  String get resetCodeExpiredHint =>
+      'The code expires after 30 minutes. Request a new one if it lapsed.';
+
+  @override
+  String get changePasswordIntro =>
+      'Enter your current password and pick a new one.';
+
+  @override
+  String get changePasswordSubmit => 'Save password';
+
+  @override
+  String get changePasswordSuccess => 'Password updated.';
+
+  @override
+  String get currentPassword => 'Current password';
+
+  @override
+  String get currentPasswordRequired => 'Enter your current password';
+
+  @override
+  String get passwordMustDiffer =>
+      'The new password must differ from the current one';
+
+  @override
+  String get biometricLock => 'Fingerprint lock';
+
+  @override
+  String get biometricLockSubtitle =>
+      'Ask for your fingerprint when opening the app';
+
+  @override
+  String get biometricUnavailable => 'This device has no fingerprint enrolled';
+
+  @override
+  String get biometricPromptReason => 'Confirm your identity to open ECO2';
+
+  @override
+  String get biometricEnabled => 'Fingerprint lock enabled';
+
+  @override
+  String get biometricDisabled => 'Fingerprint lock disabled';
+
+  @override
+  String get appLockTitle => 'ECO2 is locked';
+
+  @override
+  String get appLockSubtitle => 'Use your fingerprint to continue.';
+
+  @override
+  String get appLockFailed => 'We could not confirm your identity.';
+
+  @override
+  String get appLockRetry => 'Try again';
+
+  @override
+  String get appLockSignOut => 'Sign out';
+
+  @override
+  String get managePlus => 'Manage ECO2 Plus';
+
+  @override
+  String get managePlusFree => 'Free plan active';
+
+  @override
+  String get pushNotificationsSubtitle => 'Watering and achievement alerts';
+
+  @override
+  String get reminderWindow => 'Reminder hours';
+
+  @override
+  String reminderWindowValue(int start, int end) {
+    return 'From $start:00 to $end:00';
+  }
+
+  @override
+  String get reminderWindowSheetTitle => 'When should we remind you?';
+
+  @override
+  String get reminderWindowIntro =>
+      'Reminders are only sent within this window.';
+
+  @override
+  String get reminderStart => 'From';
+
+  @override
+  String get reminderEnd => 'To';
+
+  @override
+  String get reminderWindowInvalid =>
+      'The start hour must be before the end hour';
+
+  @override
+  String get reminderWindowSaved => 'Reminder hours updated';
+
+  @override
+  String get privacySheetTitle => 'Your data in ECO2';
+
+  @override
+  String get privacySheetBody =>
+      'ECO2 stores your email, your username, the plants in your garden and their care history. Photos you take stay on this device only. You can export everything or delete your account at any time.';
+
+  @override
+  String get exportDataSubtitle => 'Copy a summary to the clipboard';
+
+  @override
+  String get exportDataCopied => 'Data copied to the clipboard';
+
+  @override
+  String get exportDataFailed => 'We could not gather your data';
+
+  @override
+  String get helpSupportSubtitle => 'Write to us if something breaks';
+
+  @override
+  String get helpSheetTitle => 'Need a hand?';
+
+  @override
+  String get helpSheetBody =>
+      'Tell us what happened and which screen you were on. Copy the address and send us a message.';
+
+  @override
+  String get copyEmail => 'Copy email';
+
+  @override
+  String get emailCopied => 'Email copied';
+
+  @override
+  String appVersion(String version) {
+    return 'Version $version';
+  }
+
+  @override
+  String get aboutSheetBody =>
+      'ECO2 helps you care for your plants and see how much CO2 they absorb.';
+
+  @override
+  String get deleteAccountTitle => 'Delete your account?';
+
+  @override
+  String get deleteAccountBody =>
+      'Your profile, your plants and all their care history will be erased. This cannot be undone.';
+
+  @override
+  String get deleteAccountConfirmHint => 'Type DELETE to confirm';
+
+  @override
+  String get deleteAccountConfirmWord => 'DELETE';
+
+  @override
+  String get deleteAccountSuccess => 'Your account has been deleted.';
+
+  @override
+  String get usernameTaken => 'That username is already taken.';
+
+  @override
+  String get currentPasswordWrong => 'That is not your current password.';
+
+  @override
+  String get profileUpdateFailed =>
+      'We could not update your profile. Try again.';
+
+  @override
+  String get plantsLoadFailed => 'We could not load your plants.';
+
+  @override
+  String get plantAddFailed => 'We could not add the plant.';
+
+  @override
+  String get plantDeleteFailed => 'We could not delete the plant.';
+
+  @override
+  String get nicknameEmpty => 'The nickname cannot be empty.';
+
+  @override
+  String get nicknameUpdateFailed => 'We could not update the nickname.';
+
+  @override
+  String get missionsLoadFailed => 'We could not load the missions.';
+
+  @override
+  String get careLogFailed => 'We could not log the care action.';
+
+  @override
+  String get nicknameUpdated => 'Nickname updated.';
+
+  @override
+  String get noSpeciesMatchFilters => 'No species match these filters';
+
+  @override
+  String get noPlantsInCategory => 'You have no plants in this category yet';
+
+  @override
+  String daysOverdueLabel(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days overdue',
+      one: '1 day overdue',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String noWateringLoggedEvery(int days) {
+    return 'No log / every ${days}d';
+  }
+
+  @override
+  String daysWithoutWaterEvery(int days, int freq) {
+    return '${days}d dry / every ${freq}d';
+  }
+
+  @override
+  String get identifyConnectionError =>
+      'We could not connect to identify the plant. Check your connection and try again.';
+
+  @override
+  String get plantAlreadyRegistered => 'Plant already registered';
+
+  @override
+  String get plantAlreadyRegisteredBody =>
+      'You already have this plant in your garden. Give it a nickname so you can tell them apart.';
+
+  @override
+  String get addThisPlantQuestion => 'Add this plant to your garden?';
+
+  @override
+  String get addThisPlantBody => 'It will be added to your plant collection.';
+
+  @override
+  String get redeemMore => 'Redeem more';
+
+  @override
+  String get plantAddedSuccess => 'Plant added successfully';
+
+  @override
+  String get historyLoadFailed => 'We could not load the history.';
+
+  @override
+  String get noScansYet => 'You have not scanned any plants yet.';
+
+  @override
+  String get toMyGarden => 'To my garden';
+
+  @override
+  String get aiNotAvailable =>
+      'AI identification is not available in this version yet.';
+
+  @override
+  String get tourGalleryDescription =>
+      'Upload a photo from your gallery to analyse.';
+
+  @override
+  String get shutter => 'Shutter';
+
+  @override
+  String get tourShutterDescription => 'Tap here to scan a plant and continue.';
+
+  @override
+  String get enterUsername => 'Please enter your username';
+
+  @override
+  String get usernameTooShort => 'The username must be at least 3 characters';
+
+  @override
+  String get enterValidEmail => 'Please enter a valid email';
+
+  @override
+  String get confirmYourPassword => 'Please confirm your password';
+
+  @override
+  String estimatedValueNote(int measured, int total) {
+    String _temp0 = intl.Intl.pluralLogic(
+      measured,
+      locale: localeName,
+      other:
+          'Estimated value: $measured of $total plants rely on a published measurement.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get footprintShareEmpty =>
+      'I don\'t have any plants in my ECO2 garden yet.';
+
+  @override
+  String footprintShareSummary(int plants, String perDay, String total) {
+    return 'My ECO2 garden: $plants plants and $perDay g of CO₂ per day ($total g accumulated).';
+  }
+
+  @override
+  String get addPlantsToSeeContribution =>
+      'Add plants to your garden to see what each one contributes.';
+
+  @override
+  String get storeBestsellers => 'Bestsellers';
+
+  @override
+  String get storeAvatars => 'Avatars';
+
+  @override
+  String get storePots => 'Pots';
+
+  @override
+  String get storeO2Plus2wTitle => 'Grow your garden pro';
+
+  @override
+  String get storeO2Plus2wSubtitle => '2 weeks of O2 Plus';
+
+  @override
+  String get storePotRentalTitle => 'Rent a pot';
+
+  @override
+  String get storePotRentalSubtitle => 'Temporary slot · 2 weeks';
+
+  @override
+  String get storeAvatarExplorerTitle => 'Green Explorer avatar';
+
+  @override
+  String get storeAvatarGuardianTitle => 'Forest Guardian avatar';
+
+  @override
+  String get storePermanentUnlock => 'Permanent unlock';
+
+  @override
+  String get storePotPack3Title => 'Pack of 3 pots';
+
+  @override
+  String get storePotPack3Subtitle => '+3 permanent slots';
+
+  @override
+  String get storeO2Plus4wTitle => 'O2 Plus monthly';
+
+  @override
+  String get storeO2Plus4wSubtitle => '4 weeks of O2 Plus';
+
+  @override
+  String get newBadgeLabel => 'New';
+
+  @override
+  String get noItemsFound => 'No items found';
+
+  @override
+  String get confirmPurchaseTitle => 'Confirm purchase?';
+
+  @override
+  String confirmPurchaseBody(String item, int cost) {
+    return 'Redeem \"$item\" for $cost seeds?';
+  }
+
+  @override
+  String get confirm => 'Confirm';
+
+  @override
+  String get purchaseFailed => 'We could not complete the purchase.';
+
+  @override
+  String get boostGardenPremium => 'Boost your garden with premium perks';
+
+  @override
+  String get moreSpaceForPlants => 'Get more space for your plants';
+
+  @override
+  String get customizeYourProfile => 'Customize your profile';
+
+  @override
+  String speciesDescription(
+    String category,
+    String light,
+    String humidity,
+    int days,
+    int minTemp,
+    int maxTemp,
+  ) {
+    return 'A $category species that prefers $light light and $humidity humidity. Water it roughly every $days days, letting the soil dry between waterings, and it does well between $minTemp°C and $maxTemp°C.';
+  }
+
+  @override
+  String get purifierExcellent => 'It is an excellent air purifier.';
+
+  @override
+  String get purifierGood => 'It helps improve the air quality in your home.';
+
+  @override
+  String get humidityRangeLow => '30-40%';
+
+  @override
+  String get humidityRangeMedium => '40-60%';
+
+  @override
+  String get humidityRangeHigh => '60-80%';
+
+  @override
+  String get airPurification => 'Air purification';
+
+  @override
+  String get purificationLevel => 'Purification level';
+
+  @override
+  String get idealRequirements => 'Ideal requirements for this species';
+
+  @override
+  String everyNDaysShort(int days) {
+    return 'every $days days';
+  }
+
+  @override
+  String absorbsPerDay(String grams) {
+    return 'Absorbs ~${grams}g of CO₂/day';
+  }
+
+  @override
+  String get addToMyGarden => 'Add to my garden';
+
+  @override
+  String gramsPerDayValue(String grams) {
+    return '$grams g/day';
+  }
+
+  @override
+  String get noNotesYet => 'You haven\'t added notes for this plant yet.';
+
+  @override
+  String get airPurifierTag => 'Air purifier';
+
+  @override
+  String humidityWithPrefix(String level) {
+    return '$level humidity';
+  }
+
+  @override
+  String get watering => 'Watering';
+
+  @override
+  String get lightLabelShort => 'Light';
+
+  @override
+  String get temperature => 'Temperature';
+
+  @override
+  String get humidityLabelShort => 'Humidity';
+
+  @override
+  String get whenSoilDry => 'When the soil is dry';
+
+  @override
+  String get redeemSeedsOrSubscribe => 'Redeem your seeds or subscribe to O₂₊';
+
+  @override
+  String get viewMyAchievements => 'See my achievements and missions';
+
+  @override
+  String get exploreBotanicalSpecies => 'See species';
+
+  @override
+  String get appTour => 'App tour';
+
+  @override
+  String get appTourSubtitle => 'Replay';
+
+  @override
+  String get rewardDiscountTitle => '15% off at Vivero El Helecho';
+
+  @override
+  String get rewardDiscountDesc => 'Coupon valid on your next purchase.';
+
+  @override
+  String get rewardBadgeTitle => '\"Earth Guardian\" badge';
+
+  @override
+  String get rewardBadgeDesc => 'Show your commitment on your profile.';
+
+  @override
+  String get rewardPotsTitle => 'Custom pots (3D)';
+
+  @override
+  String get rewardPotsDesc => 'Unlock interactive designs.';
+
+  @override
+  String get redeemRewardTitle => 'Redeem reward?';
+
+  @override
+  String redeemRewardBody(String reward, int cost) {
+    return 'Are you sure you want to redeem \"$reward\" for $cost seeds?';
+  }
+
+  @override
+  String redeemSuccess(String reward) {
+    return 'Redeemed: $reward 🎁';
+  }
+
+  @override
+  String get tourWateringStatusDesc =>
+      'Here you can see whether it\'s due for watering, how many days it has gone without water, and how many days are left (or how overdue it is) for its species.';
+
+  @override
+  String get tourLogCareDesc =>
+      'Every time you water, fertilise, prune or repot it, log it here — that keeps the watering status and your history truthful.';
+
+  @override
+  String get speciesCare => 'Species care';
+
+  @override
+  String get speciesSpecSheet => 'Species spec sheet';
+
+  @override
+  String get tourSpeciesGridDesc =>
+      'Ideal watering, light, temperature and humidity for this particular species.';
+
+  @override
+  String get howToCareForThisPlant => 'How to care for this plant';
+
+  @override
+  String get plantNicknameHint => 'Plant nickname';
+
+  @override
+  String get howToCareForYourPlant => 'How to care for your plant';
+
+  @override
+  String get careCalendar => 'Care calendar';
+
+  @override
+  String get tourCareCalendarDesc =>
+      'The watering frequency is real, taken from the species. Fertilising, pruning and repotting are general good practice — the app does not compute an exact frequency for those yet.';
+
+  @override
+  String get whenToDoEachCare => 'When to do each task?';
+
+  @override
+  String get scheduleFertilizing => 'Every 4-6 weeks, in spring and summer';
+
+  @override
+  String get schedulePruning =>
+      'Remove dry, yellow or damaged leaves as soon as you spot them';
+
+  @override
+  String get scheduleRepotting =>
+      'Every 1-2 years, or when the roots fill the pot';
+
+  @override
+  String get tourStoreDesc =>
+      'Redeem your seeds for extra pots and special features.';
+
+  @override
+  String get yourGarden => 'Your garden';
+
+  @override
+  String get tourGardenDesc =>
+      'Browse the species catalog or manage the plants you already have.';
+
+  @override
+  String get aiScanner => 'AI scanner';
+
+  @override
+  String get tourScannerDesc =>
+      'Identify a plant by pointing the camera at it — the AI recognises the species.';
+
+  @override
+  String get yourProfile => 'Your profile';
+
+  @override
+  String get tourProfileDesc =>
+      'Check your progress, account settings and more.';
+
+  @override
+  String get premiumTitle => 'Supercharge your garden';
+
+  @override
+  String get premiumSubtitle =>
+      'Unlock the full potential of ECO2 and take your botanical experience further.';
+
+  @override
+  String get premiumIncludes => 'Everything included';
+
+  @override
+  String get premiumUnlimitedPots => 'Unlimited pots';
+
+  @override
+  String get premiumUnlimitedPotsDesc =>
+      'Add as many plants as you like, with no limits.';
+
+  @override
+  String get premiumBetterSearch => 'Improved search by description';
+
+  @override
+  String get premiumBetterSearchDesc =>
+      'Find plants by describing how they look, with AI.';
+
+  @override
+  String get premiumUnlimitedScans => 'Unlimited scans';
+
+  @override
+  String get premiumUnlimitedScansDesc =>
+      'Identify any plant, whenever you want.';
+
+  @override
+  String get premiumAiTreatment => 'AI-assisted treatment';
+
+  @override
+  String get premiumAiTreatmentDesc =>
+      'Personalised diagnosis of pests and care.';
+
+  @override
+  String get premiumNurseryDiscounts => 'Discounts at partner nurseries';
+
+  @override
+  String get premiumNurseryDiscountsDesc =>
+      'Up to 20% off species from selected partners.';
+
+  @override
+  String get noCompletedAchievements => 'No completed achievements yet';
+
+  @override
+  String get noLockedAchievements => 'No locked achievements right now';
+
+  @override
+  String get lockedAchievementsNote =>
+      'These achievements depend on features that are not available in the app yet.';
+
+  @override
+  String get plantIdentification => 'Plant identification';
+
+  @override
+  String get scannerTabHint =>
+      'Point the camera at the plant, or upload a photo from your gallery.';
+
+  @override
+  String get recentAnalyses => 'Recent analyses';
+
+  @override
+  String get careTypeWatering => 'Watering';
+
+  @override
+  String get careTypeFertilizing => 'Fertilising';
+
+  @override
+  String get careTypePruning => 'Pruning';
+
+  @override
+  String get careTypeRepotting => 'Repotting';
+
+  @override
+  String careLoggedToast(String type) {
+    return 'Care logged: $type 🌿';
+  }
+
+  @override
+  String get inOneDay => 'in 1 day';
+
+  @override
+  String daysAgoShort(int count) {
+    return '$count days ago';
+  }
+
+  @override
+  String inNDays(int count) {
+    return 'in $count days';
+  }
+
+  @override
+  String get noCareLoggedForPlant =>
+      'You haven\'t logged any care for this plant yet.';
+
+  @override
+  String get noEventsForFilter => 'No events for this filter.';
+
+  @override
+  String get featureComingSoon => 'This feature will be available soon.';
+
+  @override
+  String get thisPlant => 'this plant';
+
+  @override
+  String get careTypeGeneric => 'Care';
+
+  @override
+  String get changePhotoComingSoon =>
+      'Changing your profile photo will be available soon 📸';
+
+  @override
+  String get changeProfilePhoto => 'Change profile photo';
+
+  @override
+  String get personalInformation => 'Personal information';
+
+  @override
+  String get pickSpeciesToContinue =>
+      'Pick a species from the list to continue.';
+
+  @override
+  String get nameYourPlantToContinue => 'Give your plant a name to continue.';
+
+  @override
+  String get noSpeciesAvailable => 'No species available yet.';
+
+  @override
+  String noSpeciesFoundFor(String query) {
+    return 'No species found for \"$query\".';
+  }
+
+  @override
+  String get tellUsAboutYou => 'Tell us about you';
+
+  @override
+  String get usernameRequired => 'The username is required';
+
+  @override
+  String get minThreeChars => 'At least 3 characters';
+
+  @override
+  String get gender => 'Gender';
+
+  @override
+  String get activeMissionCard => 'Active mission';
+
+  @override
+  String get redeemSeedsOrSubscribeShort => 'Redeem your seeds or subscribe';
+
+  @override
+  String get welcomeToEco2Plus => 'Welcome to ECO2\nPlus!';
+
+  @override
+  String get subscriptionActive =>
+      'Your annual subscription is active. Enjoy every Plus feature from now on.';
+
+  @override
+  String get addPlantsWithoutLimit => 'Add plants without limits';
+
+  @override
+  String get gardenCanGrow => 'Your garden can grow as much as you want';
+
+  @override
+  String get sessionExpired => 'Your session expired. Please sign in again.';
+
+  @override
+  String get noNotificationsYet => 'You have no notifications right now.';
+
+  @override
+  String get needsAttention => 'Needs attention';
+
+  @override
+  String overdueByDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days overdue',
+      one: '1 day overdue',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get passwordMinSixChars =>
+      'The password must be at least 6 characters';
+
+  @override
+  String get achievementUnlockedTitle => 'Achievement unlocked!';
+
+  @override
+  String get newPlantAddedTitle => 'New plant added';
+
+  @override
+  String newPlantAddedBody(String name) {
+    return 'You added $name to your collection.';
+  }
+
+  @override
+  String get lastWateredHelpShort =>
+      'That\'s how we work out the next watering. If you don\'t know, we start counting from today.';
+
+  @override
+  String get conditionNotTracked =>
+      'This condition is not tracked in the app yet.';
+
+  @override
+  String get tourSeedsDesc =>
+      'You earn seeds by caring for your plants and completing missions. Spend them in the Store.';
+
+  @override
+  String get achievementsAndMissionsTitle => 'Achievements and missions';
+
+  @override
+  String get tourTrophyDesc =>
+      'Here you can see your trophies, your mission progress and how much XP you have.';
+
+  @override
+  String get allNotificationsRead => 'All notifications marked as read.';
+
+  @override
+  String get aiSearch => 'AI search';
+
+  @override
+  String achievementUnlockedToast(String name, String reward) {
+    return '🏆 Achievement unlocked! $name ($reward)';
+  }
+
+  @override
+  String xpAndSeedsReward(int xp, int seeds) {
+    return '+$xp XP · +$seeds seeds';
+  }
+
+  @override
+  String xpReward(int xp) {
+    return '+$xp XP';
+  }
+
+  @override
+  String progressOfPlants(int current, int total) {
+    return '$current of $total plants';
+  }
+
+  @override
+  String progressOfCares(int current, int total) {
+    return '$current of $total care actions';
+  }
+
+  @override
+  String get completed => 'Completed';
+
+  @override
+  String get pending => 'Pending';
+
+  @override
+  String get gotIt => 'Got it';
+
+  @override
+  String get accept => 'Accept';
+
+  @override
+  String get viewSpecSheet => 'View sheet';
+
+  @override
+  String get history => 'History';
+
+  @override
+  String get tourHistoryDesc => 'Check your previous scans.';
+
+  @override
+  String get plantNotFound => 'Plant not found';
+
+  @override
+  String get editNickname => 'Edit nickname';
+
+  @override
+  String get takePhoto => 'Take photo';
+
+  @override
+  String get removePhoto => 'Remove photo';
+
+  @override
+  String get photoRemoved => 'Photo removed.';
+
+  @override
+  String get photoUpdated => 'Photo updated.';
+
+  @override
+  String get genderMale => 'Male';
+
+  @override
+  String get genderFemale => 'Female';
+
+  @override
+  String get genderOther => 'Other';
+
+  @override
+  String get genderPreferNotToSay => 'Prefer not to say';
+
+  @override
+  String get birthDate => 'Date of birth';
+
+  @override
+  String get tempShort => 'Temp.';
+
+  @override
+  String get o2co2 => 'O₂ CO₂';
+
+  @override
+  String get confirmPayment => 'Confirm payment';
+
+  @override
+  String get card => 'Card';
+
+  @override
+  String get tourScanFavourite => 'Scan your favourite plant';
+
+  @override
+  String get tourScanFavouriteDesc => 'Identify any species with AI';
+
+  @override
+  String get exploreDiscounts => 'Explore exclusive discounts';
+
+  @override
+  String get exploreDiscountsDesc => 'Up to 20% off at partner nurseries';
+
+  @override
+  String redeemSeedsCount(int count) {
+    return 'Redeem $count seeds';
+  }
+
+  @override
+  String get waterings => 'Waterings';
+
+  @override
+  String get prunings => 'Prunings';
+
+  @override
+  String routeNotFound(String route) {
+    return 'Route not found: $route';
+  }
+
+  @override
+  String get careNoteHint => 'Lukewarm water · ~200ml · soil was already dry';
+
+  @override
+  String get tourNotificationsDesc =>
+      'Real alerts: watering due, achievements unlocked and new plants.';
+
+  @override
+  String wateringDueNotification(String name) {
+    return 'Watering due: $name needs water now.';
+  }
+
+  @override
+  String get fullName => 'Full name';
+
+  @override
+  String plantWatered(String name) {
+    return '$name watered 💧';
+  }
+
+  @override
+  String get nicknameExample => 'e.g. green_gardener';
+
+  @override
+  String get plantNameExample => 'e.g. My Monstera';
+
+  @override
+  String unlockedOn(String date) {
+    return 'Unlocked on $date';
+  }
+
+  @override
+  String agoMinutes(int n) {
+    return '${n}m ago';
+  }
+
+  @override
+  String agoHours(int n) {
+    return '${n}h ago';
+  }
+
+  @override
+  String agoDays(int n) {
+    return '${n}d ago';
+  }
+
+  @override
+  String get wateringDueTitle => 'Watering due';
+
+  @override
+  String get muteReminders => 'Mute reminders';
+
+  @override
+  String get muteRemindersOn => 'You won\'t get watering alerts for this plant';
+
+  @override
+  String get muteRemindersOff => 'You\'ll get alerts when it needs watering';
+
+  @override
+  String remindersMuted(String name) {
+    return 'Reminders muted for $name';
+  }
+
+  @override
+  String remindersUnmuted(String name) {
+    return 'Reminders back on for $name';
+  }
+
+  @override
+  String get logCare => 'Log care';
+
+  @override
+  String get achFirstSteps => 'First Steps';
+
+  @override
+  String get achBotanicalEye => 'Botanical Eye';
+
+  @override
+  String get achFirstRoom => 'My First Room';
+
+  @override
+  String get achHandsOn => 'Hands On';
+
+  @override
+  String get achSteadyCarer => 'Steady Carer';
+
+  @override
+  String get achGreenGuardian => 'Green Guardian';
+
+  @override
+  String get achCareMaster => 'Care Master';
+
+  @override
+  String get achBotanicalLegend => 'Botanical Legend';
+
+  @override
+  String get achMyLittleGarden => 'My Little Garden';
+
+  @override
+  String get achCollector => 'Collector';
+
+  @override
+  String get achDescOnboarding => 'Complete the ECO2 onboarding';
+
+  @override
+  String get achDescFirstScan => 'Scan your first plant with AI';
+
+  @override
+  String get achDescFirstRoom => 'Create your first room';
+
+  @override
+  String get achDescFirstCare => 'Log your first care action';
+
+  @override
+  String achDescNCares(int count) {
+    return 'Log $count care actions';
+  }
+
+  @override
+  String achDescNPlants(int count) {
+    return 'Add $count plants to your collection';
+  }
+
+  @override
+  String get aboutThisPlant => 'About this plant';
+
+  @override
+  String get difficulty => 'Difficulty';
+
+  @override
+  String get beginner => 'Beginner';
+
+  @override
+  String get expert => 'Expert';
+
+  @override
+  String get care => 'Care';
+
+  @override
+  String carEquivalent(String meters) {
+    return 'Same as a car driving ${meters}m';
+  }
+
+  @override
+  String get securePayments => 'Secure payments with 256-bit SSL encryption';
+
+  @override
+  String get selectedPlan => '★ SELECTED PLAN';
+
+  @override
+  String get eco2PlusAnnual => 'ECO2 Plus Annual';
+
+  @override
+  String get cancelAnytime => 'Cancel any time';
+
+  @override
+  String get totalToPay => 'Total to pay';
+
+  @override
+  String payAmount(String amount) {
+    return 'Pay $amount';
+  }
+
+  @override
+  String perMonthPrice(String amount) {
+    return '$amount/month';
+  }
+
+  @override
+  String get filters => 'Filters';
+
+  @override
+  String get clear => 'Clear';
+
+  @override
+  String get applyFilters => 'Apply filters';
+
+  @override
+  String get unlockO2Features => 'Unlock O₂₊ features';
+
+  @override
+  String freePotsOf(int count) {
+    return '[$count of 10 pots\nfree]';
+  }
+
+  @override
+  String get done => 'Done';
+
+  @override
+  String get customizeYourEco2 => 'Personalise your ECO2 experience';
+
+  @override
+  String get skipForNow => 'Skip for now';
+
+  @override
+  String get optional => '(optional)';
+
+  @override
+  String get continueAction => 'Continue';
+
+  @override
+  String get newScan => 'New scan';
+
+  @override
+  String matchPercent(int pct) {
+    return '$pct% match';
+  }
+
+  @override
+  String get takePhotoAction => 'Take photo';
+
+  @override
+  String get date => 'Date';
+
+  @override
+  String get noteOptional => 'Note (optional)';
+
+  @override
+  String get scanHistory => 'Scan history';
+
+  @override
+  String get otherPossibilities => 'Other possibilities';
+
+  @override
+  String get viewO2Plus => 'See O₂₊';
+
+  @override
+  String get exportToCalendar => 'Export to calendar';
+
+  @override
+  String eventsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count events',
+      one: '1 event',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get viewFullSheet => 'view full sheet';
+
+  @override
+  String get myPersonalNote => 'My personal note';
+
+  @override
+  String get noPlantNeedsWater => 'No plant needs watering right now.';
+
+  @override
+  String get waterAction => 'Water';
+
+  @override
+  String get o2PlusLabel => 'O₂ PLUS';
+
+  @override
+  String get subscribeToO2Plus => 'Subscribe to O₂₊';
+
+  @override
+  String get minCharsSuffix => ' · min. 8 characters';
+
+  @override
+  String get startUsingPlus => 'Start using Plus';
+
+  @override
+  String seedsCost(int count) {
+    return '$count seeds';
+  }
+
+  @override
+  String seedsShort(int count) {
+    return '$count sd.';
+  }
+
+  @override
+  String get species => 'Species';
+
+  @override
+  String get gramsPerDayUnit => 'g/day';
+
+  @override
+  String everyNDaysCompact(int days) {
+    return '${days}d';
+  }
+
+  @override
+  String pendingMissionsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count pending',
+      one: '1 pending',
+      zero: 'All done',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String seedsCountShort(int count) {
+    return '$count seeds';
+  }
+
+  @override
+  String get unitCares => 'care actions';
+
+  @override
+  String get unitPlants => 'plants';
+
+  @override
+  String get filterAll => 'All';
+
+  @override
+  String get fertilizings => 'Feedings';
+
+  @override
+  String get tabActive => 'Active';
+
+  @override
+  String get tabCompleted => 'Completed';
+
+  @override
+  String get tabLocked => 'Locked';
 }

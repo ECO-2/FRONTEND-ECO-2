@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:frontend_eco_2/models/models.dart';
 import 'package:frontend_eco_2/widgets/common/app_toast.dart';
+import 'package:frontend_eco_2/l10n/app_localizations.dart';
+import 'package:frontend_eco_2/utils/achievement_labels.dart';
 
 /// Muestra un toast de celebración por cada logro recién desbloqueado, uno
 /// tras otro (con una breve pausa entre cada uno) si se desbloquea más de
@@ -17,12 +19,14 @@ Future<void> _showSequentially(
 ) async {
   if (index >= unlocked.length || !context.mounted) return;
   final achievement = unlocked[index];
+  final l = AppLocalizations.of(context)!;
   final reward = achievement.seedReward > 0
-      ? '+${achievement.xpReward} XP · +${achievement.seedReward} semillas'
-      : '+${achievement.xpReward} XP';
+      ? l.xpAndSeedsReward(achievement.xpReward, achievement.seedReward)
+      : l.xpReward(achievement.xpReward);
   showAppToast(
     context,
-    '🏆 ¡Logro desbloqueado! ${achievement.name} ($reward)',
+    l.achievementUnlockedToast(
+        achievementName(context, achievement), reward),
     type: ToastType.success,
     duration: const Duration(seconds: 3),
   );

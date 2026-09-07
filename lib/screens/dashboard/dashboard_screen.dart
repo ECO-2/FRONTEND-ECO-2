@@ -24,6 +24,22 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   int _currentIndex = 2; // Default to Dashboard (center tab)
+  bool _readInitialTab = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_readInitialTab) return;
+    _readInitialTab = true;
+
+    // Pantallas como el detalle de planta vuelven aquí pidiendo una pestaña
+    // concreta con `arguments: index`. Nadie leía ese argumento, así que la
+    // barra inferior de esas pantallas siempre acababa en el Dashboard.
+    final args = ModalRoute.of(context)?.settings.arguments;
+    if (args is int && args >= 0 && args < 5) {
+      _currentIndex = args;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,6 +54,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
 
     return ShowCaseWidget(
+      enableAutoScroll: true,
+      scrollDuration: const Duration(milliseconds: 400),
       onFinish: () {
         Provider.of<SecureStorage>(context, listen: false).markAppTourSeen();
       },
@@ -59,7 +77,26 @@ class _DashboardBody extends StatefulWidget {
   State<_DashboardBody> createState() => _DashboardBodyState();
 }
 
+/// Índice de la pestaña Dashboard, que hace de raíz de la navegación por tabs.
+const int _kDashboardTabIndex = 2;
+
 class _DashboardBodyState extends State<_DashboardBody> {
+  /// Abre la pestaña Jardín ya posicionada en "Mi Jardín".
+  void _openMyGarden() {
+    Provider.of<PlantsProvider>(context, listen: false)
+        .setShowCatalogTab(false);
+    widget.onTabChange(1);
+  }
+
+  /// Abre la pestaña Jardín en el catálogo. Es lo que anuncia el ítem
+  /// "Jardín" de la barra inferior, así que no debe depender de dónde se haya
+  /// dejado el interruptor la última vez.
+  void _openCatalog() {
+    Provider.of<PlantsProvider>(context, listen: false)
+        .setShowCatalogTab(true);
+    widget.onTabChange(1);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -91,11 +128,15 @@ class _DashboardBodyState extends State<_DashboardBody> {
       const StoreScreen(isTab: true), // Tienda -> Index 0
       const GardenTab(), // Jardin -> Index 1
       HomeTab(
-        onViewAll: () => widget.onTabChange(1),
+        // "ver todas" sale de la sección "Mi Jardín" del dashboard, así que
+        // debe llevar siempre a Mi Jardín. Antes solo cambiaba de pestaña y
+        // la vista dependía de dónde se hubiera dejado el interruptor, de
+        // modo que normalmente aterrizabas en el catálogo.
+        onViewAll: () => _openMyGarden(),
       ), // Dashboard -> Index 2
       const ScannerTab(), // Escaner -> Index 3
       ProfileTab(
-        onNavigateToGarden: () => widget.onTabChange(1),
+        onNavigateToCatalog: () => _openCatalog(),
         onStartTour: _restartTour,
       ), // Perfil -> Index 4
     ];
@@ -111,30 +152,47 @@ class _DashboardBodyState extends State<_DashboardBody> {
 
     final showStatusBarInBody = appBar == null;
 
-    return Scaffold(
-      extendBody: true,
-      backgroundColor: AppColors.background,
-      appBar: appBar,
-      body: Column(
-        children: [
-          if (showStatusBarInBody) const CustomStatusBar(),
-          Expanded(child: tabs[widget.currentIndex]),
-        ],
-      ),
-      bottomNavigationBar: CustomBottomNavBar(
-        selectedIndex: widget.currentIndex,
-        onTap: (index) {
-          if (index == 3) {
-            // Ir directamente a la pantalla de la cámara
-            Navigator.pushNamed(context, AppRoutes.scan);
-          } else {
-            widget.onTabChange(index);
-          }
-        },
-        jardinKey: AppTourKeys.navJardin,
-        escanerKey: AppTourKeys.navEscaner,
-        tiendaKey: AppTourKeys.navTienda,
-        perfilKey: AppTourKeys.navPerfil,
+    final atRoot = widget.currentIndex == _kDashboardTabIndex;
+
+    // El gesto de "atrás" de Android llegaba al Navigator, que no tiene nada
+    // que desapilar aquí (Dashboard es la ruta raíz), así que la app se iba a
+    // segundo plano desde cualquier pestaña. Ahora solo se permite ese
+    // comportamiento estando ya en el Dashboard; desde Perfil, Jardín, Tienda
+    // o Escáner el gesto vuelve al Dashboard, como se espera de una barra de
+    // pestañas.
+    return PopScope(
+      canPop: atRoot,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+        widget.onTabChange(_kDashboardTabIndex);
+      },
+      child: Scaffold(
+        extendBody: true,
+        backgroundColor: AppColors.background,
+        appBar: appBar,
+        body: Column(
+          children: [
+            if (showStatusBarInBody) const CustomStatusBar(),
+            Expanded(child: tabs[widget.currentIndex]),
+          ],
+        ),
+        bottomNavigationBar: CustomBottomNavBar(
+          selectedIndex: widget.currentIndex,
+          onTap: (index) {
+            if (index == 3) {
+              // Ir directamente a la pantalla de la cámara
+              Navigator.pushNamed(context, AppRoutes.scan);
+            } else if (index == 1) {
+              _openCatalog();
+            } else {
+              widget.onTabChange(index);
+            }
+          },
+          jardinKey: AppTourKeys.navJardin,
+          escanerKey: AppTourKeys.navEscaner,
+          tiendaKey: AppTourKeys.navTienda,
+          perfilKey: AppTourKeys.navPerfil,
+        ),
       ),
     );
   }

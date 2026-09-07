@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:frontend_eco_2/l10n/app_localizations.dart';
+import 'package:frontend_eco_2/utils/plant_visuals.dart';
 
 /// Etiquetas traducibles del catálogo (categoría, luz, dificultad, humedad).
 ///
@@ -64,18 +65,31 @@ String humidityLabel(BuildContext context, String? humidity) {
 String wateringFrequencyLabel(BuildContext context, int days) =>
     AppLocalizations.of(context)!.wateringEveryDays(days);
 
+/// Chip de especie: el texto visible junto al tipo que le da color e ícono.
+///
+/// El tipo viaja con el chip porque antes se deducía leyendo el propio texto
+/// ("riego", "luz", "humedad"...). Con la app en inglés ninguna de esas
+/// palabras aparecía y todos los chips caían al estilo genérico.
+class SpeciesTag {
+  final String text;
+  final TagKind kind;
+
+  const SpeciesTag(this.text, this.kind);
+}
+
 /// Chips de una especie, ya traducidos. Reemplaza a `PlantSpecies.tags`, que
 /// devolvía las etiquetas en español desde el modelo.
-List<String> speciesTags(
+List<SpeciesTag> speciesTags(
   BuildContext context, {
   required String? category,
   required String? lightRequirement,
   required int waterFrequencyDays,
 }) =>
     [
-      categoryLabel(context, category),
-      lightWithPrefix(context, lightRequirement),
-      wateringFrequencyLabel(context, waterFrequencyDays),
+      SpeciesTag(categoryLabel(context, category), TagKind.category),
+      SpeciesTag(lightWithPrefix(context, lightRequirement), TagKind.light),
+      SpeciesTag(
+          wateringFrequencyLabel(context, waterFrequencyDays), TagKind.water),
     ];
 
 /// Clave estable de dificultad a partir de la frecuencia de riego.
@@ -98,6 +112,48 @@ String difficultyOptionLabel(BuildContext context, String key) {
   }
 }
 
+/// Rango numérico de humedad. Los números no se traducen, pero la clave se
+/// resuelve aquí para que el modelo no tenga que cargar con texto.
+String humidityRange(BuildContext context, String? humidity) {
+  final l = AppLocalizations.of(context)!;
+  switch (humidity) {
+    case 'low': return l.humidityRangeLow;
+    case 'high': return l.humidityRangeHigh;
+    default: return l.humidityRangeMedium;
+  }
+}
+
+/// Descripción de la especie construida con sus datos reales del catálogo.
+///
+/// Vivía en `PlantSpecies.description`, que es un modelo sin `BuildContext`:
+/// devolvía la frase en español montada a mano y se mostraba igual con la app
+/// en inglés.
+String speciesDescription(
+  BuildContext context, {
+  required String? category,
+  required String? lightRequirement,
+  required String? humidityPreference,
+  required int waterFrequencyDays,
+  int? minTemperature,
+  int? maxTemperature,
+  int? airPurificationScore,
+}) {
+  final l = AppLocalizations.of(context)!;
+  final base = l.speciesDescription(
+    categoryLabel(context, category).toLowerCase(),
+    lightLabel(context, lightRequirement).toLowerCase(),
+    humidityLabel(context, humidityPreference).toLowerCase(),
+    waterFrequencyDays,
+    minTemperature ?? 15,
+    maxTemperature ?? 30,
+  );
+
+  final score = airPurificationScore ?? 0;
+  if (score >= 7) return '$base ${l.purifierExcellent}';
+  if (score >= 4) return '$base ${l.purifierGood}';
+  return base;
+}
+
 /// Pista de ubicación según la luz que necesita la especie.
 String lightHint(BuildContext context, String? light) {
   final l = AppLocalizations.of(context)!;
@@ -107,4 +163,24 @@ String lightHint(BuildContext context, String? light) {
     case 'indirect': return l.lightHintIndirect;
     default: return l.lightHintDefault;
   }
+}
+
+/// Chips de la ficha de especie (categoría, luz, humedad y, si aplica, aire).
+/// Sustituye a `PlantSpecies.detailTags`, que los devolvía en español.
+List<SpeciesTag> speciesDetailTags(
+  BuildContext context, {
+  required String? category,
+  required String? lightRequirement,
+  required String? humidityPreference,
+  int? airPurificationScore,
+}) {
+  final l = AppLocalizations.of(context)!;
+  return [
+    SpeciesTag(categoryLabel(context, category), TagKind.category),
+    SpeciesTag(lightWithPrefix(context, lightRequirement), TagKind.light),
+    SpeciesTag(l.humidityWithPrefix(humidityLabel(context, humidityPreference)),
+        TagKind.humidity),
+    if ((airPurificationScore ?? 0) >= 7)
+      SpeciesTag(l.airPurifierTag, TagKind.generic),
+  ];
 }

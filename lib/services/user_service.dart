@@ -39,6 +39,22 @@ class UserService {
     return User.fromJson(data);
   }
 
+  /// PATCH /user/password — cambia la contraseña verificando la actual.
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    await _client.patch('/user/password', body: {
+      'current_password': currentPassword,
+      'new_password': newPassword,
+    });
+  }
+
+  /// DELETE /user/me — borra la cuenta y todos sus datos asociados.
+  Future<void> deleteAccount() async {
+    await _client.delete('/user/me');
+  }
+
   /// PATCH /user/onboarding — completa el perfil inicial del usuario tras el registro.
   /// Todos los campos son opcionales y pueden enviarse de forma progresiva.
   Future<User> completeOnboarding({

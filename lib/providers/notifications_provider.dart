@@ -52,7 +52,9 @@ class NotificationsProvider with ChangeNotifier {
         userId: '',
         type: 'warning',
         referenceId: p.plantId,
-        title: 'Riego pendiente: ${p.plantNickname} necesita agua ahora.',
+        title: p.plantNickname,
+        localKind: 'watering_due',
+        localSubject: p.plantNickname,
         sentAt: DateTime.now(),
       ));
     }
@@ -62,7 +64,9 @@ class NotificationsProvider with ChangeNotifier {
         userId: '',
         type: 'achievement',
         referenceId: a.achievementId,
-        title: '¡Logro desbloqueado!: ${a.title}',
+        title: a.title,
+        localKind: 'achievement_unlocked',
+        localSubject: a.title,
         sentAt: a.unlockedAt,
       ));
     }
@@ -72,7 +76,9 @@ class NotificationsProvider with ChangeNotifier {
         userId: '',
         type: 'info',
         referenceId: p.plantId,
-        title: 'Nueva planta agregada: Agregaste ${p.plantNickname} a tu colección.',
+        title: p.plantNickname,
+        localKind: 'plant_added',
+        localSubject: p.plantNickname,
         sentAt: p.addedAt,
       ));
     }

@@ -9,6 +9,7 @@ import 'package:frontend_eco_2/widgets/common/custom_text_field.dart';
 import 'package:frontend_eco_2/widgets/common/custom_status_bar.dart';
 import 'package:frontend_eco_2/widgets/common/app_toast.dart';
 import 'package:frontend_eco_2/services/services.dart';
+import 'reset_password_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -71,10 +72,48 @@ class _LoginScreenState extends State<LoginScreen> {
             (route) => false,
           );
         }
-      } else if (mounted && userProvider.errorMessage != null) {
-        showAppToast(context, userProvider.errorMessage!, type: ToastType.error);
+      } else if (mounted && userProvider.errorText(context) != null) {
+        showAppToast(context, userProvider.errorText(context)!, type: ToastType.error);
       }
     }
+  }
+
+  /// Pide el correo de recuperación al backend.
+  ///
+  /// Antes esto solo mostraba "Simulación: Recuperación de contraseña
+  /// enviada" y no llamaba a nada, pese a que POST /auth/forgot-password ya
+  /// existe y funciona.
+  Future<void> _handleForgotPassword() async {
+    final l = AppLocalizations.of(context)!;
+    final email = _emailController.text.trim();
+
+    if (email.isEmpty) {
+      showAppToast(context, l.emailRequired, type: ToastType.error);
+      return;
+    }
+
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final ok = await userProvider.forgotPassword(email);
+    if (!mounted) return;
+
+    if (!ok) {
+      showAppToast(
+        context,
+        userProvider.errorText(context) ?? l.connectionError,
+        type: ToastType.error,
+      );
+      return;
+    }
+
+    // Mensaje deliberadamente ambiguo: confirmar si el correo existe
+    // permitiría enumerar cuentas.
+    showAppToast(context, l.forgotPasswordSent, type: ToastType.success);
+
+    // Se abre el paso 2 en cualquier caso, por lo mismo: si solo apareciera
+    // cuando el correo existe, la propia navegación delataría las cuentas.
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => ResetPasswordScreen(email: email)),
+    );
   }
 
   @override
@@ -141,7 +180,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             return AppLocalizations.of(context)!.enterYourEmail;
                           }
                           if (!value.contains('@')) {
-                            return 'Por favor ingresa un correo válido';
+                            return AppLocalizations.of(context)!.enterValidEmail;
                           }
                           return null;
                         },
@@ -172,7 +211,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             return AppLocalizations.of(context)!.enterYourPassword;
                           }
                           if (value.length < 6) {
-                            return 'La contraseña debe tener al menos 6 caracteres';
+                            return AppLocalizations.of(context)!.passwordMinSixChars;
                           }
                           return null;
                         },
@@ -183,12 +222,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       Align(
                         alignment: Alignment.centerRight,
                         child: TextButton(
-                          onPressed: () {
-                            showAppToast(
-                              context,
-                              'Simulación: Recuperación de contraseña enviada.',
-                            );
-                          },
+                          onPressed: _handleForgotPassword,
                           style: TextButton.styleFrom(
                             padding: EdgeInsets.zero,
                             minimumSize: Size.zero,

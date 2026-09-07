@@ -6,6 +6,7 @@ import 'package:frontend_eco_2/providers/providers.dart';
 import 'package:frontend_eco_2/widgets/common/custom_app_bar.dart';
 import 'package:frontend_eco_2/utils/achievement_ui.dart';
 import 'package:frontend_eco_2/utils/achievement_visuals.dart';
+import 'package:frontend_eco_2/utils/achievement_labels.dart';
 
 // ── Figma color tokens ────────────────────────────────────────────────────
 const _kDark = Color(0xFF10454F);
@@ -43,8 +44,8 @@ class _TrophiesScreenState extends State<TrophiesScreen> {
 
     return Scaffold(
       backgroundColor: _kBg,
-      appBar: const CustomAppBar(
-        title: 'Trofeos',
+      appBar: CustomAppBar(
+        title: AppLocalizations.of(context)!.trophies,
         automaticallyImplyLeading: true,
       ),
       body: mp.isLoading && achievements.isEmpty
@@ -392,7 +393,7 @@ class _TrophiesScreenState extends State<TrophiesScreen> {
             const SizedBox(height: 10),
             Expanded(
               child: Text(
-                a.name,
+                achievementName(context, a),
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontFamily: 'DM Sans',
@@ -450,7 +451,7 @@ class _TrophiesScreenState extends State<TrophiesScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    a.name,
+                    achievementName(context, a),
                     style: const TextStyle(
                       fontFamily: 'DM Sans',
                       fontWeight: FontWeight.w700,
@@ -471,7 +472,7 @@ class _TrophiesScreenState extends State<TrophiesScreen> {
                     )
                   else
                     Text(
-                      'Próximamente',
+                      AppLocalizations.of(context)!.comingSoon,
                       style: const TextStyle(fontFamily: 'DM Sans', fontSize: 11, color: _kTextMuted),
                     ),
                 ],
@@ -517,7 +518,7 @@ class _TrophiesScreenState extends State<TrophiesScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    a.name,
+                    achievementName(context, a),
                     style: const TextStyle(
                       fontFamily: 'DM Sans',
                       fontWeight: FontWeight.w700,
@@ -525,9 +526,9 @@ class _TrophiesScreenState extends State<TrophiesScreen> {
                       color: _kTextDark,
                     ),
                   ),
-                  if (a.description != null)
+                  if (achievementDescription(context, a) != null)
                     Text(
-                      a.description!,
+                      achievementDescription(context, a)!,
                       style: const TextStyle(fontFamily: 'DM Sans', fontSize: 11, color: _kTextMuted),
                     ),
                 ],

@@ -19,8 +19,12 @@ import 'package:frontend_eco_2/screens/garden/plant_detail_screen.dart';
 import 'package:frontend_eco_2/screens/garden/care_history_screen.dart';
 import 'package:frontend_eco_2/screens/garden/species_detail_screen.dart';
 import 'package:frontend_eco_2/screens/scanner_screen.dart';
+import 'package:frontend_eco_2/screens/auth/splash_screen.dart';
+import 'package:frontend_eco_2/l10n/app_localizations.dart';
 
 class AppRoutes {
+  /// Pantalla de arranque: se muestra mientras se comprueba si hay sesion.
+  static const String splash = '/splash';
   static const String welcome = '/';
   static const String login = '/login';
   static const String register = '/register';
@@ -47,6 +51,8 @@ class AppRoutes {
 
   static Route<dynamic> onGenerateRoute(RouteSettings routeSettings) {
     switch (routeSettings.name) {
+      case splash:
+        return MaterialPageRoute(builder: (_) => const SplashScreen());
       case welcome:
         return MaterialPageRoute(builder: (_) => const WelcomeScreen());
       case login:
@@ -99,9 +105,9 @@ class AppRoutes {
         return MaterialPageRoute(builder: (_) => const GreenFootprintScreen());
       case missions:
         return MaterialPageRoute(
-          builder: (_) => const Scaffold(
-            appBar: CustomAppBar(title: 'Misiones'),
-            body: MissionsTab(),
+          builder: (context) => Scaffold(
+            appBar: CustomAppBar(title: AppLocalizations.of(context)!.missions) as PreferredSizeWidget,
+            body: const MissionsTab(),
           ),
         );
       case trophies:
@@ -119,7 +125,10 @@ class AppRoutes {
         return MaterialPageRoute(
           builder: (_) => Scaffold(
             body: Center(
-              child: Text('Ruta no encontrada: ${routeSettings.name}'),
+              child: Builder(
+                builder: (context) => Text(
+                    AppLocalizations.of(context)!.routeNotFound(routeSettings.name ?? '')),
+              ),
             ),
           ),
         );

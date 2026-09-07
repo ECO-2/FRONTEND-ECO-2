@@ -22,8 +22,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: const CustomAppBar(
-        title: 'Confirmar pago',
+      appBar: CustomAppBar(
+        title: AppLocalizations.of(context)!.confirmPayment,
         backgroundColor: AppColors.primaryDark,
         foregroundColor: Colors.white,
       ),
@@ -54,7 +54,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   // Payment Methods
                   _buildPaymentOption(
                     id: 'card',
-                    title: 'Tarjeta',
+                    title: AppLocalizations.of(context)!.card,
                     subtitle: '•••• 4242',
                     icon: Icons.credit_card_rounded,
                   ),
@@ -71,7 +71,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   _buildPaymentOption(
                     id: 'paypal',
                     title: 'PayPal',
-                    subtitle: 'carlos@eco2.app',
                     icon: Icons.account_balance_wallet_rounded,
                   ),
                   const SizedBox(height: 20),
@@ -84,13 +83,12 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Row(
-                      children: const [
-                        Icon(Icons.shield_outlined, color: AppColors.primary, size: 20),
-                        SizedBox(width: 12),
+                      children: [
+                        const Icon(Icons.shield_outlined, color: AppColors.primary, size: 20),
+                        const SizedBox(width: 12),
                         Expanded(
-                          child: Text(
-                            'Pagos seguros con cifrado 256-bit SSL',
-                            style: TextStyle(
+                          child: Text(AppLocalizations.of(context)!.securePayments,
+                            style: const TextStyle(
                               fontSize: 12,
                               color: AppColors.primary,
                               fontWeight: FontWeight.bold,
@@ -132,8 +130,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               color: AppColors.accent,
               borderRadius: BorderRadius.circular(6),
             ),
-            child: const Text(
-              '★ PLAN SELECCIONADO',
+            child: Text(AppLocalizations.of(context)!.selectedPlan,
               style: TextStyle(
                 color: AppColors.primaryDark,
                 fontWeight: FontWeight.bold,
@@ -153,20 +150,18 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
-                    Text(
-                      'ECO2 Plus Anual',
-                      style: TextStyle(
+                  children: [
+                    Text(AppLocalizations.of(context)!.eco2PlusAnnual,
+                      style: const TextStyle(
                         color: Colors.white,
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
                         fontFamily: 'Inter',
                       ),
                     ),
-                    SizedBox(height: 4),
-                    Text(
-                      'Cancela en cualquier momento',
-                      style: TextStyle(
+                    const SizedBox(height: 4),
+                    Text(AppLocalizations.of(context)!.cancelAnytime,
+                      style: const TextStyle(
                         color: AppColors.accent,
                         fontSize: 12,
                         fontFamily: 'Inter',
@@ -177,8 +172,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
-                children: const [
-                  Text(
+                children: [
+                  const Text(
                     '\$39.99',
                     style: TextStyle(
                       color: AppColors.accent,
@@ -187,10 +182,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       fontFamily: 'Inter',
                     ),
                   ),
-                  SizedBox(height: 2),
+                  const SizedBox(height: 2),
                   Text(
-                    '\$3.33/mes',
-                    style: TextStyle(
+                    AppLocalizations.of(context)!.perMonthPrice('\$3.33'),
+                    style: const TextStyle(
                       color: Colors.white70,
                       fontSize: 11,
                       fontFamily: 'Inter',
@@ -207,7 +202,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           // Benefits list
           _buildPlanBenefit('Macetas ilimitadas'),
           const SizedBox(height: 10),
-          _buildPlanBenefit('Búsqueda con IA'),
+          _buildPlanBenefit(AppLocalizations.of(context)!.aiSearch),
           const SizedBox(height: 10),
           _buildPlanBenefit('How to treat con IA'),
           const SizedBox(height: 10),
@@ -237,7 +232,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   Widget _buildPaymentOption({
     required String id,
     required String title,
-    required String subtitle,
+    String? subtitle,
     required IconData icon,
   }) {
     final isSelected = _selectedMethod == id;
@@ -287,15 +282,19 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       fontFamily: 'Inter',
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    subtitle,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: AppColors.textSecondary,
-                      fontFamily: 'Inter',
+                  // El subtítulo es opcional: PayPal mostraba un correo de
+                  // ejemplo como si fuera la cuenta de quien usa la app.
+                  if (subtitle != null) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      subtitle,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: AppColors.textSecondary,
+                        fontFamily: 'Inter',
+                      ),
                     ),
-                  ),
+                  ],
                 ],
               ),
             ),
@@ -337,8 +336,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Total a pagar',
+                    Text(AppLocalizations.of(context)!.totalToPay,
                       style: TextStyle(
                         fontSize: 12,
                         color: AppColors.textSecondary,
@@ -371,7 +369,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             
             // Pay button
             CustomButton(
-              text: 'Pagar \$39.99',
+              text: AppLocalizations.of(context)!.payAmount('\$39.99'),
               backgroundColor: AppColors.accent,
               foregroundColor: AppColors.primary,
               isLoading: _isProcessing,

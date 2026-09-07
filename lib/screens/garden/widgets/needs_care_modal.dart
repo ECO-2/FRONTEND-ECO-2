@@ -82,9 +82,9 @@ class _NeedsCareSheetState extends State<_NeedsCareSheet> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Necesitan atención',
-                        style: TextStyle(
+                      Text(
+                        AppLocalizations.of(context)!.needsAttention,
+                        style: const TextStyle(
                           fontFamily: 'DM Sans',
                           fontWeight: FontWeight.bold,
                           fontSize: 22,
@@ -128,8 +128,7 @@ class _NeedsCareSheetState extends State<_NeedsCareSheet> {
                     children: [
                       const Icon(Icons.check_circle_rounded, color: AppColors.primary, size: 40),
                       const SizedBox(height: 10),
-                      const Text(
-                        'Ninguna planta necesita riego ahora mismo.',
+                      Text(AppLocalizations.of(context)!.noPlantNeedsWater,
                         textAlign: TextAlign.center,
                         style: TextStyle(fontFamily: 'DM Sans', color: Color(0xFF807F7F)),
                       ),
@@ -189,7 +188,8 @@ class _NeedsCareSheetState extends State<_NeedsCareSheet> {
       setState(() => _watering.remove(plant.id));
       showAppToast(
         context,
-        missionsProvider.errorMessage ?? 'No se pudo registrar el riego.',
+        missionsProvider.errorText(context) ??
+            AppLocalizations.of(context)!.careLogFailed,
         type: ToastType.error,
       );
       return;
@@ -203,7 +203,7 @@ class _NeedsCareSheetState extends State<_NeedsCareSheet> {
       _justWatered.add(plant.id);
     });
 
-    showAppToast(context, '${plant.nickname} regada 💧', type: ToastType.success);
+    showAppToast(context, AppLocalizations.of(context)!.plantWatered(plant.nickname), type: ToastType.success);
     showAchievementUnlockedSnackbars(context, unlocked);
   }
 
@@ -212,7 +212,7 @@ class _NeedsCareSheetState extends State<_NeedsCareSheet> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => CareSheetContent(plant: plant, sp: SpeciesData.fromReal(species)),
+      builder: (_) => CareSheetContent(plant: plant, sp: SpeciesData.fromReal(context, species)),
     );
   }
 }
@@ -299,7 +299,7 @@ class _NeedsCareRow extends StatelessWidget {
                     neverWatered
                         ? 'Nunca registrada — necesita riego'
                         : overdueBy! > 0
-                            ? 'Vencido hace $overdueBy día${overdueBy == 1 ? '' : 's'}'
+                            ? AppLocalizations.of(context)!.overdueByDays(overdueBy)
                             : 'Necesita riego hoy',
                     style: const TextStyle(
                       fontFamily: 'DM Sans',
@@ -329,14 +329,13 @@ class _NeedsCareRow extends StatelessWidget {
                           valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                         ),
                       )
-                    : const Row(
+                    : Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.water_drop_rounded, size: 13, color: Colors.white),
-                          SizedBox(width: 4),
-                          Text(
-                            'Regar',
-                            style: TextStyle(
+                          const Icon(Icons.water_drop_rounded, size: 13, color: Colors.white),
+                          const SizedBox(width: 4),
+                          Text(AppLocalizations.of(context)!.waterAction,
+                            style: const TextStyle(
                               fontFamily: 'Inter',
                               fontWeight: FontWeight.bold,
                               fontSize: 11,

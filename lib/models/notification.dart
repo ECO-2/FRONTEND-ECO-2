@@ -7,6 +7,13 @@ class NotificationModel {
   final DateTime? readAt;
   final DateTime sentAt;
 
+  /// Para las notificaciones que sintetiza la app (logro desbloqueado, planta
+  /// añadida): qué clase de aviso es y el nombre que va dentro. Se guardan por
+  /// separado del [title] porque el texto visible depende del idioma, y el
+  /// provider que las crea no tiene BuildContext con el que traducir.
+  final String? localKind;
+  final String? localSubject;
+
   NotificationModel({
     required this.id,
     required this.userId,
@@ -15,6 +22,8 @@ class NotificationModel {
     this.referenceId,
     this.readAt,
     required this.sentAt,
+    this.localKind,
+    this.localSubject,
   });
 
   factory NotificationModel.fromJson(Map<String, dynamic> json) {

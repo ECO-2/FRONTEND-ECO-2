@@ -36,7 +36,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   void _submit() async {
     if (_formKey.currentState!.validate()) {
       if (_passwordController.text != _confirmPasswordController.text) {
-        showAppToast(context, 'Las contraseñas no coinciden.', type: ToastType.error);
+        showAppToast(context, AppLocalizations.of(context)!.passwordsDoNotMatch, type: ToastType.error);
         return;
       }
 
@@ -53,8 +53,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
           AppRoutes.onboarding,
           (route) => false,
         );
-      } else if (mounted && userProvider.errorMessage != null) {
-        showAppToast(context, userProvider.errorMessage!, type: ToastType.error);
+      } else if (mounted && userProvider.errorText(context) != null) {
+        showAppToast(context, userProvider.errorText(context)!, type: ToastType.error);
       }
     }
   }
@@ -96,13 +96,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       CustomTextField(
                         controller: _usernameController,
                         labelText: AppLocalizations.of(context)!.username,
-                        hintText: 'carlos_eco',
+                        hintText: AppLocalizations.of(context)!.nicknameExample,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Por favor ingresa tu nombre de usuario';
+                            return AppLocalizations.of(context)!.enterUsername;
                           }
                           if (value.length < 3) {
-                            return 'El nombre de usuario debe tener al menos 3 caracteres';
+                            return AppLocalizations.of(context)!.usernameTooShort;
                           }
                           return null;
                         },
@@ -117,10 +117,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         keyboardType: TextInputType.emailAddress,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Por favor ingresa tu correo';
+                            return AppLocalizations.of(context)!.enterYourEmail;
                           }
                           if (!value.contains('@')) {
-                            return 'Por favor ingresa un correo válido';
+                            return AppLocalizations.of(context)!.enterValidEmail;
                           }
                           return null;
                         },
@@ -146,7 +146,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 ),
                               ),
                               TextSpan(
-                                text: ' · min. 8 caracteres',
+                                text: AppLocalizations.of(context)!.minCharsSuffix,
                                 style: TextStyle(
                                   color: AppColors.textSecondary,
                                   fontSize: 12,
@@ -156,11 +156,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ),
                         ),
                         hintText: '•••••',
-                        suffixText: 'min. 8 chars',
+                        suffixText: AppLocalizations.of(context)!.passwordMinChars,
                         obscureText: _obscurePassword,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Por favor ingresa tu contraseña';
+                            return AppLocalizations.of(context)!.enterYourPassword;
                           }
                           if (value.length < 8) {
                             return AppLocalizations.of(context)!.passwordTooShort;
@@ -184,14 +184,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         controller: _confirmPasswordController,
                         labelText: AppLocalizations.of(context)!.confirmPassword,
                         hintText: '••••••••',
-                        suffixText: 'min. 8 chars',
+                        suffixText: AppLocalizations.of(context)!.passwordMinChars,
                         obscureText: _obscurePassword,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Por favor confirma tu contraseña';
+                            return AppLocalizations.of(context)!.confirmYourPassword;
                           }
                           if (value != _passwordController.text) {
-                            return 'Las contraseñas no coinciden';
+                            return AppLocalizations.of(context)!.passwordsDoNotMatch;
                           }
                           return null;
                         },
@@ -242,11 +242,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       const SizedBox(height: 24),
 
                       // Centered implicit terms acceptance footnote
-                      const Center(
+                      Center(
                         child: Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 16.0),
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
                           child: Text(
-                            'Al registrarte aceptas los Términos de Uso y la Política de Privacidad de ECO2.',
+                            AppLocalizations.of(context)!.termsNotice,
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               color: AppColors.textSecondary,

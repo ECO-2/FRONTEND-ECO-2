@@ -29,13 +29,13 @@ class CareGuideCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
-              Icon(Icons.tips_and_updates_rounded, size: 18, color: Color(0xFF10454F)),
-              SizedBox(width: 8),
+              const Icon(Icons.tips_and_updates_rounded, size: 18, color: Color(0xFF10454F)),
+              const SizedBox(width: 8),
               Text(
-                'Cómo cuidar tu planta',
-                style: TextStyle(
+                AppLocalizations.of(context)!.howToCareForYourPlant,
+                style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 15,
                   color: Color(0xFF0D2B31),
@@ -59,10 +59,8 @@ class CareGuideCard extends StatelessWidget {
           const SizedBox(height: 16),
           wrapWithTourStep(
             key: scheduleKey,
-            title: 'Calendario de cuidados',
-            description:
-                'La frecuencia de riego es real, según la especie. Fertilización, poda y trasplante '
-                'son buenas prácticas generales — la app aún no calcula una frecuencia exacta para esas.',
+            title: AppLocalizations.of(context)!.careCalendar,
+            description: AppLocalizations.of(context)!.tourCareCalendarDesc,
             child: _buildSchedule(context),
           ),
         ],
@@ -74,9 +72,9 @@ class CareGuideCard extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          '¿Cuándo hacer cada cuidado?',
-          style: TextStyle(
+        Text(
+          AppLocalizations.of(context)!.whenToDoEachCare,
+          style: const TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 12,
             color: Color(0xFF0D2B31),
@@ -84,15 +82,15 @@ class CareGuideCard extends StatelessWidget {
           ),
         ),
         SizedBox(height: 8),
-        _scheduleRow('watering', AppLocalizations.of(context)!.careEveryNDays(sp.waterFreqDays)),
-        _scheduleRow('fertilizing', 'Cada 4-6 semanas, en primavera y verano'),
-        _scheduleRow('pruning', 'Retira hojas secas, amarillas o dañadas en cuanto las notes'),
-        _scheduleRow('repotting', 'Cada 1-2 años, o cuando las raíces llenen la maceta'),
+        _scheduleRow(context, 'watering', AppLocalizations.of(context)!.careEveryNDays(sp.waterFreqDays)),
+        _scheduleRow(context, 'fertilizing', AppLocalizations.of(context)!.scheduleFertilizing),
+        _scheduleRow(context, 'pruning', AppLocalizations.of(context)!.schedulePruning),
+        _scheduleRow(context, 'repotting', AppLocalizations.of(context)!.scheduleRepotting),
       ],
     );
   }
 
-  Widget _scheduleRow(String taskType, String schedule) {
+  Widget _scheduleRow(BuildContext context, String taskType, String schedule) {
     final visual = careTaskVisual(taskType);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
@@ -104,7 +102,7 @@ class CareGuideCard extends StatelessWidget {
           SizedBox(
             width: 90,
             child: Text(
-              visual.label,
+              careTaskLabel(context, taskType),
               style: const TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w700,

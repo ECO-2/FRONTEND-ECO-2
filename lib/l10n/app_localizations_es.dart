@@ -178,7 +178,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get editProfile => 'Editar perfil';
 
   @override
-  String get editProfileSubtitle => 'Nombre, bio, foto';
+  String get editProfileSubtitle => 'Nombre de usuario';
 
   @override
   String get changePassword => 'Cambiar contraseña';
@@ -217,7 +217,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get privacy => 'Privacidad';
 
   @override
-  String get privacySubtitle => 'Control de datos personales';
+  String get privacySubtitle => 'Qué datos guarda ECO2';
 
   @override
   String get exportMyData => 'Exportar mis datos';
@@ -506,10 +506,14 @@ class AppLocalizationsEs extends AppLocalizations {
   String get wateringPending => 'Riego pendiente';
 
   @override
-  String get achievementUnlocked => '¡Logro desbloqueado!';
+  String achievementUnlocked(String title) {
+    return '¡Logro desbloqueado!: $title';
+  }
 
   @override
-  String get newPlantAdded => 'Nueva planta agregada';
+  String newPlantAdded(String name) {
+    return 'Nueva planta agregada: Agregaste $name a tu colección.';
+  }
 
   @override
   String get seedbed => 'Semillero';
@@ -548,7 +552,8 @@ class AppLocalizationsEs extends AppLocalizations {
   String get noAchievementsYet => 'No has completado logros todavía.';
 
   @override
-  String get allAchievementsDone => '¡Ya desbloqueaste todos los logros!';
+  String get allAchievementsDone =>
+      '¡Completaste todos los logros disponibles!';
 
   @override
   String get noAchievementsConfigured => 'Todavía no hay logros configurados.';
@@ -566,10 +571,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get achievementLockedLabel => 'Logro bloqueado';
 
   @override
-  String get activeMissions => 'Misiones Activas';
+  String get activeMissions => 'Misiones activas';
 
   @override
-  String get plantCatalog => 'Catálogo de Plantas';
+  String get plantCatalog => 'Catálogo de plantas';
 
   @override
   String get seedStore => 'Tienda de Semillas';
@@ -828,4 +833,1291 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get speciesNotFound => 'Especie no encontrada';
+
+  @override
+  String get forgotPasswordTitle => 'Recuperar contraseña';
+
+  @override
+  String get forgotPasswordBody =>
+      'Escribe tu correo y te enviaremos un código para restablecer la contraseña.';
+
+  @override
+  String get forgotPasswordSent =>
+      'Si existe una cuenta con ese correo, te hemos enviado un código.';
+
+  @override
+  String get send => 'Enviar';
+
+  @override
+  String get emailRequired => 'Escribe tu correo primero';
+
+  @override
+  String get resetPasswordTitle => 'Restablecer contraseña';
+
+  @override
+  String get resetPasswordIntro =>
+      'Pega aquí el código que te enviamos por correo y elige tu nueva contraseña.';
+
+  @override
+  String get resetCodeLabel => 'Código de recuperación';
+
+  @override
+  String get resetCodeHint => 'ABCD-2345';
+
+  @override
+  String get resetCodeRequired => 'Escribe el código que recibiste';
+
+  @override
+  String get newPassword => 'Nueva contraseña';
+
+  @override
+  String get passwordsDoNotMatch => 'Las contraseñas no coinciden';
+
+  @override
+  String get resetPasswordSubmit => 'Cambiar contraseña';
+
+  @override
+  String get resetPasswordSuccess =>
+      'Contraseña actualizada. Ya puedes iniciar sesión.';
+
+  @override
+  String get resetCodeExpiredHint =>
+      'El código vence a los 30 minutos. Pide uno nuevo si ya caducó.';
+
+  @override
+  String get changePasswordIntro =>
+      'Escribe tu contraseña actual y elige una nueva.';
+
+  @override
+  String get changePasswordSubmit => 'Guardar contraseña';
+
+  @override
+  String get changePasswordSuccess => 'Contraseña actualizada.';
+
+  @override
+  String get currentPassword => 'Contraseña actual';
+
+  @override
+  String get currentPasswordRequired => 'Escribe tu contraseña actual';
+
+  @override
+  String get passwordMustDiffer =>
+      'La nueva contraseña debe ser distinta de la actual';
+
+  @override
+  String get biometricLock => 'Bloqueo con huella';
+
+  @override
+  String get biometricLockSubtitle => 'Pide tu huella al abrir la app';
+
+  @override
+  String get biometricUnavailable =>
+      'Este dispositivo no tiene huella registrada';
+
+  @override
+  String get biometricPromptReason => 'Confirma tu identidad para abrir ECO2';
+
+  @override
+  String get biometricEnabled => 'Bloqueo con huella activado';
+
+  @override
+  String get biometricDisabled => 'Bloqueo con huella desactivado';
+
+  @override
+  String get appLockTitle => 'ECO2 está bloqueado';
+
+  @override
+  String get appLockSubtitle => 'Usa tu huella para continuar.';
+
+  @override
+  String get appLockFailed => 'No se pudo confirmar tu identidad.';
+
+  @override
+  String get appLockRetry => 'Reintentar';
+
+  @override
+  String get appLockSignOut => 'Cerrar sesión';
+
+  @override
+  String get managePlus => 'Gestionar ECO2 Plus';
+
+  @override
+  String get managePlusFree => 'Plan gratuito activo';
+
+  @override
+  String get pushNotificationsSubtitle => 'Avisos de riego y logros';
+
+  @override
+  String get reminderWindow => 'Horario de recordatorios';
+
+  @override
+  String reminderWindowValue(int start, int end) {
+    return 'De $start:00 a $end:00';
+  }
+
+  @override
+  String get reminderWindowSheetTitle => '¿Cuándo quieres los avisos?';
+
+  @override
+  String get reminderWindowIntro =>
+      'Los recordatorios solo se envían dentro de esta franja.';
+
+  @override
+  String get reminderStart => 'Desde';
+
+  @override
+  String get reminderEnd => 'Hasta';
+
+  @override
+  String get reminderWindowInvalid =>
+      'La hora de inicio debe ser anterior a la de fin';
+
+  @override
+  String get reminderWindowSaved => 'Horario de recordatorios actualizado';
+
+  @override
+  String get privacySheetTitle => 'Tus datos en ECO2';
+
+  @override
+  String get privacySheetBody =>
+      'ECO2 guarda tu correo, tu nombre de usuario, las plantas de tu jardín y su historial de cuidados. Las fotos que tomas se guardan solo en este dispositivo. Puedes exportar todo o borrar la cuenta cuando quieras.';
+
+  @override
+  String get exportDataSubtitle => 'Copia un resumen al portapapeles';
+
+  @override
+  String get exportDataCopied => 'Datos copiados al portapapeles';
+
+  @override
+  String get exportDataFailed => 'No se pudieron reunir tus datos';
+
+  @override
+  String get helpSupportSubtitle => 'Escríbenos si algo falla';
+
+  @override
+  String get helpSheetTitle => '¿Necesitas ayuda?';
+
+  @override
+  String get helpSheetBody =>
+      'Escríbenos contando qué ocurrió y desde qué pantalla. Copia el correo y mándanos un mensaje.';
+
+  @override
+  String get copyEmail => 'Copiar correo';
+
+  @override
+  String get emailCopied => 'Correo copiado';
+
+  @override
+  String appVersion(String version) {
+    return 'Versión $version';
+  }
+
+  @override
+  String get aboutSheetBody =>
+      'ECO2 te ayuda a cuidar tus plantas y a ver cuánto CO₂ absorben.';
+
+  @override
+  String get deleteAccountTitle => '¿Eliminar tu cuenta?';
+
+  @override
+  String get deleteAccountBody =>
+      'Se borrarán tu perfil, tus plantas y todo su historial de cuidados. No se puede deshacer.';
+
+  @override
+  String get deleteAccountConfirmHint => 'Escribe ELIMINAR para confirmar';
+
+  @override
+  String get deleteAccountConfirmWord => 'ELIMINAR';
+
+  @override
+  String get deleteAccountSuccess => 'Tu cuenta ha sido eliminada.';
+
+  @override
+  String get usernameTaken => 'Ese nombre de usuario ya está en uso.';
+
+  @override
+  String get currentPasswordWrong => 'La contraseña actual no es correcta.';
+
+  @override
+  String get profileUpdateFailed =>
+      'No se pudo actualizar el perfil. Inténtalo nuevamente.';
+
+  @override
+  String get plantsLoadFailed => 'No se pudieron cargar tus plantas.';
+
+  @override
+  String get plantAddFailed => 'No se pudo añadir la planta.';
+
+  @override
+  String get plantDeleteFailed => 'No se pudo eliminar la planta.';
+
+  @override
+  String get nicknameEmpty => 'El apodo no puede estar vacío.';
+
+  @override
+  String get nicknameUpdateFailed => 'No se pudo actualizar el apodo.';
+
+  @override
+  String get missionsLoadFailed => 'No se pudieron cargar las misiones.';
+
+  @override
+  String get careLogFailed => 'No se pudo registrar el cuidado.';
+
+  @override
+  String get nicknameUpdated => 'Apodo actualizado.';
+
+  @override
+  String get noSpeciesMatchFilters =>
+      'No se encontraron especies con estos filtros';
+
+  @override
+  String get noPlantsInCategory =>
+      'No tienes plantas en esta categoría todavía';
+
+  @override
+  String daysOverdueLabel(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count días de retraso',
+      one: '1 día de retraso',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String noWateringLoggedEvery(int days) {
+    return 'Sin riego registrado · c/${days}d';
+  }
+
+  @override
+  String daysWithoutWaterEvery(int days, int freq) {
+    return '${days}d sin riego · c/${freq}d';
+  }
+
+  @override
+  String get identifyConnectionError =>
+      'No se pudo conectar para identificar la planta. Verifica tu conexión e inténtalo de nuevo.';
+
+  @override
+  String get plantAlreadyRegistered => 'Planta ya registrada';
+
+  @override
+  String get plantAlreadyRegisteredBody =>
+      'Ya tienes esta planta registrada en tu jardín. Te sugerimos ponerle un apodo (diferenciador) para no confundirla.';
+
+  @override
+  String get addThisPlantQuestion => '¿Desea añadir esta planta a su jardín?';
+
+  @override
+  String get addThisPlantBody => 'Se añadirá a tu colección de plantas.';
+
+  @override
+  String get redeemMore => 'Canjear más';
+
+  @override
+  String get plantAddedSuccess => 'Planta añadida con éxito';
+
+  @override
+  String get historyLoadFailed => 'No se pudo cargar el historial.';
+
+  @override
+  String get noScansYet => 'Todavía no has escaneado ninguna planta.';
+
+  @override
+  String get toMyGarden => 'A mi jardín';
+
+  @override
+  String get aiNotAvailable =>
+      'La identificación por IA todavía no está disponible en esta versión.';
+
+  @override
+  String get tourGalleryDescription =>
+      'Sube una foto de tu galería para analizar.';
+
+  @override
+  String get shutter => 'Obturador';
+
+  @override
+  String get tourShutterDescription =>
+      'Presiona aquí para escanear una planta y continuar.';
+
+  @override
+  String get enterUsername => 'Por favor ingresa tu nombre de usuario';
+
+  @override
+  String get usernameTooShort =>
+      'El nombre de usuario debe tener al menos 3 caracteres';
+
+  @override
+  String get enterValidEmail => 'Por favor ingresa un correo válido';
+
+  @override
+  String get confirmYourPassword => 'Por favor confirma tu contraseña';
+
+  @override
+  String estimatedValueNote(int measured, int total) {
+    String _temp0 = intl.Intl.pluralLogic(
+      measured,
+      locale: localeName,
+      other:
+          'Valor estimado: $measured de $total plantas se apoyan en una medición publicada.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get footprintShareEmpty =>
+      'Todavía no tengo plantas en mi jardín ECO2.';
+
+  @override
+  String footprintShareSummary(int plants, String perDay, String total) {
+    return 'Mi jardín ECO2: $plants plantas y $perDay g de CO₂ al día ($total g acumulados).';
+  }
+
+  @override
+  String get addPlantsToSeeContribution =>
+      'Añade plantas a tu jardín para ver cuánto aporta cada una.';
+
+  @override
+  String get storeBestsellers => 'Más vendidos';
+
+  @override
+  String get storeAvatars => 'Avatares';
+
+  @override
+  String get storePots => 'Macetas';
+
+  @override
+  String get storeO2Plus2wTitle => 'Cosecha tu jardín pro';
+
+  @override
+  String get storeO2Plus2wSubtitle => '2 semanas de O2 Plus';
+
+  @override
+  String get storePotRentalTitle => 'Alquila una maceta';
+
+  @override
+  String get storePotRentalSubtitle => 'Espacio temporal · 2 semanas';
+
+  @override
+  String get storeAvatarExplorerTitle => 'Avatar Explorador Verde';
+
+  @override
+  String get storeAvatarGuardianTitle => 'Avatar Guardián del Bosque';
+
+  @override
+  String get storePermanentUnlock => 'Desbloqueo permanente';
+
+  @override
+  String get storePotPack3Title => 'Pack de 3 macetas';
+
+  @override
+  String get storePotPack3Subtitle => '+3 espacios permanentes';
+
+  @override
+  String get storeO2Plus4wTitle => 'O2 Plus mensual';
+
+  @override
+  String get storeO2Plus4wSubtitle => '4 semanas de O2 Plus';
+
+  @override
+  String get newBadgeLabel => 'Nuevo';
+
+  @override
+  String get noItemsFound => 'No se encontraron artículos';
+
+  @override
+  String get confirmPurchaseTitle => '¿Confirmar compra?';
+
+  @override
+  String confirmPurchaseBody(String item, int cost) {
+    return '¿Deseas canjear \"$item\" por $cost semillas?';
+  }
+
+  @override
+  String get confirm => 'Confirmar';
+
+  @override
+  String get purchaseFailed => 'No se pudo completar la compra.';
+
+  @override
+  String get boostGardenPremium => 'Impulsa tu jardín con beneficios premium';
+
+  @override
+  String get moreSpaceForPlants => 'Consigue más espacio para tus plantas';
+
+  @override
+  String get customizeYourProfile => 'Personaliza tu perfil';
+
+  @override
+  String speciesDescription(
+    String category,
+    String light,
+    String humidity,
+    int days,
+    int minTemp,
+    int maxTemp,
+  ) {
+    return 'Especie $category que prefiere luz $light y humedad $humidity. Riega aproximadamente cada $days días, dejando secar el sustrato entre riegos, y se adapta bien a temperaturas entre $minTemp°C y $maxTemp°C.';
+  }
+
+  @override
+  String get purifierExcellent => 'Es una excelente purificadora de aire.';
+
+  @override
+  String get purifierGood => 'Ayuda a mejorar la calidad del aire de tu hogar.';
+
+  @override
+  String get humidityRangeLow => '30-40%';
+
+  @override
+  String get humidityRangeMedium => '40-60%';
+
+  @override
+  String get humidityRangeHigh => '60-80%';
+
+  @override
+  String get airPurification => 'Purificación de aire';
+
+  @override
+  String get purificationLevel => 'Nivel de purificación';
+
+  @override
+  String get idealRequirements => 'Requisitos ideales para esta especie';
+
+  @override
+  String everyNDaysShort(int days) {
+    return 'c/$days días';
+  }
+
+  @override
+  String absorbsPerDay(String grams) {
+    return 'Absorbe ~${grams}g de CO₂/día';
+  }
+
+  @override
+  String get addToMyGarden => 'Añadir a mi jardín';
+
+  @override
+  String gramsPerDayValue(String grams) {
+    return '$grams g/día';
+  }
+
+  @override
+  String get noNotesYet => 'Aún no has agregado notas para esta planta.';
+
+  @override
+  String get airPurifierTag => 'Aire purificador';
+
+  @override
+  String humidityWithPrefix(String level) {
+    return 'Humedad $level';
+  }
+
+  @override
+  String get watering => 'Riego';
+
+  @override
+  String get lightLabelShort => 'Luz';
+
+  @override
+  String get temperature => 'Temperatura';
+
+  @override
+  String get humidityLabelShort => 'Humedad';
+
+  @override
+  String get whenSoilDry => 'Cuando la tierra esté seca';
+
+  @override
+  String get redeemSeedsOrSubscribe => 'Canjea tus semillas o suscríbete a O₂₊';
+
+  @override
+  String get viewMyAchievements => 'Ver mis logros y misiones';
+
+  @override
+  String get exploreBotanicalSpecies => 'Ver especies';
+
+  @override
+  String get appTour => 'Recorrido de la app';
+
+  @override
+  String get appTourSubtitle => 'Ver de nuevo';
+
+  @override
+  String get rewardDiscountTitle => 'Dto. 15% Vivero El Helecho';
+
+  @override
+  String get rewardDiscountDesc => 'Cupón aplicable a tu próxima compra.';
+
+  @override
+  String get rewardBadgeTitle => 'Insignia \"Guardián de la Tierra\"';
+
+  @override
+  String get rewardBadgeDesc => 'Muestra tu compromiso en tu perfil.';
+
+  @override
+  String get rewardPotsTitle => 'Macetas personalizadas (3D)';
+
+  @override
+  String get rewardPotsDesc => 'Desbloquea diseños interactivos.';
+
+  @override
+  String get redeemRewardTitle => '¿Canjear premio?';
+
+  @override
+  String redeemRewardBody(String reward, int cost) {
+    return '¿Seguro que quieres canjear \"$reward\" por $cost semillas?';
+  }
+
+  @override
+  String redeemSuccess(String reward) {
+    return '¡Canje exitoso!: $reward 🎁';
+  }
+
+  @override
+  String get tourWateringStatusDesc =>
+      'Aquí ves si ya toca regarla, cuántos días lleva sin riego y cuántos días faltan (o cuántos de retraso lleva) según la frecuencia de la especie.';
+
+  @override
+  String get tourLogCareDesc =>
+      'Cada vez que la riegues, fertilices, podes o trasplantes, regístralo aquí — así el estado de riego y tu historial quedan al día de verdad.';
+
+  @override
+  String get speciesCare => 'Cuidados de la especie';
+
+  @override
+  String get speciesSpecSheet => 'Ficha técnica de la especie';
+
+  @override
+  String get tourSpeciesGridDesc =>
+      'Riego, luz, temperatura y humedad ideales para esta especie en particular.';
+
+  @override
+  String get howToCareForThisPlant => 'Cómo cuidar esta planta';
+
+  @override
+  String get plantNicknameHint => 'Apodo de la planta';
+
+  @override
+  String get howToCareForYourPlant => 'Cómo cuidar tu planta';
+
+  @override
+  String get careCalendar => 'Calendario de cuidados';
+
+  @override
+  String get tourCareCalendarDesc =>
+      'La frecuencia de riego es real, según la especie. Fertilización, poda y trasplante son buenas prácticas generales — la app aún no calcula una frecuencia exacta para esas.';
+
+  @override
+  String get whenToDoEachCare => '¿Cuándo hacer cada cuidado?';
+
+  @override
+  String get scheduleFertilizing => 'Cada 4-6 semanas, en primavera y verano';
+
+  @override
+  String get schedulePruning =>
+      'Retira hojas secas, amarillas o dañadas en cuanto las notes';
+
+  @override
+  String get scheduleRepotting =>
+      'Cada 1-2 años, o cuando las raíces llenen la maceta';
+
+  @override
+  String get tourStoreDesc =>
+      'Canjea tus semillas por macetas extra y funciones especiales.';
+
+  @override
+  String get yourGarden => 'Tu Jardín';
+
+  @override
+  String get tourGardenDesc =>
+      'Explora el catálogo de especies o gestiona las plantas que ya tienes.';
+
+  @override
+  String get aiScanner => 'Escáner IA';
+
+  @override
+  String get tourScannerDesc =>
+      'Identifica una planta apuntando la cámara — la IA reconoce la especie.';
+
+  @override
+  String get yourProfile => 'Tu Perfil';
+
+  @override
+  String get tourProfileDesc =>
+      'Revisa tu progreso, ajustes de la cuenta y más.';
+
+  @override
+  String get premiumTitle => 'Potencia tu jardín';
+
+  @override
+  String get premiumSubtitle =>
+      'Desbloquea el potencial completo de ECO2 y lleva tu experiencia botánica al siguiente nivel.';
+
+  @override
+  String get premiumIncludes => 'Todo lo que incluye';
+
+  @override
+  String get premiumUnlimitedPots => 'Macetas ilimitadas';
+
+  @override
+  String get premiumUnlimitedPotsDesc =>
+      'Añade todas las plantas que quieras sin límites.';
+
+  @override
+  String get premiumBetterSearch => 'Búsqueda mejorada por descripción';
+
+  @override
+  String get premiumBetterSearchDesc =>
+      'Encuentra plantas describiendo su aspecto con IA.';
+
+  @override
+  String get premiumUnlimitedScans => 'Escaneos ilimitados';
+
+  @override
+  String get premiumUnlimitedScansDesc =>
+      'Identifica cualquier planta, cuando quieras.';
+
+  @override
+  String get premiumAiTreatment => 'Tratamiento asistido con IA';
+
+  @override
+  String get premiumAiTreatmentDesc =>
+      'Diagnóstico personalizado de plagas y cuidados.';
+
+  @override
+  String get premiumNurseryDiscounts => 'Descuentos en viveros aliados';
+
+  @override
+  String get premiumNurseryDiscountsDesc =>
+      'Hasta 20% off en especies de aliados selectos.';
+
+  @override
+  String get noCompletedAchievements => 'No hay logros completados aún';
+
+  @override
+  String get noLockedAchievements => 'No hay logros bloqueados por ahora';
+
+  @override
+  String get lockedAchievementsNote =>
+      'Estos logros dependen de funciones que todavía no están disponibles en la app.';
+
+  @override
+  String get plantIdentification => 'Identificación de plantas';
+
+  @override
+  String get scannerTabHint =>
+      'Apunta con la cámara a la planta o sube una foto de tu galería.';
+
+  @override
+  String get recentAnalyses => 'Análisis recientes';
+
+  @override
+  String get careTypeWatering => 'Riego';
+
+  @override
+  String get careTypeFertilizing => 'Fertilización';
+
+  @override
+  String get careTypePruning => 'Poda';
+
+  @override
+  String get careTypeRepotting => 'Trasplante';
+
+  @override
+  String careLoggedToast(String type) {
+    return 'Cuidado registrado: $type 🌿';
+  }
+
+  @override
+  String get inOneDay => 'en 1 día';
+
+  @override
+  String daysAgoShort(int count) {
+    return 'hace $count días';
+  }
+
+  @override
+  String inNDays(int count) {
+    return 'en $count días';
+  }
+
+  @override
+  String get noCareLoggedForPlant =>
+      'Aún no has registrado cuidados para esta planta.';
+
+  @override
+  String get noEventsForFilter => 'No hay eventos para este filtro.';
+
+  @override
+  String get featureComingSoon =>
+      'Esta función estará disponible próximamente.';
+
+  @override
+  String get thisPlant => 'esta planta';
+
+  @override
+  String get careTypeGeneric => 'Cuidado';
+
+  @override
+  String get changePhotoComingSoon =>
+      'Cambiar la foto de perfil estará disponible próximamente 📸';
+
+  @override
+  String get changeProfilePhoto => 'Cambiar foto de perfil';
+
+  @override
+  String get personalInformation => 'Información personal';
+
+  @override
+  String get pickSpeciesToContinue =>
+      'Elige una especie de la lista para continuar.';
+
+  @override
+  String get nameYourPlantToContinue =>
+      'Ponle un nombre a tu planta para continuar.';
+
+  @override
+  String get noSpeciesAvailable => 'No hay especies disponibles todavía.';
+
+  @override
+  String noSpeciesFoundFor(String query) {
+    return 'No se encontraron especies para \"$query\".';
+  }
+
+  @override
+  String get tellUsAboutYou => 'Cuéntanos sobre ti';
+
+  @override
+  String get usernameRequired => 'El nombre de usuario es obligatorio';
+
+  @override
+  String get minThreeChars => 'Mínimo 3 caracteres';
+
+  @override
+  String get gender => 'Género';
+
+  @override
+  String get activeMissionCard => 'Misión activa';
+
+  @override
+  String get redeemSeedsOrSubscribeShort => 'Canjea tus semillas o suscríbete';
+
+  @override
+  String get welcomeToEco2Plus => '¡Bienvenido a ECO2\nPlus!';
+
+  @override
+  String get subscriptionActive =>
+      'Tu suscripción anual está activa. Disfruta de todas las funciones Plus desde ahora.';
+
+  @override
+  String get addPlantsWithoutLimit => 'Añade plantas sin límite';
+
+  @override
+  String get gardenCanGrow => 'Tu jardín puede crecer todo lo que quieras';
+
+  @override
+  String get sessionExpired => 'Sesión expirada. Inicia sesión nuevamente.';
+
+  @override
+  String get noNotificationsYet => 'No tienes notificaciones por ahora.';
+
+  @override
+  String get needsAttention => 'Necesitan atención';
+
+  @override
+  String overdueByDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Vencido hace $count días',
+      one: 'Vencido hace 1 día',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get passwordMinSixChars =>
+      'La contraseña debe tener al menos 6 caracteres';
+
+  @override
+  String get achievementUnlockedTitle => '¡Logro desbloqueado!';
+
+  @override
+  String get newPlantAddedTitle => 'Nueva planta agregada';
+
+  @override
+  String newPlantAddedBody(String name) {
+    return 'Agregaste $name a tu colección.';
+  }
+
+  @override
+  String get lastWateredHelpShort =>
+      'Así calculamos cuándo toca el próximo riego. Si no lo sabes, empezamos a contar desde hoy.';
+
+  @override
+  String get conditionNotTracked =>
+      'Esta condición todavía no se rastrea en la app.';
+
+  @override
+  String get tourSeedsDesc =>
+      'Ganas semillas cuidando tus plantas y cumpliendo misiones. Úsalas en la Tienda.';
+
+  @override
+  String get achievementsAndMissionsTitle => 'Logros y misiones';
+
+  @override
+  String get tourTrophyDesc =>
+      'Aquí ves tus trofeos, el progreso de tus misiones y cuánto XP llevas.';
+
+  @override
+  String get allNotificationsRead =>
+      'Todas las notificaciones marcadas como leídas.';
+
+  @override
+  String get aiSearch => 'Búsqueda con IA';
+
+  @override
+  String achievementUnlockedToast(String name, String reward) {
+    return '🏆 ¡Logro desbloqueado! $name ($reward)';
+  }
+
+  @override
+  String xpAndSeedsReward(int xp, int seeds) {
+    return '+$xp XP · +$seeds semillas';
+  }
+
+  @override
+  String xpReward(int xp) {
+    return '+$xp XP';
+  }
+
+  @override
+  String progressOfPlants(int current, int total) {
+    return '$current de $total plantas';
+  }
+
+  @override
+  String progressOfCares(int current, int total) {
+    return '$current de $total cuidados';
+  }
+
+  @override
+  String get completed => 'Completado';
+
+  @override
+  String get pending => 'Pendiente';
+
+  @override
+  String get gotIt => 'Entendido';
+
+  @override
+  String get accept => 'Aceptar';
+
+  @override
+  String get viewSpecSheet => 'Ver ficha';
+
+  @override
+  String get history => 'Historial';
+
+  @override
+  String get tourHistoryDesc => 'Consulta tus escaneos anteriores.';
+
+  @override
+  String get plantNotFound => 'Planta no encontrada';
+
+  @override
+  String get editNickname => 'Editar apodo';
+
+  @override
+  String get takePhoto => 'Tomar foto';
+
+  @override
+  String get removePhoto => 'Quitar foto';
+
+  @override
+  String get photoRemoved => 'Foto eliminada.';
+
+  @override
+  String get photoUpdated => 'Foto actualizada.';
+
+  @override
+  String get genderMale => 'Hombre';
+
+  @override
+  String get genderFemale => 'Mujer';
+
+  @override
+  String get genderOther => 'Otro';
+
+  @override
+  String get genderPreferNotToSay => 'Prefiero no decir';
+
+  @override
+  String get birthDate => 'Fecha de nacimiento';
+
+  @override
+  String get tempShort => 'Temp.';
+
+  @override
+  String get o2co2 => 'O₂ CO₂';
+
+  @override
+  String get confirmPayment => 'Confirmar pago';
+
+  @override
+  String get card => 'Tarjeta';
+
+  @override
+  String get tourScanFavourite => 'Escanea tu planta favorita';
+
+  @override
+  String get tourScanFavouriteDesc => 'Identifica cualquier especie con IA';
+
+  @override
+  String get exploreDiscounts => 'Explora descuentos exclusivos';
+
+  @override
+  String get exploreDiscountsDesc => 'Hasta 20% off en viveros aliados';
+
+  @override
+  String redeemSeedsCount(int count) {
+    return 'Canjear $count semillas';
+  }
+
+  @override
+  String get waterings => 'Riegos';
+
+  @override
+  String get prunings => 'Podas';
+
+  @override
+  String routeNotFound(String route) {
+    return 'Ruta no encontrada: $route';
+  }
+
+  @override
+  String get careNoteHint => 'Agua tibia · ~200ml · tierra ya estaba seca';
+
+  @override
+  String get tourNotificationsDesc =>
+      'Avisos reales: riegos pendientes, logros desbloqueados y plantas nuevas.';
+
+  @override
+  String wateringDueNotification(String name) {
+    return 'Riego pendiente: $name necesita agua ahora.';
+  }
+
+  @override
+  String get fullName => 'Nombre completo';
+
+  @override
+  String plantWatered(String name) {
+    return '$name regada 💧';
+  }
+
+  @override
+  String get nicknameExample => 'ej. jardinero_verde';
+
+  @override
+  String get plantNameExample => 'ej. Mi Monstera';
+
+  @override
+  String unlockedOn(String date) {
+    return 'Desbloqueado el $date';
+  }
+
+  @override
+  String agoMinutes(int n) {
+    return 'Hace ${n}m';
+  }
+
+  @override
+  String agoHours(int n) {
+    return 'Hace ${n}h';
+  }
+
+  @override
+  String agoDays(int n) {
+    return 'Hace ${n}d';
+  }
+
+  @override
+  String get wateringDueTitle => 'Riego pendiente';
+
+  @override
+  String get muteReminders => 'Silenciar recordatorios';
+
+  @override
+  String get muteRemindersOn => 'No recibirás avisos de riego de esta planta';
+
+  @override
+  String get muteRemindersOff => 'Recibirás avisos cuando toque regarla';
+
+  @override
+  String remindersMuted(String name) {
+    return 'Recordatorios silenciados para $name';
+  }
+
+  @override
+  String remindersUnmuted(String name) {
+    return 'Recordatorios reactivados para $name';
+  }
+
+  @override
+  String get logCare => 'Registrar cuidado';
+
+  @override
+  String get achFirstSteps => 'Primeros Pasos';
+
+  @override
+  String get achBotanicalEye => 'Ojo Botánico';
+
+  @override
+  String get achFirstRoom => 'Mi Primer Espacio';
+
+  @override
+  String get achHandsOn => 'Manos a la Obra';
+
+  @override
+  String get achSteadyCarer => 'Cuidador Constante';
+
+  @override
+  String get achGreenGuardian => 'Guardián Verde';
+
+  @override
+  String get achCareMaster => 'Maestro del Cuidado';
+
+  @override
+  String get achBotanicalLegend => 'Leyenda Botánica';
+
+  @override
+  String get achMyLittleGarden => 'Mi Pequeño Jardín';
+
+  @override
+  String get achCollector => 'Coleccionista';
+
+  @override
+  String get achDescOnboarding => 'Completa el onboarding de ECO2';
+
+  @override
+  String get achDescFirstScan => 'Escanea tu primera planta con IA';
+
+  @override
+  String get achDescFirstRoom => 'Crea tu primera habitación';
+
+  @override
+  String get achDescFirstCare => 'Realiza tu primer cuidado';
+
+  @override
+  String achDescNCares(int count) {
+    return 'Realiza $count cuidados';
+  }
+
+  @override
+  String achDescNPlants(int count) {
+    return 'Registra $count plantas en tu colección';
+  }
+
+  @override
+  String get aboutThisPlant => 'Sobre esta planta';
+
+  @override
+  String get difficulty => 'Dificultad';
+
+  @override
+  String get beginner => 'Principiante';
+
+  @override
+  String get expert => 'Experto';
+
+  @override
+  String get care => 'Cuidados';
+
+  @override
+  String carEquivalent(String meters) {
+    return 'Equivalente a un auto recorriendo ${meters}m';
+  }
+
+  @override
+  String get securePayments => 'Pagos seguros con cifrado SSL de 256 bits';
+
+  @override
+  String get selectedPlan => '★ PLAN SELECCIONADO';
+
+  @override
+  String get eco2PlusAnnual => 'ECO2 Plus Anual';
+
+  @override
+  String get cancelAnytime => 'Cancela en cualquier momento';
+
+  @override
+  String get totalToPay => 'Total a pagar';
+
+  @override
+  String payAmount(String amount) {
+    return 'Pagar $amount';
+  }
+
+  @override
+  String perMonthPrice(String amount) {
+    return '$amount/mes';
+  }
+
+  @override
+  String get filters => 'Filtros';
+
+  @override
+  String get clear => 'Limpiar';
+
+  @override
+  String get applyFilters => 'Aplicar filtros';
+
+  @override
+  String get unlockO2Features => 'Desbloquea funciones O₂₊';
+
+  @override
+  String freePotsOf(int count) {
+    return '[$count macetas de 10\ngratis]';
+  }
+
+  @override
+  String get done => 'Listo';
+
+  @override
+  String get customizeYourEco2 => 'Personaliza tu experiencia ECO2';
+
+  @override
+  String get skipForNow => 'Omitir por ahora';
+
+  @override
+  String get optional => '(opcional)';
+
+  @override
+  String get continueAction => 'Continuar';
+
+  @override
+  String get newScan => 'Nuevo escaneo';
+
+  @override
+  String matchPercent(int pct) {
+    return '$pct% coincidencia';
+  }
+
+  @override
+  String get takePhotoAction => 'Hacer foto';
+
+  @override
+  String get date => 'Fecha';
+
+  @override
+  String get noteOptional => 'Nota (opcional)';
+
+  @override
+  String get scanHistory => 'Historial de escaneos';
+
+  @override
+  String get otherPossibilities => 'Otras posibilidades';
+
+  @override
+  String get viewO2Plus => 'Ver O₂₊';
+
+  @override
+  String get exportToCalendar => 'Exportar a calendario';
+
+  @override
+  String eventsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count eventos',
+      one: '1 evento',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get viewFullSheet => 'ver ficha completa';
+
+  @override
+  String get myPersonalNote => 'Mi nota personal';
+
+  @override
+  String get noPlantNeedsWater => 'Ninguna planta necesita riego ahora mismo.';
+
+  @override
+  String get waterAction => 'Regar';
+
+  @override
+  String get o2PlusLabel => 'O₂ PLUS';
+
+  @override
+  String get subscribeToO2Plus => 'Suscribirse a O₂₊';
+
+  @override
+  String get minCharsSuffix => ' · mín. 8 caracteres';
+
+  @override
+  String get startUsingPlus => 'Empezar a usar Plus';
+
+  @override
+  String seedsCost(int count) {
+    return '$count semillas';
+  }
+
+  @override
+  String seedsShort(int count) {
+    return '$count sem.';
+  }
+
+  @override
+  String get species => 'Especie';
+
+  @override
+  String get gramsPerDayUnit => 'g/día';
+
+  @override
+  String everyNDaysCompact(int days) {
+    return 'c/${days}d';
+  }
+
+  @override
+  String pendingMissionsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count pendientes',
+      one: '1 pendiente',
+      zero: 'Todo completado',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String seedsCountShort(int count) {
+    return '$count semillas';
+  }
+
+  @override
+  String get unitCares => 'cuidados';
+
+  @override
+  String get unitPlants => 'plantas';
+
+  @override
+  String get filterAll => 'Todos';
+
+  @override
+  String get fertilizings => 'Abonos';
+
+  @override
+  String get tabActive => 'Activa';
+
+  @override
+  String get tabCompleted => 'Completadas';
+
+  @override
+  String get tabLocked => 'Bloqueadas';
 }

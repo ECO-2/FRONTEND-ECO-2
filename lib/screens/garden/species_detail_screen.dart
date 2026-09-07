@@ -227,8 +227,8 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
                                   ),
                                 ),
                                 const SizedBox(height: 4),
-                                const Text(
-                                  'Purificación de aire',
+                                Text(
+                                  AppLocalizations.of(context)!.airPurification,
                                   style: TextStyle(
                                     fontSize: 11,
                                     color: Color(0xFF807F7F),
@@ -242,8 +242,14 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
                         Wrap(
                           spacing: 8,
                           runSpacing: 6,
-                          children: species.detailTags.map((tag) {
-                            final style = styleForTagKind(tagKindFor(tag));
+                          children: speciesDetailTags(
+                            context,
+                            category: species.category,
+                            lightRequirement: species.lightRequirement,
+                            humidityPreference: species.humidityPreference,
+                            airPurificationScore: species.airPurificationScore,
+                          ).map((tag) {
+                            final style = styleForTagKind(tag.kind);
                             return Container(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 12,
@@ -259,7 +265,7 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
                                   Icon(style.icon, size: 13, color: style.color),
                                   const SizedBox(width: 5),
                                   Text(
-                                    tag,
+                                    tag.text,
                                     style: TextStyle(
                                       color: style.color,
                                       fontSize: 12,
@@ -273,8 +279,7 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
                           }).toList(),
                         ),
                         const SizedBox(height: 24),
-                        const Text(
-                          'Sobre esta planta',
+                        Text(AppLocalizations.of(context)!.aboutThisPlant,
                           style: TextStyle(
                             fontFamily: 'DM Sans',
                             fontWeight: FontWeight.bold,
@@ -284,7 +289,16 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          species.description,
+                          speciesDescription(
+                            context,
+                            category: species.category,
+                            lightRequirement: species.lightRequirement,
+                            humidityPreference: species.humidityPreference,
+                            waterFrequencyDays: species.waterFrequencyDays,
+                            minTemperature: species.minTemperature,
+                            maxTemperature: species.maxTemperature,
+                            airPurificationScore: species.airPurificationScore,
+                          ),
                           style: const TextStyle(
                             fontFamily: 'Inter',
                             fontSize: 14,
@@ -296,8 +310,7 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text(
-                              'Dificultad',
+                            Text(AppLocalizations.of(context)!.difficulty,
                               style: TextStyle(
                                 fontFamily: 'DM Sans',
                                 fontWeight: FontWeight.bold,
@@ -315,7 +328,8 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: Text(
-                                species.difficulty,
+                                difficultyLabel(
+                                    context, species.waterFrequencyDays),
                                 style: const TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.bold,
@@ -349,17 +363,15 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
                         const SizedBox(height: 4),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: const [
-                            Text(
-                              'Principiante',
-                              style: TextStyle(
+                          children: [
+                            Text(AppLocalizations.of(context)!.beginner,
+                              style: const TextStyle(
                                 fontSize: 11,
                                 color: Color(0xFF807F7F),
                               ),
                             ),
-                            Text(
-                              'Experto',
-                              style: TextStyle(
+                            Text(AppLocalizations.of(context)!.expert,
+                              style: const TextStyle(
                                 fontSize: 11,
                                 color: Color(0xFF807F7F),
                               ),
@@ -367,8 +379,7 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
                           ],
                         ),
                         const SizedBox(height: 32),
-                        const Text(
-                          'Cuidados',
+                        Text(AppLocalizations.of(context)!.care,
                           style: TextStyle(
                             fontFamily: 'DM Sans',
                             fontWeight: FontWeight.bold,
@@ -376,8 +387,8 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
                             color: Color(0xFF0D2B31),
                           ),
                         ),
-                        const Text(
-                          'Requisitos ideales para esta especie',
+                        Text(
+                          AppLocalizations.of(context)!.idealRequirements,
                           style: TextStyle(
                             fontFamily: 'Inter',
                             fontSize: 13,
@@ -392,9 +403,10 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
                                 icon: Icons.water_drop_rounded,
                                 iconColor: const Color(0xFF1565C0),
                                 iconBg: const Color(0xFFE3F2FD),
-                                label: 'Riego',
-                                value: 'c/${species.waterFrequencyDays} días',
-                                subText: 'Cuando tierra seca',
+                                label: AppLocalizations.of(context)!.watering,
+                                value: AppLocalizations.of(context)!.everyNDaysShort(
+                                    species.waterFrequencyDays),
+                                subText: AppLocalizations.of(context)!.whenSoilDry,
                               ),
                             ),
                             const SizedBox(width: 12),
@@ -403,7 +415,7 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
                                 icon: Icons.wb_sunny_rounded,
                                 iconColor: const Color(0xFFFBC02D),
                                 iconBg: const Color(0xFFFFFDE7),
-                                label: 'Luz',
+                                label: AppLocalizations.of(context)!.lightLabelShort,
                                 value: lightLabel(context, species.lightRequirement),
                                 subText: lightHint(context, species.lightRequirement),
                               ),
@@ -418,7 +430,7 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
                                 icon: Icons.thermostat_rounded,
                                 iconColor: const Color(0xFFE64A19),
                                 iconBg: const Color(0xFFFBE9E7),
-                                label: 'Temperatura',
+                                label: AppLocalizations.of(context)!.temperature,
                                 value:
                                     '${species.minTemperature ?? 15}-${species.maxTemperature ?? 28}°C',
                                 subText: categoryLabel(context, species.category),
@@ -430,9 +442,11 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
                                 icon: Icons.opacity_rounded,
                                 iconColor: const Color(0xFF00796B),
                                 iconBg: const Color(0xFFE0F2F1),
-                                label: 'Humedad',
-                                value: species.humidityRange,
-                                subText: species.humidityLevel,
+                                label: AppLocalizations.of(context)!.humidityLabelShort,
+                                value: humidityRange(
+                                    context, species.humidityPreference),
+                                subText: humidityLabel(
+                                    context, species.humidityPreference),
                               ),
                             ),
                           ],
@@ -473,7 +487,8 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          'Absorbe ~${co2GramsPerDay.toStringAsFixed(1)}g de CO₂/día',
+                                          AppLocalizations.of(context)!.absorbsPerDay(
+                                              co2GramsPerDay.toStringAsFixed(1)),
                                           style: const TextStyle(
                                             color: Colors.white,
                                             fontWeight: FontWeight.bold,
@@ -483,7 +498,7 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
                                         ),
                                         const SizedBox(height: 2),
                                         Text(
-                                          'Equivalente a un auto recorriendo ${carMetersEquivalent}m',
+                                          AppLocalizations.of(context)!.carEquivalent(carMetersEquivalent.toString()),
                                           style: const TextStyle(
                                             color: Color(0xFFBDE038),
                                             fontSize: 12,
@@ -500,7 +515,7 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
-                                    'Nivel de purificación',
+                                    AppLocalizations.of(context)!.purificationLevel,
                                     style: TextStyle(
                                       color: Colors.white.withValues(alpha: 0.75),
                                       fontSize: 11,
@@ -542,100 +557,11 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
                             ],
                           ),
                         ),
-                        const SizedBox(height: 32),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Row(
-                              children: [
-                                const Text(
-                                  'Experiencias',
-                                  style: TextStyle(
-                                    fontFamily: 'DM Sans',
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 18,
-                                    color: Color(0xFF0D2B31),
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 8,
-                                    vertical: 2,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFFEFF2EF),
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: const Text(
-                                    '128',
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.bold,
-                                      color: Color(0xFF10454F),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            TextButton(
-                              onPressed: () {},
-                              child: const Text(
-                                'Ver todas',
-                                style: TextStyle(
-                                  color: Color(0xFF10454F),
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 13,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFF8FAF9),
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(
-                              color: const Color(0xFFEFF2EF),
-                              width: 1,
-                            ),
-                          ),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Container(
-                                width: 36,
-                                height: 36,
-                                decoration: const BoxDecoration(
-                                  color: Color(0xFFE0E6E3),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Center(
-                                  child: Icon(
-                                    Icons.person_rounded,
-                                    color: Color(0xFF10454F),
-                                    size: 20,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              const Expanded(
-                                child: Text(
-                                  'Crece súper rápido en mi sala. Fácil de cuidar, solo necesita luz indirecta y agua cada semana. ¡La recomiendo!',
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    height: 1.4,
-                                    color: Color(0xFF616161),
-                                    fontFamily: 'Inter',
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 24),
+                        // Sección "Experiencias" retirada: mostraba un
+                        // contador fijo de 128 reseñas y un testimonio
+                        // inventado, idénticos para las 50 especies. No hay
+                        // reseñas en el backend, así que no había nada real que
+                        // enseñar; el botón "Ver todas" tampoco hacía nada.
                       ],
                     ),
                   ),
@@ -666,10 +592,10 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
                               ),
                               onPressed: () => Navigator.pop(context),
                             ),
-                            const Expanded(
+                            Expanded(
                               child: Text(
-                                'Jardín',
-                                style: TextStyle(
+                                AppLocalizations.of(context)!.navGarden,
+                                style: const TextStyle(
                                   fontFamily: 'DM Sans',
                                   fontWeight: FontWeight.bold,
                                   fontSize: 20,
@@ -739,9 +665,9 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
                       size: 22,
                       color: Color(0xFF10454F),
                     ),
-                    label: const Text(
-                      'Añadir a mi jardín',
-                      style: TextStyle(
+                    label: Text(
+                      AppLocalizations.of(context)!.addToMyGarden,
+                      style: const TextStyle(
                         fontFamily: 'Inter',
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
@@ -806,7 +732,8 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
     if (!success) {
       showAppToast(
         context,
-        plantsProvider.errorMessage ?? 'No se pudo agregar la planta.',
+        plantsProvider.errorText(context) ??
+            AppLocalizations.of(context)!.plantAddFailed,
         type: ToastType.error,
       );
       return;
@@ -818,7 +745,7 @@ class _SpeciesDetailScreenState extends State<SpeciesDetailScreen> {
 
     showAppToast(
       context,
-      '¡${species.commonName} añadida a tu jardín! 🌿',
+      AppLocalizations.of(context)!.plantAddedToGarden(species.commonName),
       type: ToastType.success,
     );
     showAchievementUnlockedSnackbars(context, unlocked);

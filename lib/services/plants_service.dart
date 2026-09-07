@@ -37,6 +37,7 @@ class PlantsService {
     String? nickname,
     String? healthStatus,
     DateTime? lastWateredAt,
+    bool? remindersMuted,
   }) async {
     final body = <String, dynamic>{'species_id': speciesId};
     if (nickname != null && nickname.isNotEmpty) body['nickname'] = nickname;
@@ -57,6 +58,7 @@ class PlantsService {
     String? nickname,
     String? healthStatus,
     DateTime? lastWateredAt,
+    bool? remindersMuted,
   }) async {
     final body = <String, dynamic>{};
     if (nickname != null) body['nickname'] = nickname;
@@ -64,6 +66,7 @@ class PlantsService {
     if (lastWateredAt != null) {
       body['last_watered_at'] = lastWateredAt.toUtc().toIso8601String();
     }
+    if (remindersMuted != null) body['reminders_muted'] = remindersMuted;
 
     final data =
         await _client.patch('/plants/$id', body: body) as Map<String, dynamic>;

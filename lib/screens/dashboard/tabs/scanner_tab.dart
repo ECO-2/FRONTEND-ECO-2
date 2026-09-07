@@ -7,6 +7,8 @@ import 'package:frontend_eco_2/routing/app_routes.dart';
 import 'package:frontend_eco_2/theme/app_colors.dart';
 import 'package:frontend_eco_2/widgets/common/custom_button.dart';
 import 'package:frontend_eco_2/widgets/common/app_toast.dart';
+import 'package:frontend_eco_2/services/services.dart';
+import 'package:frontend_eco_2/utils/date_labels.dart';
 
 // ── Mock identification result ────────────────────────────────────────────
 class _ScanResult {
@@ -85,9 +87,9 @@ class _ViewfinderView extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Identificación de Plantas',
-            style: TextStyle(
+          Text(
+            AppLocalizations.of(context)!.plantIdentification,
+            style: const TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 16,
               color: AppColors.textPrimary,
@@ -95,9 +97,9 @@ class _ViewfinderView extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 4),
-          const Text(
-            'Apunta con la cámara a la planta o sube una foto de tu galería.',
-            style: TextStyle(
+          Text(
+            AppLocalizations.of(context)!.scannerTabHint,
+            style: const TextStyle(
               color: AppColors.textSecondary,
               fontSize: 13,
               fontFamily: 'Inter',
@@ -225,7 +227,7 @@ class _ViewfinderView extends StatelessWidget {
             children: [
               Expanded(
                 child: CustomButton(
-                  text: 'Hacer Foto',
+                  text: AppLocalizations.of(context)!.takePhotoAction,
                   icon: Icons.camera_alt,
                   backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
@@ -251,9 +253,9 @@ class _ViewfinderView extends StatelessWidget {
           const SizedBox(height: 32),
 
           // Recent analyses
-          const Text(
-            'Análisis Recientes',
-            style: TextStyle(
+          Text(
+            AppLocalizations.of(context)!.recentAnalyses,
+            style: const TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 16,
               color: AppColors.textPrimary,
@@ -261,11 +263,58 @@ class _ViewfinderView extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          _buildRecentItem('Monstera Deliciosa', '98% · Muy saludable',
-              'Hace 2 horas', Icons.eco),
-          const SizedBox(height: 10),
-          _buildRecentItem('Poto (Epipremnum aureum)', '94% · Requiere riego',
-              'Ayer', Icons.local_florist),
+          // Historial real (GET del servicio de identificacion). Antes habia
+          // dos entradas inventadas fijas -- "Monstera 98% hace 2 horas" y
+          // "Poto 94% ayer" -- iguales para todo el mundo, escaneara o no.
+          FutureBuilder<List<PlantIdentification>>(
+            future: Provider.of<IdentificationService>(context, listen: false)
+                .getHistory(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 20),
+                  child: Center(
+                    child: SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                  ),
+                );
+              }
+              final history = snapshot.data ?? const <PlantIdentification>[];
+              if (history.isEmpty) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 20),
+                  child: Text(
+                    AppLocalizations.of(context)!.noScansYet,
+                    style: const TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 13,
+                      fontFamily: 'Inter',
+                    ),
+                  ),
+                );
+              }
+              return Column(
+                children: [
+                  for (final item in history.take(3)) ...[
+                    _buildRecentItem(
+                      item.species?.commonName ??
+                          AppLocalizations.of(context)!.notIdentified,
+                      item.confidenceScore == null
+                          ? ''
+                          : AppLocalizations.of(context)!
+                              .matchPercent((item.confidenceScore! * 100).round()),
+                      formatShortDate(context, item.createdAt),
+                      Icons.eco,
+                    ),
+                    const SizedBox(height: 10),
+                  ],
+                ],
+              );
+            },
+          ),
           const SizedBox(height: 100),
         ],
       ),
@@ -354,14 +403,13 @@ class _ResultView extends StatelessWidget {
             children: [
               GestureDetector(
                 onTap: onReset,
-                child: const Row(
+                child: Row(
                   children: [
-                    Icon(Icons.arrow_back_ios_rounded,
+                    const Icon(Icons.arrow_back_ios_rounded,
                         size: 16, color: AppColors.primary),
-                    SizedBox(width: 4),
-                    Text(
-                      'Nuevo escaneo',
-                      style: TextStyle(
+                    const SizedBox(width: 4),
+                    Text(AppLocalizations.of(context)!.newScan,
+                      style: const TextStyle(
                         color: AppColors.primary,
                         fontWeight: FontWeight.w600,
                         fontFamily: 'Inter',
@@ -420,7 +468,7 @@ class _ResultView extends StatelessWidget {
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Text(
-                              '${result.confidencePct}% coincidencia',
+                              AppLocalizations.of(context)!.matchPercent(result.confidencePct),
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 11,
@@ -485,8 +533,7 @@ class _ResultView extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(vertical: 13),
                   ),
                   icon: const Icon(Icons.info_outline_rounded, size: 18),
-                  label: const Text(
-                    'Ver ficha',
+                  label: Text(AppLocalizations.of(context)!.viewSpecSheet,
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontFamily: 'Inter',
@@ -525,9 +572,9 @@ class _ResultView extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(vertical: 13),
                   ),
                   icon: const Icon(Icons.add_circle_outline_rounded, size: 18),
-                  label: const Text(
-                    'A mi jardín',
-                    style: TextStyle(
+                  label: Text(
+                    AppLocalizations.of(context)!.toMyGarden,
+                    style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontFamily: 'Inter',
                     ),
@@ -537,7 +584,7 @@ class _ResultView extends StatelessWidget {
                         .addPlant(result.commonName, result.speciesId, result.commonName);
                     showAppToast(
                       context,
-                      '${result.commonName} añadida a tu jardín 🌿',
+                      AppLocalizations.of(context)!.plantAddedToGarden(result.commonName),
                       type: ToastType.success,
                     );
                     onReset();

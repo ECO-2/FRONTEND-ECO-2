@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend_eco_2/theme/app_colors.dart';
 import 'species_data.dart';
+import 'package:frontend_eco_2/l10n/app_localizations.dart';
 
 class SpeciesCareGrid extends StatelessWidget {
   final SpeciesData sp;
@@ -20,7 +21,7 @@ class SpeciesCareGrid extends StatelessWidget {
               child: _buildCareGridCard(
                 icon: Icons.water_drop_outlined,
                 iconColor: const Color(0xFF4A90D9),
-                label: 'Riego',
+                label: AppLocalizations.of(context)!.watering,
                 value: sp.waterFreq,
               ),
             ),
@@ -29,7 +30,7 @@ class SpeciesCareGrid extends StatelessWidget {
               child: _buildCareGridCard(
                 icon: Icons.wb_sunny_outlined,
                 iconColor: const Color(0xFFFABF2E),
-                label: 'Luz',
+                label: AppLocalizations.of(context)!.lightLabelShort,
                 value: sp.light,
               ),
             ),
@@ -42,7 +43,7 @@ class SpeciesCareGrid extends StatelessWidget {
               child: _buildCareGridCard(
                 icon: Icons.thermostat_outlined,
                 iconColor: const Color(0xFFF56B1C),
-                label: 'Temp.',
+                label: AppLocalizations.of(context)!.tempShort,
                 value: sp.temp,
               ),
             ),
@@ -51,7 +52,7 @@ class SpeciesCareGrid extends StatelessWidget {
               child: _buildCareGridCard(
                 icon: Icons.opacity_rounded,
                 iconColor: const Color(0xFF00796B),
-                label: 'Humedad',
+                label: AppLocalizations.of(context)!.humidityLabelShort,
                 value: sp.humidity,
               ),
             ),
@@ -64,7 +65,7 @@ class SpeciesCareGrid extends StatelessWidget {
               child: _buildCareGridCard(
                 icon: Icons.eco_outlined,
                 iconColor: AppColors.primary,
-                label: 'O₂ CO₂',
+                label: AppLocalizations.of(context)!.o2co2,
                 value: sp.co2,
               ),
             ),

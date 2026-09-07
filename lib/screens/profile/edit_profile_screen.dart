@@ -17,7 +17,6 @@ class EditProfileScreen extends StatefulWidget {
 class _EditProfileScreenState extends State<EditProfileScreen> {
   final _formKey = GlobalKey<FormState>();
   
-  late TextEditingController _fullNameController;
   late TextEditingController _usernameController;
   late TextEditingController _emailController;
 
@@ -27,12 +26,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final user = userProvider.currentUser;
 
-    // Pre-populate with user data or default mockup values from Figma
-    _fullNameController = TextEditingController(
-      text: user != null && user.username.isNotEmpty && user.username != 'usuario'
-          ? user.username
-          : 'Carlos Eco',
-    );
     _usernameController = TextEditingController(
       // Solo datos reales. Antes venía precargado '@carlos_eco', y teléfono,
       // ciudad y fecha de nacimiento traían valores inventados que el usuario
@@ -46,7 +39,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   @override
   void dispose() {
-    _fullNameController.dispose();
     _usernameController.dispose();
     _emailController.dispose();
     super.dispose();
@@ -80,7 +72,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       // Mensaje real del backend (p. ej. nombre de usuario ya en uso).
       showAppToast(
         context,
-        userProvider.errorMessage ?? l.genericError,
+        userProvider.errorText(context) ?? l.genericError,
         type: ToastType.error,
       );
       return;
@@ -154,7 +146,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                               right: 0,
                               child: InkWell(
                                 onTap: () {
-                                  showAppToast(context, 'Función para cambiar foto próximamente 📸');
+                                  showAppToast(context, AppLocalizations.of(context)!.changePhotoComingSoon);
                                 },
                                 child: Container(
                                   width: 36,
@@ -177,11 +169,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         const SizedBox(height: 12),
                         TextButton(
                           onPressed: () {
-                            showAppToast(context, 'Función para cambiar foto próximamente 📸');
+                            showAppToast(context, AppLocalizations.of(context)!.changePhotoComingSoon);
                           },
-                          child: const Text(
-                            'Cambiar foto de perfil',
-                            style: TextStyle(
+                          child: Text(
+                            AppLocalizations.of(context)!.changeProfilePhoto,
+                            style: const TextStyle(
                               color: AppColors.primary,
                               fontSize: 14,
                               fontWeight: FontWeight.bold,
@@ -208,9 +200,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'Información personal',
-                            style: TextStyle(
+                          Text(
+                            AppLocalizations.of(context)!.personalInformation,
+                            style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
                               color: AppColors.textSecondary,
@@ -219,15 +211,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           ),
                           const SizedBox(height: 20),
                           
-                          // Full name
-                          CustomTextField(
-                            controller: _fullNameController,
-                            labelText: 'Nombre completo',
-                            customLabel: _buildCustomLabel('Nombre completo'),
-                            prefixIcon: Icons.person_outline_rounded,
-                          ),
-                          const SizedBox(height: 20),
-
+                          // El campo "Nombre completo" se retiro: no existe
+                          // en el modelo de usuario ni lo guardaba ningun
+                          // endpoint, y venia precargado con "Carlos Eco", que
+                          // alguien podia acabar guardando como suyo.
                           // Username
                           CustomTextField(
                             controller: _usernameController,
@@ -240,8 +227,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           // Email
                           CustomTextField(
                             controller: _emailController,
-                            labelText: 'Correo electrónico',
-                            customLabel: _buildCustomLabel('Correo electrónico'),
+                            labelText: AppLocalizations.of(context)!.email,
+                            customLabel: _buildCustomLabel(AppLocalizations.of(context)!.email),
                             prefixIcon: Icons.mail_outline_rounded,
                             keyboardType: TextInputType.emailAddress,
                           ),

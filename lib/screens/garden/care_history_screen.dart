@@ -5,17 +5,26 @@ import 'package:frontend_eco_2/services/services.dart';
 import 'package:frontend_eco_2/utils/care_task_labels.dart';
 import 'package:frontend_eco_2/widgets/common/custom_app_bar.dart';
 import 'package:frontend_eco_2/widgets/common/app_toast.dart';
+import 'package:frontend_eco_2/l10n/app_localizations.dart';
+import 'package:frontend_eco_2/utils/date_labels.dart';
 
-const _kFilterTaskTypes = {
-  'Riegos': 'watering',
-  'Podas': 'pruning',
-  'Abonos': 'fertilizing',
-};
+// Claves estables, no etiquetas: el estado guardaba el texto visible, asi que
+// el filtro dejaba de coincidir en cuanto la app cambiaba de idioma.
+const _kFilters = ['all', 'watering', 'pruning', 'fertilizing'];
 
-const _kMonths = [
-  'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-  'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
-];
+String _filterLabel(BuildContext context, String key) {
+  final l = AppLocalizations.of(context)!;
+  switch (key) {
+    case 'watering':
+      return l.waterings;
+    case 'pruning':
+      return l.prunings;
+    case 'fertilizing':
+      return l.fertilizings;
+    default:
+      return l.filterAll;
+  }
+}
 
 class CareHistoryScreen extends StatefulWidget {
   const CareHistoryScreen({super.key});
@@ -25,10 +34,10 @@ class CareHistoryScreen extends StatefulWidget {
 }
 
 class _CareHistoryScreenState extends State<CareHistoryScreen> {
-  String _selectedFilter = 'Todos';
+  String _selectedFilter = 'all';
   UserPlant? _plant;
   List<CareLog>? _logs;
-  String? _error;
+  bool _hasError = false;
 
   @override
   void didChangeDependencies() {
@@ -48,13 +57,13 @@ class _CareHistoryScreenState extends State<CareHistoryScreen> {
       setState(() => _logs = logs);
     } catch (_) {
       if (!mounted) return;
-      setState(() => _error = 'No se pudo cargar el historial.');
+      setState(() => _hasError = true);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final nickname = _plant?.nickname ?? 'esta planta';
+    final nickname = _plant?.nickname ?? AppLocalizations.of(context)!.thisPlant;
     final logs = _logs ?? const <CareLog>[];
 
     final riegos = logs.where((l) => l.taskType == 'watering').length;
@@ -62,14 +71,15 @@ class _CareHistoryScreenState extends State<CareHistoryScreen> {
     final podas = logs.where((l) => l.taskType == 'pruning').length;
 
     final filteredLogs = logs.where((l) {
-      if (_selectedFilter == 'Todos') return true;
-      return l.taskType == _kFilterTaskTypes[_selectedFilter];
+      if (_selectedFilter == 'all') return true;
+      return l.taskType == _selectedFilter;
     }).toList()
       ..sort((a, b) => b.performedAt.compareTo(a.performedAt));
 
     final grouped = <String, List<CareLog>>{};
     for (final log in filteredLogs) {
-      final key = '${_kMonths[log.performedAt.month - 1]} ${log.performedAt.year}';
+      // Antes venia de una lista de meses en espanol escrita a mano.
+      final key = formatMonthYear(context, log.performedAt);
       grouped.putIfAbsent(key, () => []).add(log);
     }
 
@@ -81,8 +91,7 @@ class _CareHistoryScreenState extends State<CareHistoryScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text(
-              'Historial',
+            Text(AppLocalizations.of(context)!.history,
               style: TextStyle(
                 fontFamily: 'DM Sans',
                 fontWeight: FontWeight.bold,
@@ -118,7 +127,7 @@ class _CareHistoryScreenState extends State<CareHistoryScreen> {
           const SizedBox(width: 16),
         ],
       ),
-      body: _logs == null && _error == null
+      body: _logs == null && !_hasError
           ? const Center(child: CircularProgressIndicator())
           : Column(
               children: [
@@ -128,10 +137,11 @@ class _CareHistoryScreenState extends State<CareHistoryScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        if (_error != null)
+                        if (_hasError)
                           Padding(
                             padding: const EdgeInsets.only(bottom: 16),
-                            child: Text(_error!, style: const TextStyle(color: Colors.red)),
+                            child: Text(AppLocalizations.of(context)!.historyLoadFailed,
+                                style: const TextStyle(color: Colors.red)),
                           ),
                         // Upper counts card — totales reales del historial completo.
                         Container(
@@ -150,7 +160,7 @@ class _CareHistoryScreenState extends State<CareHistoryScreen> {
                                   iconColor: const Color(0xFF4A90D9),
                                   iconBgColor: const Color(0xFFEAF3FC),
                                   value: '$riegos',
-                                  label: 'Riegos',
+                                  label: AppLocalizations.of(context)!.waterings,
                                 ),
                               ),
                               Container(width: 1, height: 40, color: const Color(0xFFE2E7E4)),
@@ -160,7 +170,7 @@ class _CareHistoryScreenState extends State<CareHistoryScreen> {
                                   iconColor: const Color(0xFF8A9A65),
                                   iconBgColor: const Color(0xFFEFF5E4),
                                   value: '$fertilizaciones',
-                                  label: 'Fertilización',
+                                  label: AppLocalizations.of(context)!.careTypeFertilizing,
                                 ),
                               ),
                               Container(width: 1, height: 40, color: const Color(0xFFE2E7E4)),
@@ -170,7 +180,7 @@ class _CareHistoryScreenState extends State<CareHistoryScreen> {
                                   iconColor: const Color(0xFFF56B1C),
                                   iconBgColor: const Color(0xFFFFF0EC),
                                   value: '$podas',
-                                  label: 'Podas',
+                                  label: AppLocalizations.of(context)!.prunings,
                                 ),
                               ),
                             ],
@@ -186,13 +196,11 @@ class _CareHistoryScreenState extends State<CareHistoryScreen> {
                                 scrollDirection: Axis.horizontal,
                                 child: Row(
                                   children: [
-                                    _buildFilterChip('Todos'),
-                                    const SizedBox(width: 8),
-                                    _buildFilterChip('Riegos'),
-                                    const SizedBox(width: 8),
-                                    _buildFilterChip('Podas'),
-                                    const SizedBox(width: 8),
-                                    _buildFilterChip('Abonos'),
+                                    for (final f in _kFilters) ...[
+                                      if (f != _kFilters.first)
+                                        const SizedBox(width: 8),
+                                      _buildFilterChip(f),
+                                    ],
                                   ],
                                 ),
                               ),
@@ -207,8 +215,8 @@ class _CareHistoryScreenState extends State<CareHistoryScreen> {
                             child: Center(
                               child: Text(
                                 logs.isEmpty
-                                    ? 'Aún no has registrado cuidados para esta planta.'
-                                    : 'No hay eventos para este filtro.',
+                                    ? AppLocalizations.of(context)!.noCareLoggedForPlant
+                                    : AppLocalizations.of(context)!.noEventsForFilter,
                                 style: const TextStyle(color: Color(0xFF807F7F)),
                               ),
                             ),
@@ -227,7 +235,7 @@ class _CareHistoryScreenState extends State<CareHistoryScreen> {
                                   ),
                                 ),
                                 Text(
-                                  '${entry.value.length} evento${entry.value.length == 1 ? '' : 's'}',
+                                  AppLocalizations.of(context)!.eventsCount(entry.value.length),
                                   style: const TextStyle(fontSize: 12, color: Color(0xFF807F7F)),
                                 ),
                               ],
@@ -301,7 +309,8 @@ class _CareHistoryScreenState extends State<CareHistoryScreen> {
                                                       Row(
                                                         children: [
                                                           Text(
-                                                            visual.label,
+                                                            careTaskLabel(
+                                                                context, log.taskType),
                                                             style: const TextStyle(
                                                               fontWeight: FontWeight.bold,
                                                               fontSize: 14,
@@ -310,7 +319,7 @@ class _CareHistoryScreenState extends State<CareHistoryScreen> {
                                                           ),
                                                           const SizedBox(width: 8),
                                                           Text(
-                                                            _formatDay(log.performedAt),
+                                                            formatDayMonth(context, log.performedAt),
                                                             style: const TextStyle(
                                                               fontSize: 11,
                                                               color: Color(0xFF807F7F),
@@ -349,8 +358,7 @@ class _CareHistoryScreenState extends State<CareHistoryScreen> {
                     ),
                     onPressed: () => _showComingSoon(context),
                     icon: const Icon(Icons.calendar_today_rounded, size: 16),
-                    label: const Text(
-                      'Exportar a calendario',
+                    label: Text(AppLocalizations.of(context)!.exportToCalendar,
                       style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                     ),
                   ),
@@ -361,14 +369,7 @@ class _CareHistoryScreenState extends State<CareHistoryScreen> {
   }
 
   void _showComingSoon(BuildContext context) {
-    showAppToast(context, 'Esta función estará disponible próximamente.');
-  }
-
-  String _formatDay(DateTime dt) {
-    const monthsShort = [
-      'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic',
-    ];
-    return '${dt.day} ${monthsShort[dt.month - 1]}';
+    showAppToast(context, AppLocalizations.of(context)!.featureComingSoon);
   }
 
   Widget _buildMetricCol({
@@ -403,11 +404,12 @@ class _CareHistoryScreenState extends State<CareHistoryScreen> {
     );
   }
 
-  Widget _buildFilterChip(String label) {
-    final isSelected = _selectedFilter == label;
+  Widget _buildFilterChip(String key) {
+    final isSelected = _selectedFilter == key;
+    final label = _filterLabel(context, key);
 
     return GestureDetector(
-      onTap: () => setState(() => _selectedFilter = label),
+      onTap: () => setState(() => _selectedFilter = key),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(

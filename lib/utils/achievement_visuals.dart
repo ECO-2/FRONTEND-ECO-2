@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend_eco_2/models/achievement.dart';
 import 'package:frontend_eco_2/providers/missions_provider.dart';
+import 'package:frontend_eco_2/utils/achievement_labels.dart';
 
 /// Identidad visual de un logro: su vector y su color.
 class AchievementVisual {
@@ -24,25 +25,26 @@ const _inicio = Color(0xFF10454F); // primeros pasos
 /// Botánica") mostraban exactamente la misma gota, así que la pantalla de
 /// trofeos parecía una lista repetida y no transmitía progresión.
 ///
-/// Se mapea por nombre porque es lo que el usuario ve y lo que distingue un
-/// hito de otro; si aparece un logro nuevo que aún no está aquí, se cae a un
-/// icono por tipo de condición en vez de romperse.
-const Map<String, AchievementVisual> _byName = {
+/// Se mapea por la clave estable de [achievementKey] (condición + valor) y no
+/// por el nombre: el nombre llega del backend en español y ahora se traduce en
+/// la app, así que buscar por él dejaría todos los logros con el icono de
+/// respaldo en cuanto la app estuviera en inglés.
+const Map<String, AchievementVisual> _byKey = {
   // Progresión de cuidados: de la mano que riega a la corona.
-  'Manos a la Obra': AchievementVisual(Icons.pan_tool_rounded, _cuidado),
-  'Cuidador Constante': AchievementVisual(Icons.opacity_rounded, _cuidado),
-  'Guardián Verde': AchievementVisual(Icons.shield_moon_rounded, _cuidado),
-  'Maestro del Cuidado': AchievementVisual(Icons.workspace_premium_rounded, _cuidado),
-  'Leyenda Botánica': AchievementVisual(Icons.military_tech_rounded, _cuidado),
+  'hands_on': AchievementVisual(Icons.pan_tool_rounded, _cuidado),
+  'steady_carer': AchievementVisual(Icons.opacity_rounded, _cuidado),
+  'green_guardian': AchievementVisual(Icons.shield_moon_rounded, _cuidado),
+  'care_master': AchievementVisual(Icons.workspace_premium_rounded, _cuidado),
+  'botanical_legend': AchievementVisual(Icons.military_tech_rounded, _cuidado),
 
   // Progresión de colección: del brote al bosque.
-  'Mi Pequeño Jardín': AchievementVisual(Icons.local_florist_rounded, _coleccion),
-  'Coleccionista': AchievementVisual(Icons.forest_rounded, _coleccion),
+  'my_little_garden': AchievementVisual(Icons.local_florist_rounded, _coleccion),
+  'collector': AchievementVisual(Icons.forest_rounded, _coleccion),
 
   // Otras familias.
-  'Mi Primer Espacio': AchievementVisual(Icons.meeting_room_rounded, _espacio),
-  'Ojo Botánico': AchievementVisual(Icons.center_focus_strong_rounded, _descubrir),
-  'Primeros Pasos': AchievementVisual(Icons.flag_rounded, _inicio),
+  'first_room': AchievementVisual(Icons.meeting_room_rounded, _espacio),
+  'botanical_eye': AchievementVisual(Icons.center_focus_strong_rounded, _descubrir),
+  'first_steps': AchievementVisual(Icons.flag_rounded, _inicio),
 };
 
 const Map<String, AchievementVisual> _byCondition = {
@@ -54,7 +56,8 @@ const Map<String, AchievementVisual> _byCondition = {
 };
 
 AchievementVisual visualForAchievement(Achievement achievement) {
-  return _byName[achievement.name] ??
+  final key = achievementKey(achievement.conditionType, achievement.conditionValue);
+  return (key == null ? null : _byKey[key]) ??
       _byCondition[achievement.conditionType] ??
       const AchievementVisual(Icons.emoji_events_rounded, Color(0xFFFABF2E));
 }

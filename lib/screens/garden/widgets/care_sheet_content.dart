@@ -6,15 +6,26 @@ import 'package:frontend_eco_2/providers/providers.dart';
 import 'package:frontend_eco_2/utils/achievement_feedback.dart';
 import 'package:frontend_eco_2/widgets/common/app_toast.dart';
 import 'species_data.dart';
+import 'package:frontend_eco_2/utils/date_labels.dart';
 
-// Etiqueta visible en español -> task_type real que espera el backend
-// (enum TaskType de Prisma: watering/fertilizing/pruning/repotting/...).
-const Map<String, String> _kCareTaskTypes = {
-  'Riego': 'watering',
-  'Fertilización': 'fertilizing',
-  'Poda': 'pruning',
-  'Trasplante': 'repotting',
-};
+// El tipo de cuidado se guarda ya con el valor que espera el backend (enum
+// TaskType de Prisma). Antes se guardaba la etiqueta visible en español y un
+// mapa la traducía: con la app en inglés la clave no existía y reventaba.
+
+/// Etiqueta visible de un tipo de cuidado.
+String careTypeLabel(BuildContext context, String taskType) {
+  final l = AppLocalizations.of(context)!;
+  switch (taskType) {
+    case 'fertilizing':
+      return l.careTypeFertilizing;
+    case 'pruning':
+      return l.careTypePruning;
+    case 'repotting':
+      return l.careTypeRepotting;
+    default:
+      return l.careTypeWatering;
+  }
+}
 
 class CareSheetContent extends StatefulWidget {
   final UserPlant plant;
@@ -31,7 +42,7 @@ class CareSheetContent extends StatefulWidget {
 }
 
 class _CareSheetContentState extends State<CareSheetContent> {
-  String _selectedType = 'Riego';
+  String _selectedType = 'watering';
   String _selectedDateOption = 'Hoy';
   DateTime _customDate = DateTime.now();
   final TextEditingController _noteController = TextEditingController();
@@ -41,14 +52,6 @@ class _CareSheetContentState extends State<CareSheetContent> {
   void dispose() {
     _noteController.dispose();
     super.dispose();
-  }
-
-  String _formatSuggestionDate(DateTime dt) {
-    final months = [
-      'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
-      'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'
-    ];
-    return '${dt.day} ${months[dt.month - 1]} ${dt.year}';
   }
 
   @override
@@ -68,16 +71,16 @@ class _CareSheetContentState extends State<CareSheetContent> {
     
     String daysText;
     if (daysDiff == 0) {
-      daysText = 'hoy';
+      daysText = AppLocalizations.of(context)!.today.toLowerCase();
     } else if (daysDiff == 1) {
-      daysText = 'en 1 día';
+      daysText = AppLocalizations.of(context)!.inOneDay;
     } else if (daysDiff < 0) {
-      daysText = 'hace ${-daysDiff} días';
+      daysText = AppLocalizations.of(context)!.daysAgoShort(-daysDiff);
     } else {
-      daysText = 'en $daysDiff días';
+      daysText = AppLocalizations.of(context)!.inNDays(daysDiff);
     }
     
-    final nextDateStr = _formatSuggestionDate(nextDate);
+    final nextDateStr = formatMediumDate(context, nextDate);
     final nextSuggestedCareText = "$nextDateStr · $daysText";
 
     return Padding(
@@ -116,8 +119,7 @@ class _CareSheetContentState extends State<CareSheetContent> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Registrar cuidado',
+                        Text(AppLocalizations.of(context)!.logCare,
                           style: TextStyle(
                             fontFamily: 'DM Sans',
                             fontWeight: FontWeight.bold,
@@ -173,7 +175,7 @@ class _CareSheetContentState extends State<CareSheetContent> {
                 children: [
                   Expanded(
                     child: _buildTypeCard(
-                      type: 'Riego',
+                      type: 'watering',
                       icon: Icons.water_drop_rounded,
                       activeBgColor: const Color(0xFF164650),
                       inactiveIconBgColor: const Color(0xFFEAF3FC),
@@ -183,7 +185,7 @@ class _CareSheetContentState extends State<CareSheetContent> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: _buildTypeCard(
-                      type: 'Fertilización',
+                      type: 'fertilizing',
                       icon: Icons.grain_rounded,
                       activeBgColor: const Color(0xFF164650),
                       inactiveIconBgColor: const Color(0xFFEFF5E4),
@@ -197,7 +199,7 @@ class _CareSheetContentState extends State<CareSheetContent> {
                 children: [
                   Expanded(
                     child: _buildTypeCard(
-                      type: 'Poda',
+                      type: 'pruning',
                       icon: Icons.content_cut_rounded,
                       activeBgColor: const Color(0xFF164650),
                       inactiveIconBgColor: const Color(0xFFFFF0EC),
@@ -207,7 +209,7 @@ class _CareSheetContentState extends State<CareSheetContent> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: _buildTypeCard(
-                      type: 'Trasplante',
+                      type: 'repotting',
                       icon: Icons.upload_rounded,
                       activeBgColor: const Color(0xFF164650),
                       inactiveIconBgColor: const Color(0xFFF0F2F1),
@@ -219,8 +221,7 @@ class _CareSheetContentState extends State<CareSheetContent> {
               const SizedBox(height: 24),
               
               // Fecha label
-              const Text(
-                'Fecha',
+              Text(AppLocalizations.of(context)!.date,
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 14,
@@ -242,8 +243,7 @@ class _CareSheetContentState extends State<CareSheetContent> {
               const SizedBox(height: 24),
               
               // Nota label
-              const Text(
-                'Nota (opcional)',
+              Text(AppLocalizations.of(context)!.noteOptional,
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 14,
@@ -258,7 +258,7 @@ class _CareSheetContentState extends State<CareSheetContent> {
                 decoration: InputDecoration(
                   filled: true,
                   fillColor: const Color(0xFFEFF1F0),
-                  hintText: 'Agua tibia · ~200ml · tierra ya estaba seca',
+                  hintText: AppLocalizations.of(context)!.careNoteHint,
                   hintStyle: const TextStyle(color: Color(0xFF9CA59E), fontSize: 13),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -338,8 +338,7 @@ class _CareSheetContentState extends State<CareSheetContent> {
                           valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                         ),
                       )
-                    : const Text(
-                        'Registrar cuidado',
+                    : Text(AppLocalizations.of(context)!.logCare,
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 15,
@@ -366,7 +365,7 @@ class _CareSheetContentState extends State<CareSheetContent> {
     final missionsProvider = Provider.of<MissionsProvider>(context, listen: false);
     final unlocked = await missionsProvider.logCare(
       userPlantId: widget.plant.id,
-      taskType: _kCareTaskTypes[_selectedType]!,
+      taskType: _selectedType,
     );
 
     if (unlocked == null) {
@@ -374,7 +373,8 @@ class _CareSheetContentState extends State<CareSheetContent> {
       setState(() => _isSubmitting = false);
       showAppToast(
         context,
-        missionsProvider.errorMessage ?? 'No se pudo registrar el cuidado.',
+        missionsProvider.errorText(context) ??
+            AppLocalizations.of(context)!.careLogFailed,
         type: ToastType.error,
       );
       return;
@@ -382,13 +382,16 @@ class _CareSheetContentState extends State<CareSheetContent> {
 
     // El riego además actualiza last_watered_at, que es lo que mueve el
     // badge "necesita riego" en el resto de la app.
-    if (_selectedType == 'Riego') {
+    if (_selectedType == 'watering') {
       await plantsProvider.waterPlant(widget.plant.id, date: finalDate);
     }
 
     if (!mounted) return;
     Navigator.pop(context);
-    showAppToast(context, 'Cuidado registrado: $_selectedType 🌿', type: ToastType.success);
+    showAppToast(
+        context,
+        AppLocalizations.of(context)!.careLoggedToast(careTypeLabel(context, _selectedType)),
+        type: ToastType.success);
     showAchievementUnlockedSnackbars(context, unlocked);
   }
 
@@ -433,7 +436,7 @@ class _CareSheetContentState extends State<CareSheetContent> {
             const SizedBox(width: 12),
             Expanded(
               child: Text(
-                type,
+                careTypeLabel(context, type),
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 14,

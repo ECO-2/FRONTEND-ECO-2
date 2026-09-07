@@ -9,6 +9,20 @@ import 'package:frontend_eco_2/widgets/common/plant_card.dart';
 import 'package:frontend_eco_2/widgets/garden/add_plant_modal.dart';
 import 'package:frontend_eco_2/utils/achievement_ui.dart';
 import 'package:frontend_eco_2/utils/co2_estimate.dart';
+import 'package:frontend_eco_2/utils/achievement_labels.dart';
+
+/// Estilo unico de los titulos de seccion del dashboard.
+///
+/// Estaban escritos a mano en cada sitio y habian divergido: "Mi Jardin" y
+/// "Mi Huella Verde" iban a 22 en DM Sans, mientras "Mision Activa" se habia
+/// quedado en 16 con Inter, asi que la pantalla se veia despareja.
+const TextStyle kDashboardSectionTitle = TextStyle(
+  fontSize: 22,
+  fontWeight: FontWeight.bold,
+  color: AppColors.textPrimary,
+  fontFamily: 'DM Sans',
+);
+
 
 class HomeTab extends StatelessWidget {
   final VoidCallback onViewAll;
@@ -97,15 +111,7 @@ class HomeTab extends StatelessWidget {
           // ── Mi Huella Verde header ────────────────────
           Row(
             children: [
-              Text(
-                l.greenFootprint,
-                style: const TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
-                  fontFamily: 'DM Sans',
-                ),
-              ),
+              Text(l.greenFootprint, style: kDashboardSectionTitle),
               const SizedBox(width: 8),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
@@ -132,14 +138,9 @@ class HomeTab extends StatelessWidget {
           const SizedBox(height: 24),
 
           // ── Misión Activa ─────────────────────────────
-          const Text(
-            'Misión Activa',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
-              fontFamily: 'Inter',
-            ),
+          Text(
+            AppLocalizations.of(context)!.activeMissionCard,
+            style: kDashboardSectionTitle,
           ),
           const SizedBox(height: 12),
           _buildMissionCard(context, missionsProvider),
@@ -161,15 +162,7 @@ class HomeTab extends StatelessWidget {
       children: [
         Row(
           children: [
-            Text(
-              title,
-              style: const TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
-                fontFamily: 'DM Sans',
-              ),
-            ),
+            Text(title, style: kDashboardSectionTitle),
             if (showGardenIcon) ...[
               const SizedBox(width: 8),
               Container(
@@ -263,20 +256,19 @@ class HomeTab extends StatelessWidget {
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
-                Text(
-                  'Desbloquea funciones O2+',
-                  style: TextStyle(
+              children: [
+                Text(AppLocalizations.of(context)!.unlockO2Features,
+                  style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
                     fontSize: 14,
                     fontFamily: 'Inter',
                   ),
                 ),
-                SizedBox(height: 4),
+                const SizedBox(height: 4),
                 Text(
-                  'Canjea tus semillas o suscríbete',
-                  style: TextStyle(
+                  AppLocalizations.of(context)!.redeemSeedsOrSubscribeShort,
+                  style: const TextStyle(
                     color: AppColors.accent,
                     fontSize: 12,
                     fontFamily: 'Inter',
@@ -294,11 +286,10 @@ class HomeTab extends StatelessWidget {
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(color: AppColors.accent, width: 1),
               ),
-              child: const Row(
+              child: Row(
                 children: [
-                  Text(
-                    'Ver',
-                    style: TextStyle(
+                  Text(AppLocalizations.of(context)!.view,
+                    style: const TextStyle(
                       color: AppColors.accent,
                       fontWeight: FontWeight.bold,
                       fontSize: 13,
@@ -385,7 +376,7 @@ class HomeTab extends StatelessWidget {
                           ),
                         ),
                         TextSpan(
-                          text: 'g/dia',
+                          text: AppLocalizations.of(context)!.gramsPerDayUnit,
                           style: TextStyle(
                             color: Colors.white.withValues(alpha: 0.9),
                             fontSize: 18,
@@ -453,14 +444,14 @@ class HomeTab extends StatelessWidget {
           border: Border.all(color: AppColors.primary.withValues(alpha: 0.25), width: 1),
         ),
         padding: const EdgeInsets.all(16),
-        child: const Row(
+        child: Row(
           children: [
-            Icon(Icons.emoji_events_rounded, color: AppColors.primary, size: 22),
-            SizedBox(width: 10),
+            const Icon(Icons.emoji_events_rounded, color: AppColors.primary, size: 22),
+            const SizedBox(width: 10),
             Expanded(
               child: Text(
-                '¡Completaste todos los logros disponibles!',
-                style: TextStyle(color: AppColors.textPrimary, fontFamily: 'Inter'),
+                AppLocalizations.of(context)!.allAchievementsDone,
+                style: const TextStyle(color: AppColors.textPrimary, fontFamily: 'Inter'),
               ),
             ),
           ],
@@ -472,7 +463,9 @@ class HomeTab extends StatelessWidget {
     final current = mp.progressFor(achievement);
     final clampedProgress =
         achievement.conditionValue == 0 ? 1.0 : (current / achievement.conditionValue).clamp(0.0, 1.0);
-    final unitLabel = achievement.conditionType == AchievementConditions.careLogs ? 'cuidados' : 'plantas';
+    final unitLabel = achievement.conditionType == AchievementConditions.careLogs
+        ? AppLocalizations.of(context)!.unitCares
+        : AppLocalizations.of(context)!.unitPlants;
 
     return PressableCard(
       onTap: () => showAchievementDetailSheet(
@@ -502,7 +495,11 @@ class HomeTab extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      achievement.name,
+                      // El nombre llega del backend en espanol; se traduce por
+                      // condicion + valor, igual que en Misiones y Trofeos.
+                      achievementName(context, achievement),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 24,
@@ -513,7 +510,9 @@ class HomeTab extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       achievement.conditionType == AchievementConditions.onboardingCompleted
-                          ? (current >= achievement.conditionValue ? 'Completado' : 'Pendiente')
+                          ? (current >= achievement.conditionValue
+                              ? AppLocalizations.of(context)!.completed
+                              : AppLocalizations.of(context)!.pending)
                           : '$current/${achievement.conditionValue} $unitLabel',
                       style: const TextStyle(
                         fontSize: 16,
@@ -623,9 +622,9 @@ class HomeTab extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 10),
-                  const Text(
-                    'Añadir Planta',
-                    style: TextStyle(
+                  Text(
+                    AppLocalizations.of(context)!.addPlant,
+                    style: const TextStyle(
                       fontFamily: 'DM Sans',
                       fontWeight: FontWeight.w700,
                       fontSize: 14,

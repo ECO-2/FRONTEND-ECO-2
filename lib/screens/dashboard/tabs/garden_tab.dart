@@ -106,7 +106,8 @@ class _GardenTabState extends State<GardenTab> {
     if (!success) {
       showAppToast(
         context,
-        plantsProvider.errorMessage ?? 'No se pudo agregar la planta.',
+        plantsProvider.errorText(context) ??
+            AppLocalizations.of(context)!.plantAddFailed,
         type: ToastType.error,
       );
       return;
@@ -116,7 +117,9 @@ class _GardenTabState extends State<GardenTab> {
     final unlocked = await missionsProvider.onPlantAdded(plantsProvider.userPlants.length);
     if (!context.mounted) return;
 
-    showAppToast(context, '¡${species.commonName} añadida a tu jardín! 🌿', type: ToastType.success);
+    showAppToast(context,
+        AppLocalizations.of(context)!.plantAddedToGarden(species.commonName),
+        type: ToastType.success);
     showAchievementUnlockedSnackbars(context, unlocked);
   }
 
@@ -160,7 +163,9 @@ class _GardenTabState extends State<GardenTab> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text(
-                  showCatalog ? 'Jardín' : 'Mi Jardín',
+                  showCatalog
+                      ? AppLocalizations.of(context)!.navGarden
+                      : AppLocalizations.of(context)!.myGarden,
                   style: const TextStyle(
                     fontFamily: 'DM Sans',
                     fontWeight: FontWeight.w700,
@@ -169,58 +174,14 @@ class _GardenTabState extends State<GardenTab> {
                   ),
                 ),
                 // Pill Toggle Selector
-                Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFEFF2F0),
-                    borderRadius: BorderRadius.circular(24),
-                  ),
-                  child: Row(
-                    children: [
-                      GestureDetector(
-                        onTap: () => plantsProvider.setShowCatalogTab(true),
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 150),
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: showCatalog ? _kDark : Colors.transparent,
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Text(
-                            'Jardín',
-                            style: TextStyle(
-                              fontFamily: 'DM Sans',
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12,
-                              color: showCatalog ? Colors.white : _kTextMuted,
-                            ),
-                          ),
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () => plantsProvider.setShowCatalogTab(false),
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 150),
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: !showCatalog ? _kDark : Colors.transparent,
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Text(
-                            'Mi Jardín',
-                            style: TextStyle(
-                              fontFamily: 'DM Sans',
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12,
-                              color: !showCatalog ? Colors.white : _kTextMuted,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                //
+                // Antes cada mitad era su propio AnimatedContainer: al cambiar,
+                // una se apagaba y la otra se encendia a la vez, y eso se leia
+                // como un parpadeo. Ahora hay una sola pastilla que se desliza
+                // de un lado al otro, y el color del texto se interpola.
+                _GardenToggle(
+                  showCatalog: showCatalog,
+                  onChanged: plantsProvider.setShowCatalogTab,
                 ),
               ],
             ),
@@ -228,9 +189,35 @@ class _GardenTabState extends State<GardenTab> {
 
           // Render view based on toggle
           Expanded(
-            child: showCatalog
-                ? _buildCatalogView(context, plantsProvider)
-                : _buildMyGardenView(context, plantsProvider, plants),
+            // El contenido tambien se cruza con una transicion corta en vez de
+            // reemplazarse de golpe.
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 220),
+              switchInCurve: Curves.easeOut,
+              switchOutCurve: Curves.easeIn,
+              transitionBuilder: (child, animation) {
+                final slide = Tween<Offset>(
+                  // Entra desde el lado al que corresponde: el catalogo desde
+                  // la izquierda, Mi Jardin desde la derecha.
+                  begin: Offset(child.key == const ValueKey('catalog') ? -0.04 : 0.04, 0),
+                  end: Offset.zero,
+                ).animate(animation);
+                return FadeTransition(
+                  opacity: animation,
+                  child: SlideTransition(position: slide, child: child),
+                );
+              },
+              child: showCatalog
+                  ? KeyedSubtree(
+                      key: const ValueKey('catalog'),
+                      child: _buildCatalogView(context, plantsProvider),
+                    )
+                  : KeyedSubtree(
+                      key: const ValueKey('my_garden'),
+                      child:
+                          _buildMyGardenView(context, plantsProvider, plants),
+                    ),
+            ),
           ),
         ],
       ),
@@ -725,8 +712,8 @@ class _GardenTabState extends State<GardenTab> {
         children: [
           Icon(Icons.search_off_rounded, size: 40, color: _kTextMuted.withValues(alpha: 0.6)),
           const SizedBox(height: 12),
-          const Text(
-            'No se encontraron especies con estos filtros',
+          Text(
+            AppLocalizations.of(context)!.noSpeciesMatchFilters,
             textAlign: TextAlign.center,
             style: TextStyle(
               fontFamily: 'Inter',
@@ -815,8 +802,7 @@ class _GardenTabState extends State<GardenTab> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
-                        'Filtros',
+                      Text(AppLocalizations.of(context)!.filters,
                         style: TextStyle(
                           fontFamily: 'DM Sans',
                           fontWeight: FontWeight.bold,
@@ -830,8 +816,7 @@ class _GardenTabState extends State<GardenTab> {
                           tempDifficulty = 'all';
                           tempLight = 'all';
                         }),
-                        child: const Text(
-                          'Limpiar',
+                        child: Text(AppLocalizations.of(context)!.clear,
                           style: TextStyle(color: _kTextMuted, fontFamily: 'Inter'),
                         ),
                       ),
@@ -907,8 +892,7 @@ class _GardenTabState extends State<GardenTab> {
                         });
                         Navigator.pop(sheetContext);
                       },
-                      child: const Text(
-                        'Aplicar filtros',
+                      child: Text(AppLocalizations.of(context)!.applyFilters,
                         style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Inter'),
                       ),
                     ),
@@ -1360,8 +1344,8 @@ class _GardenTabState extends State<GardenTab> {
         children: [
           Icon(Icons.eco_outlined, size: 40, color: _kTextMuted.withValues(alpha: 0.6)),
           const SizedBox(height: 12),
-          const Text(
-            'No tienes plantas en esta categoría todavía',
+          Text(
+            AppLocalizations.of(context)!.noPlantsInCategory,
             textAlign: TextAlign.center,
             style: TextStyle(fontFamily: 'Inter', fontWeight: FontWeight.w600, color: _kTextMuted),
           ),
@@ -1551,9 +1535,7 @@ class _GardenTabState extends State<GardenTab> {
           const SizedBox(width: 10),
           Expanded(
             child: Text(
-              count == 1
-                  ? '1 planta necesita atención hoy'
-                  : '$count plantas necesitan atención hoy',
+              AppLocalizations.of(context)!.needsAttentionToday(count),
               style: const TextStyle(
                 fontFamily: 'DM Sans',
                 fontWeight: FontWeight.w600,
@@ -1571,12 +1553,11 @@ class _GardenTabState extends State<GardenTab> {
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(color: _kDark, width: 1.2),
               ),
-              child: const Row(
+              child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
-                    'Ver',
-                    style: TextStyle(
+                  Text(AppLocalizations.of(context)!.view,
+                    style: const TextStyle(
                       fontFamily: 'DM Sans',
                       fontWeight: FontWeight.bold,
                       fontSize: 12,
@@ -1652,8 +1633,8 @@ class _GardenTabState extends State<GardenTab> {
                       ],
                     ),
                     const SizedBox(height: 6),
-                    const Text(
-                      'Añadir Planta',
+                    Text(
+                      AppLocalizations.of(context)!.addPlant,
                       style: TextStyle(
                         fontFamily: 'DM Sans',
                         fontWeight: FontWeight.w700,
@@ -1749,7 +1730,7 @@ class _DashedCornerPainter extends CustomPainter {
 
 class _GardenSpecies {
   final String scientificName;
-  final List<String> tags;
+  final List<SpeciesTag> tags;
   final Color imageBg;
   final String? assetImage;
   final String? imageUrl;
@@ -1768,11 +1749,16 @@ class _GardenSpecies {
   // Real catalog species (real UUID from the backend) don't have a legacy
   // illustration, but they do have a real photo (imageUrl) — use that, and
   // fall back to a category-based icon/color only if it's missing.
-  factory _GardenSpecies.fromReal(PlantSpecies species) {
+  factory _GardenSpecies.fromReal(BuildContext context, PlantSpecies species) {
     final visual = visualForCategory(species.category);
     return _GardenSpecies(
       scientificName: species.scientificName,
-      tags: species.tags,
+      tags: speciesTags(
+        context,
+        category: species.category,
+        lightRequirement: species.lightRequirement,
+        waterFrequencyDays: species.waterFrequencyDays,
+      ),
       imageBg: visual.background,
       imageUrl: species.imageUrl,
       placeholderIcon: visual.icon,
@@ -1783,7 +1769,7 @@ class _GardenSpecies {
 
 // ── Swipe-to-delete — compartido entre la tarjeta de lista y de cuadrícula ──
 
-Widget _buildDeleteBackground({double borderRadius = 20}) {
+Widget _buildDeleteBackground(BuildContext context, {double borderRadius = 20}) {
   return Container(
     alignment: Alignment.centerLeft,
     padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -1791,14 +1777,13 @@ Widget _buildDeleteBackground({double borderRadius = 20}) {
       color: const Color(0xFFD32F2F),
       borderRadius: BorderRadius.circular(borderRadius),
     ),
-    child: const Row(
+    child: Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(Icons.delete_outline_rounded, color: Colors.white, size: 22),
-        SizedBox(width: 8),
-        Text(
-          'Eliminar',
-          style: TextStyle(
+        const Icon(Icons.delete_outline_rounded, color: Colors.white, size: 22),
+        const SizedBox(width: 8),
+        Text(AppLocalizations.of(context)!.delete,
+          style: const TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
             fontFamily: 'Inter',
@@ -1818,16 +1803,17 @@ Future<bool> _confirmDelete(BuildContext context, String nickname) async {
   final confirmed = await showDialog<bool>(
     context: context,
     builder: (dialogContext) => AlertDialog(
-      title: const Text('¿Eliminar planta?'),
-      content: Text('Se eliminará "$nickname" de tu jardín. Esta acción no se puede deshacer.'),
+      title: Text(AppLocalizations.of(dialogContext)!.deletePlantTitle),
+      content: Text(
+          AppLocalizations.of(dialogContext)!.deletePlantBody(nickname)),
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(dialogContext, false),
-          child: const Text('Cancelar'),
+          child: Text(AppLocalizations.of(dialogContext)!.cancel),
         ),
         TextButton(
           onPressed: () => Navigator.pop(dialogContext, true),
-          child: const Text('Eliminar', style: TextStyle(color: Colors.red)),
+          child: Text(AppLocalizations.of(dialogContext)!.delete, style: TextStyle(color: Colors.red)),
         ),
       ],
     ),
@@ -1842,7 +1828,8 @@ Future<bool> _confirmDelete(BuildContext context, String nickname) async {
 Future<void> _runDelete(BuildContext context, Future<bool> Function() onDelete) async {
   final success = await onDelete();
   if (!success && context.mounted) {
-    showAppToast(context, 'No se pudo eliminar la planta.', type: ToastType.error);
+    showAppToast(context, AppLocalizations.of(context)!.plantDeleteFailed,
+        type: ToastType.error);
   }
 }
 
@@ -1869,7 +1856,7 @@ class _PlantListCard extends StatelessWidget {
     final status = WateringStatus.of(plant, species.waterFrequencyDays);
     final neverWatered = status.neverWatered;
     final needsWater = status.needsWater;
-    final sp = _GardenSpecies.fromReal(species);
+    final sp = _GardenSpecies.fromReal(context, species);
 
     // Status pill — siempre con ícono de check (estilo Figma), el color y el
     // texto reflejan el estado real: días exactos sin riego cuando ya toca,
@@ -1878,16 +1865,18 @@ class _PlantListCard extends StatelessWidget {
     final statusBorderColor = needsWater ? const Color(0xFFFFCCA0) : const Color(0xFF8A9A65);
     final statusTextColor = needsWater ? const Color(0xFFB94E13) : const Color(0xFF10454F);
     final overdueBy = status.daysOverdue;
+    final l = AppLocalizations.of(context)!;
     final statusText = !needsWater
-        ? (neverWatered ? 'Sin riego aún' : 'Al día')
+        ? (neverWatered ? l.noWateringYet : l.upToDate)
         : overdueBy <= 0
-            ? 'Riego hoy'
-            : '$overdueBy día${overdueBy == 1 ? '' : 's'} de retraso';
+            ? l.wateringToday
+            : l.daysOverdueLabel(overdueBy);
     const statusIcon = Icons.check_rounded;
 
     final daysLabel = neverWatered
-        ? 'Sin riego registrado · c/${species.waterFrequencyDays}d'
-        : '${status.daysSinceReference}d sin riego · c/${species.waterFrequencyDays}d';
+        ? l.noWateringLoggedEvery(species.waterFrequencyDays)
+        : l.daysWithoutWaterEvery(
+            status.daysSinceReference, species.waterFrequencyDays);
 
     return MediaQuery(
       // Bloquea el escalado de fuente del sistema solo para esta tarjeta —
@@ -1897,7 +1886,7 @@ class _PlantListCard extends StatelessWidget {
       child: Dismissible(
       key: ValueKey('plant-list-${plant.id}'),
       direction: DismissDirection.startToEnd,
-      background: _buildDeleteBackground(),
+      background: _buildDeleteBackground(context),
       confirmDismiss: (_) => _confirmDelete(context, plant.nickname),
       onDismissed: (_) => _runDelete(context, onDelete),
       child: GestureDetector(
@@ -2058,10 +2047,11 @@ class _PlantListCard extends StatelessWidget {
                     const SizedBox(height: 10),
 
                     // Status Row (Status Pill + Days Label)
-                    Wrap(
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      spacing: 8,
-                      runSpacing: 4,
+                    // Fila y no Wrap: con la app en ingles la etiqueta de
+                    // dias es mas larga, el Wrap saltaba a una segunda linea y
+                    // la tarjeta, que tiene alto fijo, se desbordaba por abajo.
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Container(
                           padding: const EdgeInsets.symmetric(
@@ -2085,24 +2075,33 @@ class _PlantListCard extends StatelessWidget {
                                 color: statusTextColor,
                               ),
                               const SizedBox(width: 4),
-                              Text(
-                                statusText,
-                                style: TextStyle(
-                                  fontFamily: 'Inter',
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 11,
-                                  color: statusTextColor,
+                              Flexible(
+                                child: Text(
+                                  statusText,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontFamily: 'Inter',
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 11,
+                                    color: statusTextColor,
+                                  ),
                                 ),
                               ),
                             ],
                           ),
                         ),
-                        Text(
-                          daysLabel,
-                          style: const TextStyle(
-                            fontFamily: 'Inter',
-                            fontSize: 12,
-                            color: Color(0xFF807F7F),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            daysLabel,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontFamily: 'Inter',
+                              fontSize: 12,
+                              color: Color(0xFF807F7F),
+                            ),
                           ),
                         ),
                       ],
@@ -2161,7 +2160,7 @@ class _PlantGridCard extends StatelessWidget {
       child: Dismissible(
       key: ValueKey('plant-grid-${plant.id}'),
       direction: DismissDirection.startToEnd,
-      background: _buildDeleteBackground(borderRadius: 20),
+      background: _buildDeleteBackground(context, borderRadius: 20),
       confirmDismiss: (_) => _confirmDelete(context, plant.nickname),
       onDismissed: (_) => _runDelete(context, onDelete),
       child: GestureDetector(
@@ -2264,6 +2263,91 @@ class _PlantGridCard extends StatelessWidget {
         ),
       ),
       ),
+      ),
+    );
+  }
+}
+
+/// Interruptor Jardín / Mi Jardín con una pastilla que se desliza.
+///
+/// La versión anterior pintaba dos `AnimatedContainer` independientes: al
+/// cambiar, uno perdía el fondo y el otro lo ganaba en el mismo instante, lo
+/// que se percibía como un parpadeo en lugar de un movimiento.
+class _GardenToggle extends StatelessWidget {
+  final bool showCatalog;
+  final ValueChanged<bool> onChanged;
+
+  const _GardenToggle({required this.showCatalog, required this.onChanged});
+
+  static const _duration = Duration(milliseconds: 260);
+  static const _curve = Curves.easeOutCubic;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
+
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: const Color(0xFFEFF2F0),
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: IntrinsicWidth(
+        child: Stack(
+          children: [
+            // La pastilla ocupa media fila y se alinea a un extremo u otro,
+            // así que la anchura se adapta sola al texto de cada idioma.
+            Positioned.fill(
+              child: AnimatedAlign(
+                duration: _duration,
+                curve: _curve,
+                alignment:
+                    showCatalog ? Alignment.centerLeft : Alignment.centerRight,
+                child: FractionallySizedBox(
+                  widthFactor: 0.5,
+                  heightFactor: 1,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: _kDark,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _half(context, l.navGarden, selected: showCatalog, value: true),
+                _half(context, l.myGarden, selected: !showCatalog, value: false),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _half(BuildContext context, String label,
+      {required bool selected, required bool value}) {
+    return Expanded(
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () => onChanged(value),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+          child: AnimatedDefaultTextStyle(
+            duration: _duration,
+            curve: _curve,
+            style: TextStyle(
+              fontFamily: 'DM Sans',
+              fontWeight: FontWeight.bold,
+              fontSize: 12,
+              color: selected ? Colors.white : _kTextMuted,
+            ),
+            child: Text(label, textAlign: TextAlign.center),
+          ),
+        ),
       ),
     );
   }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend_eco_2/l10n/app_localizations.dart';
 import 'package:frontend_eco_2/models/models.dart';
 import 'package:frontend_eco_2/utils/care_task_labels.dart';
+import 'package:frontend_eco_2/utils/date_labels.dart';
 
 /// Historial real de cuidados de una planta (GET /care/plants/{id}/logs).
 /// Antes esto mostraba 2 de 3 entradas completamente inventadas
@@ -23,10 +24,10 @@ class CareHistoryList extends StatelessWidget {
           borderRadius: BorderRadius.circular(14),
           border: Border.all(color: const Color(0xFFE2E7E4)),
         ),
-        child: const Text(
-          'Aún no has registrado cuidados para esta planta.',
+        child: Text(
+          AppLocalizations.of(context)!.noCareLoggedForPlant,
           textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 12, color: Color(0xFF807F7F), fontFamily: 'Inter'),
+          style: const TextStyle(fontSize: 12, color: Color(0xFF807F7F), fontFamily: 'Inter'),
         ),
       );
     }
@@ -60,7 +61,7 @@ class CareHistoryList extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  visual.label,
+                  careTaskLabel(context, log.taskType),
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 14,
@@ -69,7 +70,7 @@ class CareHistoryList extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  _formatDate(log.performedAt),
+                  formatMediumDate(context, log.performedAt),
                   style: const TextStyle(
                     fontSize: 12,
                     color: Color(0xFF807F7F),
@@ -88,11 +89,4 @@ class CareHistoryList extends StatelessWidget {
     );
   }
 
-  String _formatDate(DateTime dt) {
-    const months = [
-      'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
-      'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic',
-    ];
-    return '${dt.day.toString().padLeft(2, '0')} ${months[dt.month - 1]} ${dt.year}';
-  }
 }

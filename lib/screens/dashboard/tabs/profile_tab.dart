@@ -10,10 +10,15 @@ import 'package:frontend_eco_2/widgets/common/stat_card.dart';
 import 'package:frontend_eco_2/widgets/common/settings_option_tile.dart';
 
 class ProfileTab extends StatelessWidget {
-  final VoidCallback? onNavigateToGarden;
+  /// Abre la pestaña Jardín en el catálogo de especies.
+  ///
+  /// Es un callback distinto de "ir a Mi Jardín": el contenedor decide en qué
+  /// vista aterrizar, y antes esta fila ponía el interruptor en catálogo y el
+  /// callback lo volvía a poner en Mi Jardín justo después.
+  final VoidCallback? onNavigateToCatalog;
   final VoidCallback? onStartTour;
 
-  const ProfileTab({super.key, this.onNavigateToGarden, this.onStartTour});
+  const ProfileTab({super.key, this.onNavigateToCatalog, this.onStartTour});
 
   /// "Nivel 3 · Retoño" con los datos reales del backend. Si el progreso aún
   /// no ha cargado, se muestra el nivel base en vez de un texto inventado.
@@ -205,20 +210,20 @@ class ProfileTab extends StatelessWidget {
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
+                    children: [
                       Text(
-                        'Plan gratuito activo',
-                        style: TextStyle(
+                        AppLocalizations.of(context)!.managePlusFree,
+                        style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           color: AppColors.primary,
                           fontSize: 15,
                           fontFamily: 'Inter',
                         ),
                       ),
-                      SizedBox(height: 4),
+                      const SizedBox(height: 4),
                       Text(
-                        'Canjea tus semillas o suscríbete a O₂₊',
-                        style: TextStyle(
+                        AppLocalizations.of(context)!.redeemSeedsOrSubscribe,
+                        style: const TextStyle(
                           color: AppColors.textSecondary,
                           fontSize: 12,
                           fontFamily: 'Inter',
@@ -242,10 +247,9 @@ class ProfileTab extends StatelessWidget {
                   onPressed: () => Navigator.pushNamed(context, AppRoutes.premiumUpgrade),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
-                    children: const [
-                      Text(
-                        'Ver O₂₊',
-                        style: TextStyle(
+                    children: [
+                      Text(AppLocalizations.of(context)!.viewO2Plus,
+                        style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 13,
                           fontFamily: 'Inter',
@@ -271,39 +275,34 @@ class ProfileTab extends StatelessWidget {
           const Divider(height: 1, color: Color(0xFFE2E7E4)),
           SettingsOptionTile(
             icon: Icons.assignment_outlined,
-            title: 'Misiones Activas',
-            subtitle: 'Ver mis logros y misiones',
+            title: AppLocalizations.of(context)!.activeMissions,
+            subtitle: AppLocalizations.of(context)!
+                .pendingMissionsCount(missionsProvider.lockedAchievements.length),
             onTap: () => Navigator.pushNamed(context, AppRoutes.missions),
           ),
           const Divider(height: 1, color: Color(0xFFE2E7E4)),
           SettingsOptionTile(
             icon: Icons.menu_book_rounded,
-            title: 'Catálogo de Plantas',
-            subtitle: 'Explorar especies botánicas',
-            onTap: () {
-              plantsProvider.setShowCatalogTab(true);
-              onNavigateToGarden?.call();
-            },
+            title: AppLocalizations.of(context)!.plantCatalog,
+            subtitle: AppLocalizations.of(context)!.exploreBotanicalSpecies,
+            onTap: () => onNavigateToCatalog?.call(),
           ),
           const Divider(height: 1, color: Color(0xFFE2E7E4)),
           SettingsOptionTile(
             icon: Icons.eco_outlined,
-            title: 'Tienda de Semillas',
-            subtitle: 'Canjear ${missionsProvider.userSeeds} semillas',
+            title: AppLocalizations.of(context)!.seedStore,
+            subtitle: AppLocalizations.of(context)!
+                .seedsCountShort(missionsProvider.userSeeds),
             onTap: () => Navigator.pushNamed(context, AppRoutes.store),
           ),
           const Divider(height: 1, color: Color(0xFFE2E7E4)),
-          SettingsOptionTile(
-            icon: Icons.bolt,
-            title: 'Próximas funciones',
-            subtitle: 'Coming soon IoT (14)',
-            onTap: () {},
-          ),
+          // Fila "Próximas funciones" retirada: su onTap estaba vacío y el
+          // "(14)" del subtítulo era un conteo inventado.
           const Divider(height: 1, color: Color(0xFFE2E7E4)),
           SettingsOptionTile(
             icon: Icons.explore_outlined,
-            title: 'Recorrido de la app',
-            subtitle: 'Vuelve a ver el tutorial guiado',
+            title: AppLocalizations.of(context)!.appTour,
+            subtitle: AppLocalizations.of(context)!.appTourSubtitle,
             onTap: () => onStartTour?.call(),
           ),
           const Divider(height: 1, color: Color(0xFFE2E7E4)),
@@ -320,7 +319,7 @@ class ProfileTab extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(vertical: 12),
               ),
               icon: const Icon(Icons.logout),
-              label: const Text('Cerrar Sesión'),
+              label: Text(AppLocalizations.of(context)!.signOut),
               onPressed: () {
                 userProvider.logout();
               },

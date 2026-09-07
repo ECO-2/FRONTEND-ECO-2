@@ -3,6 +3,9 @@ import 'package:frontend_eco_2/models/models.dart';
 import 'package:frontend_eco_2/providers/providers.dart';
 import 'package:frontend_eco_2/theme/app_colors.dart';
 import 'package:frontend_eco_2/utils/achievement_visuals.dart';
+import 'package:frontend_eco_2/l10n/app_localizations.dart';
+import 'package:frontend_eco_2/utils/date_labels.dart';
+import 'package:frontend_eco_2/utils/achievement_labels.dart';
 
 /// Condiciones para las que hoy existe un contador real en la app. El resto
 /// (plant_scans, rooms_created) no tiene una feature real detrás todavía —
@@ -32,16 +35,18 @@ IconData iconForAchievementCondition(String conditionType) {
   }
 }
 
-String achievementProgressLabel(Achievement a, int current) {
+String achievementProgressLabel(
+    BuildContext context, Achievement a, int current) {
+  final l = AppLocalizations.of(context)!;
   switch (a.conditionType) {
     case AchievementConditions.userPlants:
-      return '$current de ${a.conditionValue} plantas';
+      return l.progressOfPlants(current, a.conditionValue);
     case AchievementConditions.careLogs:
-      return '$current de ${a.conditionValue} cuidados';
+      return l.progressOfCares(current, a.conditionValue);
     case AchievementConditions.onboardingCompleted:
-      return current >= a.conditionValue ? 'Completado' : 'Pendiente';
+      return current >= a.conditionValue ? l.completed : l.pending;
     default:
-      return 'Próximamente';
+      return l.comingSoon;
   }
 }
 
@@ -209,7 +214,7 @@ void showAchievementDetailSheet(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        achievement.name,
+                        achievementName(context, achievement),
                         style: const TextStyle(
                           fontFamily: 'DM Sans',
                           fontWeight: FontWeight.w700,
@@ -232,10 +237,10 @@ void showAchievementDetailSheet(
                 ),
               ],
             ),
-            if (achievement.description != null) ...[
+            if (achievementDescription(context, achievement) != null) ...[
               const SizedBox(height: 16),
               Text(
-                achievement.description!,
+                achievementDescription(context, achievement)!,
                 style: const TextStyle(
                   fontFamily: 'DM Sans',
                   fontSize: 13,
@@ -250,7 +255,7 @@ void showAchievementDetailSheet(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    achievementProgressLabel(achievement, currentProgress),
+                    achievementProgressLabel(context, achievement, currentProgress),
                     style: const TextStyle(
                       fontFamily: 'DM Sans',
                       fontWeight: FontWeight.w600,
@@ -281,19 +286,19 @@ void showAchievementDetailSheet(
               ),
             ] else
               Text(
-                unlocked ? '' : 'Esta condición todavía no se rastrea en la app.',
+                unlocked ? '' : AppLocalizations.of(context)!.conditionNotTracked,
                 style: const TextStyle(fontFamily: 'DM Sans', fontSize: 12, color: AppColors.textSecondary),
               ),
             if (unlocked && unlockedAt != null) ...[
               const SizedBox(height: 8),
               Text(
-                'Desbloqueado el ${_formatDate(unlockedAt)}',
+                AppLocalizations.of(context)!
+                    .unlockedOn(formatMediumDate(context, unlockedAt)),
                 style: const TextStyle(fontFamily: 'DM Sans', fontSize: 11, color: AppColors.textSecondary),
               ),
             ],
             const SizedBox(height: 20),
-            Text(
-              'Recompensa',
+            Text(AppLocalizations.of(context)!.reward,
               style: const TextStyle(
                 fontFamily: 'DM Sans',
                 fontWeight: FontWeight.w700,
@@ -310,10 +315,3 @@ void showAchievementDetailSheet(
   );
 }
 
-String _formatDate(DateTime date) {
-  const months = [
-    'ene', 'feb', 'mar', 'abr', 'may', 'jun',
-    'jul', 'ago', 'sep', 'oct', 'nov', 'dic',
-  ];
-  return '${date.day} ${months[date.month - 1]} ${date.year}';
-}

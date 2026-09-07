@@ -4,16 +4,18 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:provider/provider.dart';
 import 'package:frontend_eco_2/providers/providers.dart';
 import 'package:frontend_eco_2/theme/app_colors.dart';
+import 'package:frontend_eco_2/utils/store_labels.dart';
+import 'package:frontend_eco_2/widgets/store/store_card_backdrop.dart';
 import 'package:frontend_eco_2/widgets/common/custom_bottom_nav_bar.dart';
 import 'package:frontend_eco_2/widgets/common/custom_status_bar.dart';
 import 'package:frontend_eco_2/widgets/common/app_toast.dart';
 
-const _kStoreFilters = ['Más Vendidos', 'O2+', 'Avatares', 'Macetas'];
+// Claves estables, no etiquetas: comparar contra el texto visible rompia el
+// filtro en cuanto la app cambiaba de idioma.
+const _kStoreFilters = ['bestsellers', 'O2+', 'avatars', 'pots'];
 
 class _StoreListing {
   final String id;
-  final String title;
-  final String subtitle;
   final int cost;
   final String category;
   final IconData icon;
@@ -23,8 +25,6 @@ class _StoreListing {
 
   const _StoreListing({
     required this.id,
-    required this.title,
-    required this.subtitle,
     required this.cost,
     required this.category,
     required this.icon,
@@ -37,8 +37,6 @@ class _StoreListing {
 const List<_StoreListing> _kListings = [
   _StoreListing(
     id: 'o2_plus_2w',
-    title: 'Cosecha tu jardín pro',
-    subtitle: '2 Semanas de O2 Plus',
     cost: 3500,
     category: 'O2+',
     icon: Icons.star_rounded,
@@ -47,42 +45,32 @@ const List<_StoreListing> _kListings = [
   ),
   _StoreListing(
     id: 'maceta_rental_2w',
-    title: 'Alquila una Maceta',
-    subtitle: 'Espacio temporal · 2 semanas',
     cost: 150,
-    category: 'Macetas',
+    category: 'pots',
     icon: Icons.timer_outlined,
     bestseller: true,
-    badge: 'Nuevo',
+    badge: 'new',
   ),
   _StoreListing(
     id: 'avatar_explorador',
-    title: 'Avatar Explorador Verde',
-    subtitle: 'Desbloqueo permanente',
     cost: 250,
-    category: 'Avatares',
+    category: 'avatars',
     icon: Icons.face_retouching_natural_rounded,
   ),
   _StoreListing(
     id: 'avatar_guardian',
-    title: 'Avatar Guardián del Bosque',
-    subtitle: 'Desbloqueo permanente',
     cost: 600,
-    category: 'Avatares',
+    category: 'avatars',
     icon: Icons.forest_rounded,
   ),
   _StoreListing(
     id: 'maceta_pack3',
-    title: 'Pack de 3 Macetas',
-    subtitle: '+3 espacios permanentes',
     cost: 1000,
-    category: 'Macetas',
+    category: 'pots',
     icon: Icons.grid_view_rounded,
   ),
   _StoreListing(
     id: 'o2_plus_4w',
-    title: 'O2 Plus mensual',
-    subtitle: '4 Semanas de O2 Plus',
     cost: 6000,
     category: 'O2+',
     icon: Icons.workspace_premium_rounded,
@@ -136,9 +124,13 @@ class _StoreScreenState extends State<StoreScreen> {
 
     final filtered = _kListings.where((item) {
       final matchesSearch = _searchQuery.isEmpty ||
-          item.title.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-          item.subtitle.toLowerCase().contains(_searchQuery.toLowerCase());
-      final matchesFilter = _selectedFilter == 'Más Vendidos'
+          storeItemTitle(context, item.id)
+              .toLowerCase()
+              .contains(_searchQuery.toLowerCase()) ||
+          storeItemSubtitle(context, item.id)
+              .toLowerCase()
+              .contains(_searchQuery.toLowerCase());
+      final matchesFilter = _selectedFilter == 'bestsellers'
           ? item.bestseller
           : item.category == _selectedFilter;
       return matchesSearch && matchesFilter;
@@ -198,11 +190,11 @@ class _StoreScreenState extends State<StoreScreen> {
   String _sectionSubtitle(String filter) {
     switch (filter) {
       case 'O2+':
-        return 'Impulsa tu jardín con beneficios premium';
-      case 'Avatares':
-        return 'Personaliza tu perfil';
-      case 'Macetas':
-        return 'Consigue más espacio para tus plantas';
+        return AppLocalizations.of(context)!.boostGardenPremium;
+      case 'avatars':
+        return AppLocalizations.of(context)!.customizeYourProfile;
+      case 'pots':
+        return AppLocalizations.of(context)!.moreSpaceForPlants;
       default:
         return AppLocalizations.of(context)!.communityFavorites;
     }
@@ -373,6 +365,7 @@ class _StoreScreenState extends State<StoreScreen> {
         children: [
           ..._kStoreFilters.map((filter) {
             final selected = _selectedFilter == filter;
+            final filterLabel = storeCategoryLabel(context, filter);
             return Padding(
               padding: const EdgeInsets.only(right: 8),
               child: GestureDetector(
@@ -390,7 +383,7 @@ class _StoreScreenState extends State<StoreScreen> {
                   ),
                   child: Center(
                     child: Text(
-                      filter,
+                      filterLabel,
                       style: TextStyle(
                         fontFamily: 'DM Sans',
                         fontWeight: FontWeight.bold,
@@ -425,8 +418,8 @@ class _StoreScreenState extends State<StoreScreen> {
         children: [
           Icon(Icons.search_off_rounded, size: 40, color: AppColors.textMuted.withValues(alpha: 0.6)),
           const SizedBox(height: 12),
-          const Text(
-            'No se encontraron artículos',
+          Text(
+            AppLocalizations.of(context)!.noItemsFound,
             style: TextStyle(
               fontFamily: 'Inter',
               fontWeight: FontWeight.w600,
@@ -444,8 +437,8 @@ class _StoreScreenState extends State<StoreScreen> {
       builder: (ctx) => AlertDialog(
         backgroundColor: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text(
-          '¿Confirmar compra?',
+        title: Text(
+          AppLocalizations.of(context)!.confirmPurchaseTitle,
           style: TextStyle(
             fontWeight: FontWeight.bold,
             color: AppColors.primaryDark,
@@ -453,14 +446,14 @@ class _StoreScreenState extends State<StoreScreen> {
           ),
         ),
         content: Text(
-          '¿Deseas canjear "${item.title}" por ${item.cost} semillas?',
+          AppLocalizations.of(context)!.confirmPurchaseBody(storeItemTitle(context, item.id), item.cost),
           style: const TextStyle(color: AppColors.textPrimary, fontFamily: 'Inter'),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text(
-              'Cancelar',
+            child: Text(
+              AppLocalizations.of(context)!.cancel,
               style: TextStyle(color: AppColors.textSecondary, fontFamily: 'Inter'),
             ),
           ),
@@ -477,12 +470,14 @@ class _StoreScreenState extends State<StoreScreen> {
               if (!context.mounted) return;
               showAppToast(
                 context,
-                success ? '${AppLocalizations.of(context)!.purchaseSuccess(item.title)} 🎉' : 'No se pudo completar la compra.',
+                success
+                    ? '${AppLocalizations.of(context)!.purchaseSuccess(storeItemTitle(context, item.id))} 🎉'
+                    : AppLocalizations.of(context)!.purchaseFailed,
                 type: success ? ToastType.success : ToastType.error,
               );
             },
-            child: const Text(
-              'Confirmar',
+            child: Text(
+              AppLocalizations.of(context)!.confirm,
               style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Inter'),
             ),
           ),
@@ -506,15 +501,17 @@ class _StoreItemCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final canAfford = userSeeds >= item.cost;
-    final bg = item.featured ? AppColors.primaryDark : Colors.white;
     final titleColor = item.featured ? Colors.white : AppColors.primaryDark;
     final subtitleColor = item.featured ? AppColors.accent : AppColors.primary;
 
+    // Fondo con degradado y patron vectorial por familia de producto, en vez
+    // del blanco plano (o verde solido en la destacada) de antes.
     return Container(
       decoration: BoxDecoration(
-        color: bg,
         borderRadius: BorderRadius.circular(24),
-        border: item.featured ? null : Border.all(color: const Color(0xFFE2E7E4), width: 1.5),
+        border: item.featured
+            ? null
+            : Border.all(color: const Color(0xFFE2E7E4), width: 1.5),
         boxShadow: item.featured
             ? [
                 BoxShadow(
@@ -531,6 +528,10 @@ class _StoreItemCard extends StatelessWidget {
                 ),
               ],
       ),
+      child: StoreCardBackdrop(
+        category: item.category,
+        featured: item.featured,
+        child: Padding(
       padding: const EdgeInsets.all(18),
       child: Stack(
         clipBehavior: Clip.none,
@@ -541,27 +542,14 @@ class _StoreItemCard extends StatelessWidget {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: item.featured ? AppColors.accent : const Color(0xFFF0F3F1),
-                    ),
-                    alignment: Alignment.center,
-                    child: Icon(
-                      item.icon,
-                      color: item.featured ? AppColors.primaryDark : AppColors.primary,
-                      size: 22,
-                    ),
-                  ),
+                  StoreItemIcon(icon: item.icon, featured: item.featured),
                   const SizedBox(width: 14),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          item.title,
+                          storeItemTitle(context, item.id),
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
@@ -571,7 +559,7 @@ class _StoreItemCard extends StatelessWidget {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          item.subtitle,
+                          storeItemSubtitle(context, item.id),
                           style: TextStyle(
                             fontWeight: FontWeight.w600,
                             fontSize: 12,
@@ -604,7 +592,7 @@ class _StoreItemCard extends StatelessWidget {
                       Expanded(
                         child: Center(
                           child: Text(
-                            '${item.cost} Semillas',
+                            AppLocalizations.of(context)!.seedsCost(item.cost),
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 13,
@@ -635,7 +623,7 @@ class _StoreItemCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
-                  item.badge!,
+                  item.badge == 'new' ? AppLocalizations.of(context)!.newBadgeLabel : item.badge!,
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 10,
@@ -646,6 +634,8 @@ class _StoreItemCard extends StatelessWidget {
               ),
             ),
         ],
+      ),
+        ),
       ),
     );
   }

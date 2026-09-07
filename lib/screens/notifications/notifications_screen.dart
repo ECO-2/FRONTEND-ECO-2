@@ -93,19 +93,19 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           // ── List ─────────────────────────────────────────────
           Expanded(
             child: notifProvider.notifications.isEmpty
-                ? const Center(
+                ? Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.notifications_none,
                           size: 64,
                           color: Colors.grey,
                         ),
-                        SizedBox(height: 16),
+                        const SizedBox(height: 16),
                         Text(
-                          'No tienes notificaciones por ahora.',
-                          style: TextStyle(
+                          AppLocalizations.of(context)!.noNotificationsYet,
+                          style: const TextStyle(
                             color: Colors.grey,
                             fontFamily: 'DM Sans',
                           ),
@@ -127,7 +127,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                                 notifProvider.markAllAsRead();
                                 showAppToast(
                                   context,
-                                  'Todas las notificaciones marcadas como leídas.',
+                                  AppLocalizations.of(context)!.allNotificationsRead,
                                   duration: const Duration(seconds: 1, milliseconds: 400),
                                 );
                               },
@@ -235,9 +235,27 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         iconBg = const Color(0xFFF0F0F0);
     }
 
-    final parts = notification.title.split(': ');
-    final titleText = parts[0];
-    final bodyText = parts.length > 1 ? parts[1] : '';
+    // Las notificaciones locales traen su tipo y su sujeto por separado, así
+    // que se traducen aquí. Las que llegan del backend siguen partiendo el
+    // texto por ': ', que es como vienen formadas.
+    final l = AppLocalizations.of(context)!;
+    final String titleText;
+    final String bodyText;
+    switch (notification.localKind) {
+      case 'achievement_unlocked':
+        titleText = l.achievementUnlockedTitle;
+        bodyText = notification.localSubject ?? '';
+      case 'watering_due':
+        titleText = l.wateringDueTitle;
+        bodyText = l.wateringDueNotification(notification.localSubject ?? '');
+      case 'plant_added':
+        titleText = l.newPlantAddedTitle;
+        bodyText = l.newPlantAddedBody(notification.localSubject ?? '');
+      default:
+        final parts = notification.title.split(': ');
+        titleText = parts[0];
+        bodyText = parts.length > 1 ? parts[1] : '';
+    }
 
     return InkWell(
       onTap: () {

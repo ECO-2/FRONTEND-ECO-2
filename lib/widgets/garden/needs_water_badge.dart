@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend_eco_2/l10n/app_localizations.dart';
 
 /// Cartel de "necesita riego" que se muestra sobre la foto de la planta.
 ///
@@ -46,8 +47,7 @@ class NeedsWaterBadge extends StatelessWidget {
           // Gota: comunica el "qué" de un vistazo, antes incluso de leer.
           Icon(Icons.water_drop_rounded, size: iconSize, color: Colors.white),
           SizedBox(width: compact ? 3 : 4),
-          Text(
-            'Riego',
+          Text(AppLocalizations.of(context)!.needsWater,
             style: TextStyle(
               fontSize: fontSize,
               fontWeight: FontWeight.w800,

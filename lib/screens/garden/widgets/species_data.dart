@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:frontend_eco_2/models/models.dart';
 import 'package:frontend_eco_2/utils/plant_visuals.dart';
+import 'package:frontend_eco_2/utils/catalog_labels.dart';
+import 'package:frontend_eco_2/l10n/app_localizations.dart';
 
 class SpeciesData {
   final String scientific;
   final Color bg;
-  final List<String> tags;
+  final List<SpeciesTag> tags;
   final String? assetImage;
   final String? imageUrl;
   final String waterFreq;
@@ -33,11 +35,11 @@ class SpeciesData {
     required this.light,
     required this.temp,
     required this.co2,
-    this.humidity = '40-60%',
+    required this.humidity,
     required this.personalNote,
     this.placeholderIcon = Icons.local_florist_rounded,
     this.placeholderIconColor = const Color(0xFFB0B0B0),
-    this.placementHint = 'Luz filtrada, lejos de corrientes de aire.',
+    required this.placementHint,
     required this.careGuide,
   });
 
@@ -46,26 +48,44 @@ class SpeciesData {
   // from the real fields the API does return (category, light, water
   // frequency, humidity, air_purification_score) instead of showing the
   // same generic placeholder text for all 50+ species.
-  factory SpeciesData.fromReal(PlantSpecies species) {
+  /// Recibe el contexto porque las etiquetas (luz, humedad, guía de cuidado)
+  /// son texto visible: antes se armaban en español dentro del modelo, que no
+  /// tiene forma de saber en qué idioma está la app.
+  factory SpeciesData.fromReal(BuildContext context, PlantSpecies species) {
+    final l = AppLocalizations.of(context)!;
     final visual = visualForCategory(species.category);
     final score = species.airPurificationScore ?? 0;
     final co2Grams = 1.0 + score * 0.4;
     return SpeciesData(
       scientific: species.scientificName,
       bg: visual.background,
-      tags: species.tags,
+      tags: speciesTags(
+        context,
+        category: species.category,
+        lightRequirement: species.lightRequirement,
+        waterFrequencyDays: species.waterFrequencyDays,
+      ),
       imageUrl: species.imageUrl,
-      waterFreq: 'c/${species.waterFrequencyDays}d',
+      waterFreq: l.everyNDaysShort(species.waterFrequencyDays),
       waterFreqDays: species.waterFrequencyDays,
-      light: lightLabelEs(species.lightRequirement),
+      light: lightLabel(context, species.lightRequirement),
       temp: '${species.minTemperature ?? 15}-${species.maxTemperature ?? 30}°C',
-      co2: '${co2Grams.toStringAsFixed(1)} g/día',
-      humidity: species.humidityRange,
-      personalNote: 'Aún no has agregado notas para esta planta.',
+      co2: l.gramsPerDayValue(co2Grams.toStringAsFixed(1)),
+      humidity: humidityRange(context, species.humidityPreference),
+      personalNote: l.noNotesYet,
       placeholderIcon: visual.icon,
       placeholderIconColor: visual.color,
-      placementHint: lightHintEs(species.lightRequirement),
-      careGuide: species.description,
+      placementHint: lightHint(context, species.lightRequirement),
+      careGuide: speciesDescription(
+        context,
+        category: species.category,
+        lightRequirement: species.lightRequirement,
+        humidityPreference: species.humidityPreference,
+        waterFrequencyDays: species.waterFrequencyDays,
+        minTemperature: species.minTemperature,
+        maxTemperature: species.maxTemperature,
+        airPurificationScore: species.airPurificationScore,
+      ),
     );
   }
 }

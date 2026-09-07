@@ -8,6 +8,7 @@ import 'package:frontend_eco_2/utils/achievement_feedback.dart';
 import 'package:frontend_eco_2/widgets/common/custom_button.dart';
 import 'package:frontend_eco_2/widgets/common/custom_text_field.dart';
 import 'package:frontend_eco_2/widgets/common/app_toast.dart';
+import 'package:frontend_eco_2/l10n/app_localizations.dart';
 
 /// Pantalla de onboarding: el usuario completa su perfil después del registro.
 /// Llama a PATCH /user/onboarding con username, género y fecha de nacimiento.
@@ -25,16 +26,28 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   String? _selectedGender;
   DateTime? _selectedDate;
 
+  // Solo el valor que espera el backend y el icono: la etiqueta visible se
+  // resuelve al pintar, porque esta lista es `const` y ahi no hay contexto.
   static const _genderOptions = [
-    _GenderOption(value: 'male', label: 'Hombre', icon: Icons.man),
-    _GenderOption(value: 'female', label: 'Mujer', icon: Icons.woman),
-    _GenderOption(value: 'other', label: 'Otro', icon: Icons.person),
-    _GenderOption(
-      value: 'prefer_not_to_say',
-      label: 'Prefiero no decir',
-      icon: Icons.person_off,
-    ),
+    _GenderOption(value: 'male', icon: Icons.man),
+    _GenderOption(value: 'female', icon: Icons.woman),
+    _GenderOption(value: 'other', icon: Icons.person),
+    _GenderOption(value: 'prefer_not_to_say', icon: Icons.person_off),
   ];
+
+  String _genderLabel(BuildContext context, String value) {
+    final l = AppLocalizations.of(context)!;
+    switch (value) {
+      case 'male':
+        return l.genderMale;
+      case 'female':
+        return l.genderFemale;
+      case 'other':
+        return l.genderOther;
+      default:
+        return l.genderPreferNotToSay;
+    }
+  }
 
   @override
   void dispose() {
@@ -60,12 +73,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   CupertinoButton(
-                    child: const Text('Cancelar'),
+                    child: Text(AppLocalizations.of(context)!.cancel),
                     onPressed: () => Navigator.pop(context),
                   ),
                   CupertinoButton(
-                    child: const Text(
-                      'Listo',
+                    child: Text(AppLocalizations.of(context)!.done,
                       style: TextStyle(color: AppColors.primary),
                     ),
                     onPressed: () => Navigator.pop(context),
@@ -140,8 +152,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         AppRoutes.dashboard,
         (route) => false,
       );
-    } else if (userProvider.errorMessage != null) {
-      showAppToast(context, userProvider.errorMessage!, type: ToastType.error);
+    } else if (userProvider.errorText(context) != null) {
+      showAppToast(context, userProvider.errorText(context)!, type: ToastType.error);
     }
   }
 
@@ -204,10 +216,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       ),
                     ),
                     const SizedBox(height: 10),
-                    const Text(
-                      'Cuéntanos sobre ti',
+                    Text(
+                      AppLocalizations.of(context)!.tellUsAboutYou,
                       textAlign: TextAlign.center,
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: Colors.white,
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
@@ -215,8 +227,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       ),
                     ),
                     const SizedBox(height: 4),
-                    Text(
-                      'Personaliza tu experiencia ECO2',
+                    Text(AppLocalizations.of(context)!.customizeYourEco2,
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: Colors.white.withValues(alpha: 0.8),
@@ -240,20 +251,20 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     // ── Nombre de usuario ──────────────────────────────
                     _SectionLabel(
                       icon: Icons.person_outline_rounded,
-                      label: 'Nombre de usuario',
+                      label: AppLocalizations.of(context)!.username,
                       required: true,
                     ),
                     const SizedBox(height: 8),
                     CustomTextField(
                       controller: _usernameController,
-                      labelText: 'Nombre de usuario',
-                      hintText: 'planta_lover',
+                      labelText: AppLocalizations.of(context)!.username,
+                      hintText: AppLocalizations.of(context)!.nicknameExample,
                       validator: (v) {
                         if (v == null || v.trim().isEmpty) {
-                          return 'El nombre de usuario es obligatorio';
+                          return AppLocalizations.of(context)!.usernameRequired;
                         }
                         if (v.trim().length < 3) {
-                          return 'Mínimo 3 caracteres';
+                          return AppLocalizations.of(context)!.minThreeChars;
                         }
                         return null;
                       },
@@ -263,7 +274,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     // ── Género ─────────────────────────────────────────
                     _SectionLabel(
                       icon: Icons.wc_rounded,
-                      label: 'Género',
+                      label: AppLocalizations.of(context)!.gender,
                       required: false,
                     ),
                     const SizedBox(height: 12),
@@ -301,7 +312,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                 Icon(opt.icon, size: 24),
                                 const SizedBox(width: 6),
                                 Text(
-                                  opt.label,
+                                  _genderLabel(context, opt.value),
                                   style: TextStyle(
                                     color: selected
                                         ? Colors.white
@@ -322,7 +333,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     // ── Fecha de nacimiento ────────────────────────────
                     _SectionLabel(
                       icon: Icons.cake_rounded,
-                      label: 'Fecha de nacimiento',
+                      label: AppLocalizations.of(context)!.birthDate,
                       required: false,
                     ),
                     const SizedBox(height: 8),
@@ -387,7 +398,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       builder: (_, up, _) => SizedBox(
                         width: double.infinity,
                         child: CustomButton(
-                          text: 'Continuar',
+                          text: AppLocalizations.of(context)!.continueAction,
                           backgroundColor: AppColors.primaryDark,
                           foregroundColor: Colors.white,
                           isLoading: up.isLoading,
@@ -401,8 +412,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     Center(
                       child: TextButton(
                         onPressed: _skip,
-                        child: const Text(
-                          'Omitir por ahora',
+                        child: Text(AppLocalizations.of(context)!.skipForNow,
                           style: TextStyle(
                             color: AppColors.textSecondary,
                             fontFamily: 'Inter',
@@ -428,11 +438,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
 class _GenderOption {
   final String value;
-  final String label;
   final IconData icon;
   const _GenderOption({
     required this.value,
-    required this.label,
     required this.icon,
   });
 }
@@ -474,8 +482,7 @@ class _SectionLabel extends StatelessWidget {
           ),
         ] else ...[
           const SizedBox(width: 6),
-          Text(
-            '(opcional)',
+          Text(AppLocalizations.of(context)!.optional,
             style: TextStyle(
               color: AppColors.textSecondary.withValues(alpha: 0.7),
               fontSize: 12,

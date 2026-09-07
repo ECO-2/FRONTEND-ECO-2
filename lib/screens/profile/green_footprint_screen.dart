@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend_eco_2/l10n/app_localizations.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:frontend_eco_2/models/models.dart';
@@ -32,7 +33,7 @@ class GreenFootprintScreen extends StatefulWidget {
 class _GreenFootprintScreenState extends State<GreenFootprintScreen> {
   GreenFootprint? _data;
   bool _loading = true;
-  String? _error;
+  bool _hasError = false;
 
   @override
   void initState() {
@@ -43,7 +44,7 @@ class _GreenFootprintScreenState extends State<GreenFootprintScreen> {
   Future<void> _load() async {
     setState(() {
       _loading = true;
-      _error = null;
+      _hasError = false;
     });
     try {
       final service = Provider.of<UserService>(context, listen: false);
@@ -56,7 +57,7 @@ class _GreenFootprintScreenState extends State<GreenFootprintScreen> {
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _error = 'No pudimos calcular tu huella verde.';
+        _hasError = true;
         _loading = false;
       });
     }
@@ -66,13 +67,13 @@ class _GreenFootprintScreenState extends State<GreenFootprintScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: _kBg,
-      appBar: const CustomAppBar(
-        title: 'Mi Huella Verde',
+      appBar: CustomAppBar(
+        title: AppLocalizations.of(context)!.greenFootprint,
         automaticallyImplyLeading: true,
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
-          : _error != null
+          : _hasError
               ? _buildError()
               : RefreshIndicator(
                   onRefresh: _load,
@@ -111,12 +112,14 @@ class _GreenFootprintScreenState extends State<GreenFootprintScreen> {
             const Icon(Icons.cloud_off_rounded, size: 44, color: _kTextMuted),
             const SizedBox(height: 12),
             Text(
-              _error!,
+              AppLocalizations.of(context)!.footprintError,
               textAlign: TextAlign.center,
               style: const TextStyle(fontFamily: 'DM Sans', color: _kTextMuted),
             ),
             const SizedBox(height: 16),
-            OutlinedButton(onPressed: _load, child: const Text('Reintentar')),
+            OutlinedButton(
+                onPressed: _load,
+                child: Text(AppLocalizations.of(context)!.retry)),
           ],
         ),
       ),
@@ -134,8 +137,7 @@ class _GreenFootprintScreenState extends State<GreenFootprintScreen> {
       padding: const EdgeInsets.fromLTRB(24, 22, 24, 18),
       child: Column(
         children: [
-          const Text(
-            'CO₂ absorbido hoy',
+          Text(AppLocalizations.of(context)!.co2AbsorbedToday,
             style: TextStyle(
               fontFamily: 'DM Sans',
               fontWeight: FontWeight.w500,
@@ -154,8 +156,8 @@ class _GreenFootprintScreenState extends State<GreenFootprintScreen> {
               height: 1.0,
             ),
           ),
-          const Text(
-            'gramos / día',
+          Text(
+            AppLocalizations.of(context)!.gramsPerDay,
             style: TextStyle(
               fontFamily: 'DM Sans',
               fontWeight: FontWeight.w500,
@@ -172,8 +174,9 @@ class _GreenFootprintScreenState extends State<GreenFootprintScreen> {
             ),
             child: Text(
               data.plantCount == 0
-                  ? 'Aún no tienes plantas en tu jardín'
-                  : 'Acumulado: ${(data.totalKg * 1000).toStringAsFixed(2)} g',
+                  ? AppLocalizations.of(context)!.noPlantsYet
+                  : AppLocalizations.of(context)!.accumulatedGrams(
+                      (data.totalKg * 1000).toStringAsFixed(2)),
               style: const TextStyle(
                 fontFamily: 'DM Sans',
                 fontWeight: FontWeight.w600,
@@ -187,9 +190,7 @@ class _GreenFootprintScreenState extends State<GreenFootprintScreen> {
             // De las 51 especies del catálogo solo 9 tienen medición publicada.
             // Decirlo evita presentar una inferencia como si fuera un dato.
             Text(
-              'Valor estimado: ${data.measured} de ${data.plantCount} '
-              '${data.plantCount == 1 ? "planta se apoya" : "plantas se apoyan"} '
-              'en una medición publicada.',
+              AppLocalizations.of(context)!.estimatedValueNote(data.measured, data.plantCount),
               textAlign: TextAlign.center,
               style: const TextStyle(
                 fontFamily: 'DM Sans',
@@ -206,11 +207,11 @@ class _GreenFootprintScreenState extends State<GreenFootprintScreen> {
 
   Widget _buildPlantContributions(GreenFootprint data) {
     if (data.breakdown.isEmpty) {
-      return const Padding(
-        padding: EdgeInsets.fromLTRB(24, 18, 24, 18),
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(24, 18, 24, 18),
         child: Text(
-          'Añade plantas a tu jardín para ver cuánto aporta cada una.',
-          style: TextStyle(fontFamily: 'DM Sans', fontSize: 13, color: _kTextMuted),
+          AppLocalizations.of(context)!.addPlantsToSeeContribution,
+          style: const TextStyle(fontFamily: 'DM Sans', fontSize: 13, color: _kTextMuted),
         ),
       );
     }
@@ -227,8 +228,7 @@ class _GreenFootprintScreenState extends State<GreenFootprintScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Aporte por planta',
+          Text(AppLocalizations.of(context)!.contributionPerPlant,
             style: TextStyle(
               fontFamily: 'DM Sans',
               fontWeight: FontWeight.w700,
@@ -320,8 +320,8 @@ class _GreenFootprintScreenState extends State<GreenFootprintScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Evolución semanal',
+          Text(
+            AppLocalizations.of(context)!.weeklyEvolution,
             style: TextStyle(
               fontFamily: 'DM Sans',
               fontWeight: FontWeight.w700,
@@ -330,9 +330,9 @@ class _GreenFootprintScreenState extends State<GreenFootprintScreen> {
             ),
           ),
           const SizedBox(height: 4),
-          const Text(
-            'Refleja cuándo entró cada planta a tu jardín.',
-            style: TextStyle(fontFamily: 'DM Sans', fontSize: 11, color: _kTextMuted),
+          Text(
+            AppLocalizations.of(context)!.weeklyEvolutionHelp,
+            style: const TextStyle(fontFamily: 'DM Sans', fontSize: 11, color: _kTextMuted),
           ),
           const SizedBox(height: 12),
           Container(
@@ -400,8 +400,7 @@ class _GreenFootprintScreenState extends State<GreenFootprintScreen> {
             ),
           ),
           icon: const Icon(Icons.copy_rounded, size: 20),
-          label: const Text(
-            'Copiar mi huella verde',
+          label: Text(AppLocalizations.of(context)!.copyMyFootprint,
             style: TextStyle(
               fontFamily: 'DM Sans',
               fontWeight: FontWeight.w700,
@@ -414,14 +413,15 @@ class _GreenFootprintScreenState extends State<GreenFootprintScreen> {
           // share_plus.
           onPressed: () async {
             final resumen = data.plantCount == 0
-                ? 'Todavía no tengo plantas en mi jardín ECO2.'
-                : 'Mi jardín ECO2: ${data.plantCount} '
-                    '${data.plantCount == 1 ? "planta" : "plantas"} y '
-                    '${data.gramsPerDay.toStringAsFixed(2)} g de CO₂ al día '
-                    '(${(data.totalKg * 1000).toStringAsFixed(2)} g acumulados).';
+                ? AppLocalizations.of(context)!.footprintShareEmpty
+                : AppLocalizations.of(context)!.footprintShareSummary(
+                    data.plantCount,
+                    data.gramsPerDay.toStringAsFixed(2),
+                    (data.totalKg * 1000).toStringAsFixed(2),
+                  );
             await Clipboard.setData(ClipboardData(text: resumen));
             if (!mounted) return;
-            showAppToast(context, 'Copiado al portapapeles', type: ToastType.success);
+            showAppToast(context, AppLocalizations.of(context)!.copiedToClipboard, type: ToastType.success);
           },
         ),
       ),

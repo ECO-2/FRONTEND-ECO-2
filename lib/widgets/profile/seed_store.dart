@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:frontend_eco_2/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:frontend_eco_2/theme/app_colors.dart';
 import 'package:frontend_eco_2/providers/providers.dart';
 import 'package:frontend_eco_2/widgets/common/app_toast.dart';
 
+/// Premio del canje. Solo guarda datos que no son texto visible: el titulo y
+/// la descripcion se resuelven por `id` en _rewardTitle / _rewardDescription,
+/// porque esta lista es `const` y ahi no hay BuildContext que traduzca.
 class SeedRewardItem {
   final String id;
-  final String title;
   final int cost;
-  final String description;
   final IconData icon;
 
   const SeedRewardItem({
     required this.id,
-    required this.title,
     required this.cost,
-    required this.description,
     required this.icon,
   });
 }
@@ -26,23 +26,17 @@ class SeedStoreList extends StatelessWidget {
   final List<SeedRewardItem> _rewards = const [
     SeedRewardItem(
       id: 'r1',
-      title: 'Dto. 15% Vivero El Helecho',
       cost: 50,
-      description: 'Cupón aplicable a tu próxima compra.',
       icon: Icons.local_offer_outlined,
     ),
     SeedRewardItem(
       id: 'r2',
-      title: 'Badge "Guardián de la Tierra"',
       cost: 100,
-      description: 'Muestra tu compromiso en tu perfil.',
       icon: Icons.emoji_events_outlined,
     ),
     SeedRewardItem(
       id: 'r3',
-      title: 'Macetas personalizadas (3D)',
       cost: 150,
-      description: 'Desbloquea diseños interactivos.',
       icon: Icons.grid_view_rounded,
     ),
   ];
@@ -86,7 +80,7 @@ class SeedStoreList extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      reward.title,
+                      _rewardTitle(context, reward.id),
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 14,
@@ -96,7 +90,7 @@ class SeedStoreList extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      reward.description,
+                      _rewardDescription(context, reward.id),
                       style: const TextStyle(
                         fontSize: 11,
                         color: AppColors.textSecondary,
@@ -123,7 +117,7 @@ class SeedStoreList extends StatelessWidget {
                       }
                     : null,
                 child: Text(
-                  '${reward.cost} sem.',
+                  AppLocalizations.of(context)!.seedsShort(reward.cost),
                   style: const TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
@@ -148,8 +142,8 @@ class SeedStoreList extends StatelessWidget {
       builder: (ctx) => AlertDialog(
         backgroundColor: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text(
-          '¿Canjear premio?',
+        title: Text(
+          AppLocalizations.of(context)!.redeemRewardTitle,
           style: TextStyle(
             fontWeight: FontWeight.bold,
             color: AppColors.primaryDark,
@@ -157,7 +151,8 @@ class SeedStoreList extends StatelessWidget {
           ),
         ),
         content: Text(
-          '¿Estás seguro de que deseas canjear "${reward.title}" por ${reward.cost} semillas?',
+          AppLocalizations.of(context)!.redeemRewardBody(
+              _rewardTitle(context, reward.id), reward.cost),
           style: const TextStyle(
             color: AppColors.textPrimary,
             fontFamily: 'Inter',
@@ -166,8 +161,8 @@ class SeedStoreList extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text(
-              'Cancelar',
+            child: Text(
+              AppLocalizations.of(context)!.cancel,
               style: TextStyle(color: AppColors.textSecondary, fontFamily: 'Inter'),
             ),
           ),
@@ -185,18 +180,48 @@ class SeedStoreList extends StatelessWidget {
                 if (!context.mounted) return;
                 showAppToast(
                   context,
-                  '¡Canje exitoso!: ${reward.title} 🎁',
+                  AppLocalizations.of(context)!.redeemSuccess(_rewardTitle(context, reward.id)),
                   type: ToastType.success,
                 );
               }
             },
-            child: const Text(
-              'Confirmar',
+            child: Text(
+              AppLocalizations.of(context)!.confirm,
               style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Inter'),
             ),
           ),
         ],
       ),
     );
+  }
+}
+
+// Textos de los premios, resueltos en la UI: el catalogo es una lista const y
+// ahi no hay BuildContext con el que traducir.
+String _rewardTitle(BuildContext context, String id) {
+  final l = AppLocalizations.of(context)!;
+  switch (id) {
+    case 'r1':
+      return l.rewardDiscountTitle;
+    case 'r2':
+      return l.rewardBadgeTitle;
+    case 'r3':
+      return l.rewardPotsTitle;
+    default:
+      return id;
+  }
+}
+
+String _rewardDescription(BuildContext context, String id) {
+  final l = AppLocalizations.of(context)!;
+  switch (id) {
+    case 'r1':
+      return l.rewardDiscountDesc;
+    case 'r2':
+      return l.rewardBadgeDesc;
+    case 'r3':
+      return l.rewardPotsDesc;
+    default:
+      return '';
   }
 }

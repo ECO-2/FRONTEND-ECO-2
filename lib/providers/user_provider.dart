@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:frontend_eco_2/models/models.dart';
 import 'package:frontend_eco_2/services/services.dart';
+import 'app_error.dart';
+import 'package:frontend_eco_2/l10n/app_localizations.dart';
 
 class UserProvider with ChangeNotifier {
   final AuthService _authService;
@@ -10,6 +12,7 @@ class UserProvider with ChangeNotifier {
   User? _currentUser;
   bool _isLoading = false;
   String? _errorMessage;
+  AppError? _errorCode;
 
   UserProvider({
     required AuthService authService,
@@ -22,6 +25,17 @@ class UserProvider with ChangeNotifier {
   User? get currentUser => _currentUser;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
+
+  /// Texto de error ya traducido. Prefiere el código propio; si el fallo vino
+  /// del backend con un mensaje concreto, devuelve ese. Null si no hay error.
+  String? errorText(BuildContext context) {
+    final code = _errorCode;
+    if (code != null) return code.localize(context);
+    if (_errorMessage == kSessionExpired) {
+      return AppLocalizations.of(context)!.sessionExpired;
+    }
+    return _errorMessage;
+  }
   bool get isAuthenticated => _currentUser != null;
 
   void setUser(User? user) {
@@ -36,6 +50,7 @@ class UserProvider with ChangeNotifier {
 
   void clearError() {
     _errorMessage = null;
+    _errorCode = null;
     notifyListeners();
   }
 
@@ -68,19 +83,19 @@ class UserProvider with ChangeNotifier {
   Future<bool> login(String email, String password) async {
     _setLoading(true);
     _errorMessage = null;
+    _errorCode = null;
     try {
       await _authService.login(email, password);
       _currentUser = await _userService.getMe();
       _setLoading(false);
       return true;
     } on ApiException catch (e) {
-      _errorMessage = e.isUnauthorized
-          ? 'Correo o contraseña incorrectos.'
-          : e.message;
+      _errorCode = e.isUnauthorized ? AppError.wrongCredentials : null;
+      _errorMessage = e.isUnauthorized ? null : e.message;
       _setLoading(false);
       return false;
     } catch (_) {
-      _errorMessage = 'Error de conexión. Verifica tu internet.';
+      _errorCode = AppError.connection;
       _setLoading(false);
       return false;
     }
@@ -94,6 +109,7 @@ class UserProvider with ChangeNotifier {
   Future<bool> register(String email, String password) async {
     _setLoading(true);
     _errorMessage = null;
+    _errorCode = null;
     try {
       await _authService.register(email, password);
       // Después de registrar, hacer login para obtener los tokens.
@@ -102,13 +118,12 @@ class UserProvider with ChangeNotifier {
       _setLoading(false);
       return true;
     } on ApiException catch (e) {
-      _errorMessage = e.isConflict
-          ? 'Este correo ya tiene una cuenta registrada.'
-          : e.message;
+      _errorCode = e.isConflict ? AppError.emailTaken : null;
+      _errorMessage = e.isConflict ? null : e.message;
       _setLoading(false);
       return false;
     } catch (_) {
-      _errorMessage = 'Error de conexión. Verifica tu internet.';
+      _errorCode = AppError.connection;
       _setLoading(false);
       return false;
     }
@@ -126,6 +141,7 @@ class UserProvider with ChangeNotifier {
   }) async {
     _setLoading(true);
     _errorMessage = null;
+    _errorCode = null;
     try {
       _currentUser = await _userService.updateProfile(
         username: username,
@@ -136,13 +152,63 @@ class UserProvider with ChangeNotifier {
       _setLoading(false);
       return true;
     } on ApiException catch (e) {
-      _errorMessage = e.isConflict
-          ? 'Ese nombre de usuario ya está en uso.'
-          : e.message;
+      _errorCode = e.isConflict ? AppError.usernameTaken : null;
+      _errorMessage = e.isConflict ? null : e.message;
       _setLoading(false);
       return false;
     } catch (_) {
-      _errorMessage = 'Error de conexión. Verifica tu internet.';
+      _errorCode = AppError.connection;
+      _setLoading(false);
+      return false;
+    }
+  }
+
+  /// Cambia la contraseña del usuario autenticado. El backend verifica la
+  /// actual, así que un 401 aquí significa "la contraseña actual no es esa",
+  /// no que la sesión haya caducado.
+  Future<bool> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    _setLoading(true);
+    _errorMessage = null;
+    _errorCode = null;
+    try {
+      await _userService.changePassword(
+        currentPassword: currentPassword,
+        newPassword: newPassword,
+      );
+      _setLoading(false);
+      return true;
+    } on ApiException catch (e) {
+      _errorCode = e.isUnauthorized ? AppError.currentPasswordWrong : null;
+      _errorMessage = e.isUnauthorized ? null : e.message;
+      _setLoading(false);
+      return false;
+    } catch (_) {
+      _errorCode = AppError.connection;
+      _setLoading(false);
+      return false;
+    }
+  }
+
+  /// Borra la cuenta y su contenido en el servidor, y limpia la sesión local.
+  Future<bool> deleteAccount() async {
+    _setLoading(true);
+    _errorMessage = null;
+    _errorCode = null;
+    try {
+      await _userService.deleteAccount();
+      await logout();
+      _setLoading(false);
+      return true;
+    } on ApiException catch (e) {
+      _errorCode = null;
+      _errorMessage = e.message;
+      _setLoading(false);
+      return false;
+    } catch (_) {
+      _errorCode = AppError.connection;
       _setLoading(false);
       return false;
     }
@@ -160,6 +226,7 @@ class UserProvider with ChangeNotifier {
   }) async {
     _setLoading(true);
     _errorMessage = null;
+    _errorCode = null;
     try {
       final updatedUser = await _userService.completeOnboarding(
         username: username,
@@ -179,14 +246,69 @@ class UserProvider with ChangeNotifier {
       _setLoading(false);
       return true;
     } on ApiException catch (e) {
-      _errorMessage = e.isConflict
-          ? 'Ese nombre de usuario ya está en uso.'
-          : e.message;
+      _errorCode = e.isConflict ? AppError.usernameTaken : null;
+      _errorMessage = e.isConflict ? null : e.message;
       _setLoading(false);
       return false;
     } catch (e) {
       debugPrint('Error en completeOnboarding: $e');
-      _errorMessage = 'Error al actualizar el perfil. Inténtalo nuevamente.';
+      _errorCode = AppError.profileUpdateFailed;
+      _setLoading(false);
+      return false;
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Recuperación de contraseña
+  // ---------------------------------------------------------------------------
+
+  /// Pide al backend que envíe el correo de recuperación.
+  ///
+  /// Devuelve true si la petición se cursó. No distingue si el correo existe:
+  /// el backend responde igual en ambos casos a propósito, para no permitir
+  /// enumerar usuarios, y la app mantiene esa ambigüedad.
+  Future<bool> forgotPassword(String email) async {
+    _setLoading(true);
+    _errorMessage = null;
+    _errorCode = null;
+    try {
+      await _authService.forgotPassword(email);
+      _setLoading(false);
+      return true;
+    } on ApiException catch (e) {
+      _errorCode = null;
+      _errorMessage = e.message;
+      _setLoading(false);
+      return false;
+    } catch (_) {
+      _errorCode = AppError.connection;
+      _setLoading(false);
+      return false;
+    }
+  }
+
+  /// Aplica la nueva contraseña usando el código recibido por correo.
+  /// A diferencia de [forgotPassword], aquí sí interesa distinguir el fallo:
+  /// un código inválido o vencido tiene que decirlo — no hay nada que filtrar,
+  /// porque quien lo usa ya tiene el código en la mano.
+  Future<bool> resetPassword({
+    required String code,
+    required String newPassword,
+  }) async {
+    _setLoading(true);
+    _errorMessage = null;
+    _errorCode = null;
+    try {
+      await _authService.resetPassword(code: code, newPassword: newPassword);
+      _setLoading(false);
+      return true;
+    } on ApiException catch (e) {
+      _errorCode = null;
+      _errorMessage = e.message;
+      _setLoading(false);
+      return false;
+    } catch (_) {
+      _errorCode = AppError.connection;
       _setLoading(false);
       return false;
     }
@@ -200,6 +322,7 @@ class UserProvider with ChangeNotifier {
     await _authService.logout();
     _currentUser = null;
     _errorMessage = null;
+    _errorCode = null;
     notifyListeners();
   }
 }

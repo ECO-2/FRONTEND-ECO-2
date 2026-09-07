@@ -5,6 +5,7 @@ import 'package:frontend_eco_2/widgets/common/custom_bottom_nav_bar.dart';
 import 'package:frontend_eco_2/widgets/common/custom_status_bar.dart';
 import 'package:frontend_eco_2/widgets/common/custom_button.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:frontend_eco_2/l10n/app_localizations.dart';
 
 class PremiumUpgradeScreen extends StatelessWidget {
   final bool isTab;
@@ -66,16 +67,15 @@ class PremiumUpgradeScreen extends StatelessWidget {
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
-                          children: const [
-                            Icon(
+                          children: [
+                            const Icon(
                               Icons.star_rounded,
                               size: 14,
                               color: AppColors.primary,
                             ),
-                            SizedBox(width: 4),
-                            Text(
-                              'O₂ PLUS',
-                              style: TextStyle(
+                            const SizedBox(width: 4),
+                            Text(AppLocalizations.of(context)!.o2PlusLabel,
+                              style: const TextStyle(
                                 color: AppColors.primary,
                                 fontWeight: FontWeight.bold,
                                 fontSize: 12,
@@ -88,9 +88,9 @@ class PremiumUpgradeScreen extends StatelessWidget {
                       const SizedBox(height: 20),
 
                       // Main Title
-                      const Text(
-                        'Potencia tu jardín',
-                        style: TextStyle(
+                      Text(
+                        AppLocalizations.of(context)!.premiumTitle,
+                        style: const TextStyle(
                           color: Colors.white,
                           fontSize: 32,
                           fontWeight: FontWeight.bold,
@@ -103,7 +103,7 @@ class PremiumUpgradeScreen extends StatelessWidget {
 
                       // Subtitle
                       Text(
-                        'Desbloquea el potencial completo de ECO2 y lleva tu experiencia botánica al siguiente nivel.',
+                        AppLocalizations.of(context)!.premiumSubtitle,
                         style: TextStyle(
                           color: Colors.white.withValues(alpha: 0.75),
                           fontSize: 14,
@@ -135,9 +135,9 @@ class PremiumUpgradeScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Todo lo que incluye',
-                          style: TextStyle(
+                        Text(
+                          AppLocalizations.of(context)!.premiumIncludes,
+                          style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                             color: AppColors.textPrimary,
@@ -151,9 +151,8 @@ class PremiumUpgradeScreen extends StatelessWidget {
                           icon: Icons.all_inclusive_rounded,
                           iconBgColor: const Color(0xFFE5ECEB),
                           iconColor: AppColors.primary,
-                          title: 'Macetas ilimitadas',
-                          subtitle:
-                              'Añade todas las plantas que quieras sin límites.',
+                          title: AppLocalizations.of(context)!.premiumUnlimitedPots,
+                          subtitle: AppLocalizations.of(context)!.premiumUnlimitedPotsDesc,
                         ).animate().fadeIn(delay: 350.ms, duration: 400.ms).slideX(begin: 0.1, end: 0),
                         const Divider(height: 1, color: Color(0xFFF1F4F3)),
 
@@ -162,9 +161,8 @@ class PremiumUpgradeScreen extends StatelessWidget {
                           icon: Icons.search_rounded,
                           iconBgColor: const Color(0xFFF0F4E5),
                           iconColor: AppColors.primary,
-                          title: 'Búsqueda mejorada por descripción',
-                          subtitle:
-                              'Encuentra plantas describiendo su aspecto con IA.',
+                          title: AppLocalizations.of(context)!.premiumBetterSearch,
+                          subtitle: AppLocalizations.of(context)!.premiumBetterSearchDesc,
                         ).animate().fadeIn(delay: 450.ms, duration: 400.ms).slideX(begin: 0.1, end: 0),
                         const Divider(height: 1, color: Color(0xFFF1F4F3)),
 
@@ -173,9 +171,8 @@ class PremiumUpgradeScreen extends StatelessWidget {
                           icon: Icons.photo_camera_outlined,
                           iconBgColor: const Color(0xFFEBECE8),
                           iconColor: AppColors.primary,
-                          title: 'Escaneos ilimitados',
-                          subtitle:
-                              'Identifica cualquier planta, cuando quieras.',
+                          title: AppLocalizations.of(context)!.premiumUnlimitedScans,
+                          subtitle: AppLocalizations.of(context)!.premiumUnlimitedScansDesc,
                         ).animate().fadeIn(delay: 550.ms, duration: 400.ms).slideX(begin: 0.1, end: 0),
                         const Divider(height: 1, color: Color(0xFFF1F4F3)),
 
@@ -184,9 +181,8 @@ class PremiumUpgradeScreen extends StatelessWidget {
                           icon: Icons.smart_toy_outlined,
                           iconBgColor: const Color(0xFFEEF5D1),
                           iconColor: const Color(0xFF8BA526),
-                          title: 'How to treat asistido con IA',
-                          subtitle:
-                              'Diagnóstico personalizado de plagas y cuidados.',
+                          title: AppLocalizations.of(context)!.premiumAiTreatment,
+                          subtitle: AppLocalizations.of(context)!.premiumAiTreatmentDesc,
                         ).animate().fadeIn(delay: 650.ms, duration: 400.ms).slideX(begin: 0.1, end: 0),
                         const Divider(height: 1, color: Color(0xFFF1F4F3)),
 
@@ -195,9 +191,8 @@ class PremiumUpgradeScreen extends StatelessWidget {
                           icon: Icons.local_offer_outlined,
                           iconBgColor: const Color(0xFFF6F5E5),
                           iconColor: const Color(0xFF908E74),
-                          title: 'Descuentos en viveros aliados',
-                          subtitle:
-                              'Hasta 20% off en especies de aliados selectos.',
+                          title: AppLocalizations.of(context)!.premiumNurseryDiscounts,
+                          subtitle: AppLocalizations.of(context)!.premiumNurseryDiscountsDesc,
                         ).animate().fadeIn(delay: 750.ms, duration: 400.ms).slideX(begin: 0.1, end: 0),
                         const Divider(height: 1, color: Color(0xFFF1F4F3)),
 
@@ -205,7 +200,7 @@ class PremiumUpgradeScreen extends StatelessWidget {
 
                         // Subscription Action Button
                         CustomButton(
-                          text: 'Suscribirse a O₂₊',
+                          text: AppLocalizations.of(context)!.subscribeToO2Plus,
                           backgroundColor: AppColors.primary,
                           foregroundColor: Colors.white,
                           borderRadius: BorderRadius.circular(16),

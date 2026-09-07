@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend_eco_2/utils/plant_visuals.dart';
+import 'package:frontend_eco_2/utils/catalog_labels.dart';
 
 /// Fila de chips de tags en una sola línea, con scroll horizontal en vez de
 /// envolver a una segunda línea. Se usa en tarjetas de tamaño fijo (imagen +
@@ -7,7 +8,7 @@ import 'package:frontend_eco_2/utils/plant_visuals.dart';
 /// del layout (por ejemplo, achica el área de la imagen). Con esto la altura
 /// de la tarjeta es siempre predecible sin importar cuántos tags haya.
 class TagChipsRow extends StatelessWidget {
-  final List<String> tags;
+  final List<SpeciesTag> tags;
   final double fontSize;
   final double iconSize;
   final EdgeInsets padding;
@@ -39,8 +40,9 @@ class TagChipsRow extends StatelessWidget {
     );
   }
 
-  Widget _chip(String text) {
-    final style = styleForTagKind(tagKindFor(text));
+  Widget _chip(SpeciesTag tag) {
+    final text = tag.text;
+    final style = styleForTagKind(tag.kind);
     return Container(
       padding: padding,
       decoration: BoxDecoration(

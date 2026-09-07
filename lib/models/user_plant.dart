@@ -9,6 +9,10 @@ class UserPlant {
   final String? healthStatus;
   final DateTime? acquiredAt;
   final DateTime? lastWateredAt;
+
+  /// Recordatorios silenciados solo para esta planta. Es distinto de apagar
+  /// las notificaciones de toda la cuenta: el resto del jardín sigue avisando.
+  final bool remindersMuted;
   final DateTime createdAt;
   final DateTime? updatedAt;
   final DateTime? deletedAt;
@@ -30,6 +34,7 @@ class UserPlant {
     this.healthStatus,
     this.acquiredAt,
     this.lastWateredAt,
+    this.remindersMuted = false,
     required this.createdAt,
     this.updatedAt,
     this.deletedAt,
@@ -53,6 +58,7 @@ class UserPlant {
       lastWateredAt: json['last_watered_at'] != null
           ? DateTime.tryParse(json['last_watered_at'] as String)
           : null,
+      remindersMuted: json['reminders_muted'] as bool? ?? false,
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: json['updated_at'] != null
           ? DateTime.tryParse(json['updated_at'] as String)
@@ -74,6 +80,7 @@ class UserPlant {
       'health_status': healthStatus,
       'acquired_at': acquiredAt?.toIso8601String(),
       'last_watered_at': lastWateredAt?.toIso8601String(),
+      'reminders_muted': remindersMuted,
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt?.toIso8601String(),
       'deleted_at': deletedAt?.toIso8601String(),
@@ -89,6 +96,7 @@ class UserPlant {
     String? healthStatus,
     DateTime? acquiredAt,
     DateTime? lastWateredAt,
+    bool? remindersMuted,
     DateTime? createdAt,
     DateTime? updatedAt,
     DateTime? deletedAt,
@@ -103,6 +111,7 @@ class UserPlant {
       healthStatus: healthStatus ?? this.healthStatus,
       acquiredAt: acquiredAt ?? this.acquiredAt,
       lastWateredAt: lastWateredAt ?? this.lastWateredAt,
+      remindersMuted: remindersMuted ?? this.remindersMuted,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       deletedAt: deletedAt ?? this.deletedAt,

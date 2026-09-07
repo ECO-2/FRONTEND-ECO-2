@@ -114,9 +114,9 @@ class _SuccessScreenState extends State<SuccessScreen> {
                               top: 160,
                               left: 24,
                               right: 24,
-                              child: const Text(
-                                '¡Bienvenido a ECO2\nPlus!',
-                                style: TextStyle(
+                              child: Text(
+                                AppLocalizations.of(context)!.welcomeToEco2Plus,
+                                style: const TextStyle(
                                   color: AppColors.primaryDark,
                                   fontSize: 32,
                                   fontWeight: FontWeight.bold,
@@ -132,9 +132,9 @@ class _SuccessScreenState extends State<SuccessScreen> {
                               top: 248,
                               left: 40,
                               right: 40,
-                              child: const Text(
-                                'Tu suscripción anual está activa. Disfruta de todas las funciones Plus desde ahora.',
-                                style: TextStyle(
+                              child: Text(
+                                AppLocalizations.of(context)!.subscriptionActive,
+                                style: const TextStyle(
                                   color: AppColors.primaryDark,
                                   fontSize: 14,
                                   height: 1.4,
@@ -190,24 +190,24 @@ class _SuccessScreenState extends State<SuccessScreen> {
                               // Step 1
                               _buildStepRow(
                                 number: '1',
-                                title: 'Escanea tu planta favorita',
-                                subtitle: 'Identifica cualquier especie con IA',
+                                title: AppLocalizations.of(context)!.tourScanFavourite,
+                                subtitle: AppLocalizations.of(context)!.tourScanFavouriteDesc,
                               ),
                               const SizedBox(height: 18),
                               
                               // Step 2
                               _buildStepRow(
                                 number: '2',
-                                title: 'Añade plantas sin límite',
-                                subtitle: 'Tu jardín puede crecer todo lo que quieras',
+                                title: AppLocalizations.of(context)!.addPlantsWithoutLimit,
+                                subtitle: AppLocalizations.of(context)!.gardenCanGrow,
                               ),
                               const SizedBox(height: 18),
                               
                               // Step 3
                               _buildStepRow(
                                 number: '3',
-                                title: 'Explora descuentos exclusivos',
-                                subtitle: 'Hasta 20% off en viveros aliados',
+                                title: AppLocalizations.of(context)!.exploreDiscounts,
+                                subtitle: AppLocalizations.of(context)!.exploreDiscountsDesc,
                               ),
                             ],
                           ),
@@ -243,8 +243,7 @@ class _SuccessScreenState extends State<SuccessScreen> {
                           (route) => false,
                         );
                       },
-                      child: const Text(
-                        'Empezar a usar Plus',
+                      child: Text(AppLocalizations.of(context)!.startUsingPlus,
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,

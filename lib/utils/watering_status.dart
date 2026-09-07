@@ -1,3 +1,5 @@
+import 'package:flutter/widgets.dart';
+import 'package:frontend_eco_2/l10n/app_localizations.dart';
 import 'package:frontend_eco_2/models/user_plant.dart';
 
 /// Estado de riego de una planta, calculado en un único sitio.
@@ -79,10 +81,18 @@ class WateringStatus {
     );
   }
 
-  /// Texto corto de estado para mostrar junto a la planta.
-  String get label {
-    if (needsWater) return daysOverdue > 0 ? 'Riego vencido' : 'Riego hoy';
-    if (neverWatered) return 'Sin riego aún';
-    return 'Al día';
+}
+
+/// Texto corto de estado para mostrar junto a la planta.
+///
+/// Estaba como getter en [WateringStatus], que es lógica pura sin
+/// `BuildContext`: devolvía el texto en español y se mostraba así también con
+/// la app en inglés.
+String wateringStatusLabel(BuildContext context, WateringStatus status) {
+  final l = AppLocalizations.of(context)!;
+  if (status.needsWater) {
+    return status.daysOverdue > 0 ? l.wateringOverdue : l.wateringToday;
   }
+  if (status.neverWatered) return l.noWateringYet;
+  return l.upToDate;
 }

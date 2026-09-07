@@ -7,6 +7,7 @@ class SecureStorage {
   static const _appTourSeenKey = 'app_tour_seen';
   static const _plantCareTourSeenKey = 'plant_care_tour_seen';
   static const _languageCodeKey = 'language_code';
+  static const _biometricLockKey = 'biometric_lock_enabled';
 
   final FlutterSecureStorage _storage = const FlutterSecureStorage(
     aOptions: AndroidOptions(encryptedSharedPreferences: true),
@@ -61,4 +62,15 @@ class SecureStorage {
       _storage.write(key: _languageCodeKey, value: code);
 
   Future<void> clearLanguageCode() => _storage.delete(key: _languageCodeKey);
+
+  // ── Bloqueo biométrico ────────────────────────────────────────────────
+  // Solo guarda la preferencia; la huella nunca sale del sistema operativo,
+  // que es quien la verifica y devuelve un sí o un no.
+  Future<bool> isBiometricLockEnabled() async {
+    return (await _storage.read(key: _biometricLockKey)) == 'true';
+  }
+
+  Future<void> setBiometricLockEnabled(bool enabled) => enabled
+      ? _storage.write(key: _biometricLockKey, value: 'true')
+      : _storage.delete(key: _biometricLockKey);
 }

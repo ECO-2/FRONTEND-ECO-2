@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:frontend_eco_2/models/models.dart';
 import 'package:frontend_eco_2/services/services.dart';
+import 'app_error.dart';
+import 'package:frontend_eco_2/l10n/app_localizations.dart';
 
 /// Tipo de condición usada por los logros sembrados en el backend
 /// (Achievement.conditionType). Centralizado acá porque tanto el conteo
@@ -29,6 +31,7 @@ class MissionsProvider with ChangeNotifier {
   int _careLogCount = 0;
   bool _isLoading = false;
   String? _errorMessage;
+  AppError? _errorCode;
 
   MissionsProvider({
     required GamificationService gamificationService,
@@ -42,6 +45,17 @@ class MissionsProvider with ChangeNotifier {
   int get careLogCount => _careLogCount;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
+
+  /// Texto de error ya traducido. Prefiere el código propio; si el fallo vino
+  /// del backend con un mensaje concreto, devuelve ese. Null si no hay error.
+  String? errorText(BuildContext context) {
+    final code = _errorCode;
+    if (code != null) return code.localize(context);
+    if (_errorMessage == kSessionExpired) {
+      return AppLocalizations.of(context)!.sessionExpired;
+    }
+    return _errorMessage;
+  }
 
   /// IDs de logros ya desbloqueados por el usuario.
   List<String> get completedAchievementIds =>
@@ -101,6 +115,7 @@ class MissionsProvider with ChangeNotifier {
   Future<void> init() async {
     _setLoading(true);
     _errorMessage = null;
+    _errorCode = null;
     try {
       final results = await Future.wait([
         _gamificationService.getProgress(),
@@ -115,9 +130,10 @@ class MissionsProvider with ChangeNotifier {
       _careLogCount =
           xpLogs.where((log) => log.actionType == _kCareLogActionType).length;
     } on ApiException catch (e) {
+      _errorCode = null;
       _errorMessage = e.message;
     } catch (_) {
-      _errorMessage = 'Error al cargar misiones.';
+      _errorCode = AppError.missionsLoadFailed;
     } finally {
       _setLoading(false);
     }
@@ -175,14 +191,16 @@ class MissionsProvider with ChangeNotifier {
     required String taskType,
   }) async {
     _errorMessage = null;
+    _errorCode = null;
     try {
       await _careService.createCareLog(userPlantId: userPlantId, taskType: taskType);
     } on ApiException catch (e) {
+      _errorCode = null;
       _errorMessage = e.message;
       notifyListeners();
       return null;
     } catch (_) {
-      _errorMessage = 'No se pudo registrar el cuidado.';
+      _errorCode = AppError.careLogFailed;
       notifyListeners();
       return null;
     }
@@ -244,7 +262,8 @@ class MissionsProvider with ChangeNotifier {
       } on ApiException catch (e) {
         // 409 = ya estaba desbloqueado (ej. otra sesión/dispositivo se
         // adelantó) — no es un error real, solo lo ignoramos.
-        if (!e.isConflict) _errorMessage = e.message;
+        if (!e.isConflict) _errorCode = null;
+ _errorMessage = e.message;
       } catch (_) {
         // Falla de red puntual: se reintentará la próxima vez que se
         // cumpla la condición (ej. al agregar la siguiente planta).

@@ -5,6 +5,7 @@ import 'package:frontend_eco_2/models/models.dart';
 import 'package:frontend_eco_2/providers/providers.dart';
 import 'package:frontend_eco_2/utils/achievement_ui.dart';
 import 'package:frontend_eco_2/utils/achievement_visuals.dart';
+import 'package:frontend_eco_2/utils/achievement_labels.dart';
 
 // ── Color tokens ─────────────────────────────────────────────────────────
 const _kDark = Color(0xFF10454F);
@@ -15,7 +16,6 @@ const _kCardBorder = Color(0xFFE5E5E5);
 
 const _kTrackableConditions = kTrackableAchievementConditions;
 final _iconForCondition = iconForAchievementCondition;
-final _progressLabel = achievementProgressLabel;
 
 class MissionsTab extends StatefulWidget {
   const MissionsTab({super.key});
@@ -57,7 +57,7 @@ class _MissionsTabState extends State<MissionsTab> {
                         _buildActiveMissionCard(mp, featured),
                         SizedBox(height: 24),
                       ] else
-                        _buildEmptyState('¡Completaste todos los logros disponibles!'),
+                        _buildEmptyState(AppLocalizations.of(context)!.allAchievementsDone),
                       if (upcoming.isNotEmpty) ...[
                         _buildSectionHeader(AppLocalizations.of(context)!.upcomingAchievements),
                         const SizedBox(height: 12),
@@ -68,7 +68,7 @@ class _MissionsTabState extends State<MissionsTab> {
                       ],
                     ] else if (_selectedTab == 1) ...[
                       if (completed.isEmpty)
-                        _buildEmptyState('No hay logros completados aún')
+                        _buildEmptyState(AppLocalizations.of(context)!.noCompletedAchievements)
                       else
                         ...completed.map((a) => Padding(
                               padding: const EdgeInsets.only(bottom: 10),
@@ -76,12 +76,12 @@ class _MissionsTabState extends State<MissionsTab> {
                             )),
                     ] else ...[
                       if (comingSoon.isEmpty)
-                        _buildEmptyState('No hay logros bloqueados por ahora')
+                        _buildEmptyState(AppLocalizations.of(context)!.noLockedAchievements)
                       else ...[
                         Padding(
                           padding: const EdgeInsets.only(bottom: 12),
                           child: Text(
-                            'Estos logros dependen de funciones que todavía no están disponibles en la app.',
+                            AppLocalizations.of(context)!.lockedAchievementsNote,
                             style: TextStyle(color: _kTextMuted, fontSize: 12, fontFamily: 'DM Sans'),
                           ),
                         ),
@@ -113,7 +113,8 @@ class _MissionsTabState extends State<MissionsTab> {
 
   // ── Tabs row ─────────────────────────────────────────────────────────
   Widget _buildTabs() {
-    const tabs = ['Activa', 'Completadas', 'Bloqueadas'];
+    final l = AppLocalizations.of(context)!;
+    final tabs = [l.tabActive, l.tabCompleted, l.tabLocked];
     return Container(
       color: Colors.white,
       padding: const EdgeInsets.only(left: 24, right: 24, top: 4),
@@ -220,7 +221,7 @@ class _MissionsTabState extends State<MissionsTab> {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      a.name,
+                      achievementName(context, a),
                       style: const TextStyle(
                         fontFamily: 'DM Sans',
                         fontWeight: FontWeight.w700,
@@ -228,10 +229,10 @@ class _MissionsTabState extends State<MissionsTab> {
                         color: Colors.white,
                       ),
                     ),
-                    if (a.description != null) ...[
+                    if (achievementDescription(context, a) != null) ...[
                       const SizedBox(height: 2),
                       Text(
-                        a.description!,
+                        achievementDescription(context, a)!,
                         style: const TextStyle(
                           fontFamily: 'DM Sans',
                           fontWeight: FontWeight.w500,
@@ -260,7 +261,7 @@ class _MissionsTabState extends State<MissionsTab> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                _progressLabel(a, current),
+                achievementProgressLabel(context, a, current),
                 style: const TextStyle(
                   fontFamily: 'DM Sans',
                   fontWeight: FontWeight.w500,
@@ -352,7 +353,7 @@ class _MissionsTabState extends State<MissionsTab> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  a.name,
+                  achievementName(context, a),
                   style: const TextStyle(
                     fontFamily: 'DM Sans',
                     fontWeight: FontWeight.w700,
@@ -362,7 +363,10 @@ class _MissionsTabState extends State<MissionsTab> {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  locked ? (a.description ?? 'Próximamente') : _progressLabel(a, current),
+                  locked
+                      ? (achievementDescription(context, a) ??
+                          AppLocalizations.of(context)!.comingSoon)
+                      : achievementProgressLabel(context, a, current),
                   style: const TextStyle(
                     fontFamily: 'DM Sans',
                     fontWeight: FontWeight.w400,
@@ -414,7 +418,7 @@ class _MissionsTabState extends State<MissionsTab> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    a.name,
+                    achievementName(context, a),
                     style: const TextStyle(
                       fontFamily: 'DM Sans',
                       fontWeight: FontWeight.w700,
@@ -422,9 +426,9 @@ class _MissionsTabState extends State<MissionsTab> {
                       color: _kTextDark,
                     ),
                   ),
-                  if (a.description != null)
+                  if (achievementDescription(context, a) != null)
                     Text(
-                      a.description!,
+                      achievementDescription(context, a)!,
                       style: const TextStyle(
                         fontFamily: 'DM Sans',
                         fontSize: 11,

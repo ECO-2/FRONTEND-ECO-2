@@ -60,17 +60,16 @@ class CareStatusCard extends StatelessWidget {
                     color: const Color(0xFFF56B1C),
                     borderRadius: BorderRadius.circular(20),
                   ),
-                  child: const Row(
+                  child: Row(
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.warning_amber_rounded,
                         size: 12,
                         color: Colors.white,
                       ),
-                      SizedBox(width: 4),
-                      Text(
-                        'Riego Urgente',
-                        style: TextStyle(
+                      const SizedBox(width: 4),
+                      Text(AppLocalizations.of(context)!.urgentWatering,
+                        style: const TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
@@ -100,7 +99,7 @@ class CareStatusCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        status.label,
+                        wateringStatusLabel(context, status),
                         style: const TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.bold,
@@ -119,12 +118,16 @@ class CareStatusCard extends StatelessWidget {
               Expanded(
                 child: Column(
                   children: [
-                    Text(
-                      '$daysSinceWater',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 22,
-                        color: Color(0xFF0D2B31),
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        '$daysSinceWater',
+                        maxLines: 1,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 22,
+                          color: Color(0xFF0D2B31),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -132,7 +135,9 @@ class CareStatusCard extends StatelessWidget {
                       // Si nunca se registró un riego, el contador va desde que
                       // se añadió la planta: decir "sin riego" sería afirmar
                       // algo que no sabemos.
-                      status.neverWatered ? 'días en tu jardín' : 'días sin riego',
+                      status.neverWatered
+                          ? AppLocalizations.of(context)!.daysInYourGarden
+                          : AppLocalizations.of(context)!.daysWithoutWater,
                       textAlign: TextAlign.center,
                       style: const TextStyle(fontSize: 10, color: Color(0xFF807F7F)),
                     ),
@@ -142,18 +147,28 @@ class CareStatusCard extends StatelessWidget {
               Expanded(
                 child: Column(
                   children: [
-                    Text(
-                      sp.waterFreq,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 22,
-                        color: Color(0xFF0D2B31),
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      // Forma compacta: en ingles `sp.waterFreq` es
+                      // "every 7 days" y a 22px no cabia en un tercio del
+                      // ancho, asi que la fila se desbordaba.
+                      child: Text(
+                        AppLocalizations.of(context)!.everyNDaysCompact(sp.waterFreqDays),
+                        maxLines: 1,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 22,
+                          color: Color(0xFF0D2B31),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 2),
-                    const Text(
-                      'frecuencia',
-                      style: TextStyle(fontSize: 10, color: Color(0xFF807F7F)),
+                    Text(
+                      AppLocalizations.of(context)!.frequency,
+                      textAlign: TextAlign.center,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontSize: 10, color: Color(0xFF807F7F)),
                     ),
                   ],
                 ),
@@ -161,17 +176,24 @@ class CareStatusCard extends StatelessWidget {
               Expanded(
                 child: Column(
                   children: [
-                    Text(
-                      isOverdue ? '+$overdueDays\u{0064}' : '${daysRemaining}d',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 22,
-                        color: Color(0xFF0D2B31),
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        isOverdue ? '+$overdueDays\u{0064}' : '${daysRemaining}d',
+                        maxLines: 1,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 22,
+                          color: Color(0xFF0D2B31),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      isOverdue ? 'vencido' : 'restantes',
+                      isOverdue ? AppLocalizations.of(context)!.overdue : AppLocalizations.of(context)!.remaining,
+                      textAlign: TextAlign.center,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: const TextStyle(fontSize: 10, color: Color(0xFF807F7F)),
                     ),
                   ],
