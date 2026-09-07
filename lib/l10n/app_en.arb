@@ -834,5 +834,16 @@
   "plusOnlyFeature": "Available with O₂₊",
   "copyCode": "Copy code",
   "plusUnlimitedSummary": "Unlimited pots and scans",
-  "manage": "Manage"
+  "manage": "Manage",
+  "chooseAvatar": "Choose your avatar",
+  "avatarUpdated": "Avatar updated",
+  "noAvatar": "No avatar",
+  "avatarAgronomist": "Agronomist",
+  "avatarFarmer": "Farmer",
+  "avatarGardener": "Gardener",
+  "avatarTechnologist": "Technologist",
+  "avatarBreeder": "Poultry keeper",
+  "avatarExplorer": "Explorer",
+  "avatarScientist": "Scientist",
+  "avatarFlorist": "Florist"
 }

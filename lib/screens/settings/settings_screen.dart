@@ -14,6 +14,7 @@ import 'package:frontend_eco_2/screens/profile/change_password_screen.dart';
 import 'package:frontend_eco_2/widgets/common/custom_app_bar.dart';
 import 'package:frontend_eco_2/widgets/common/settings_option_tile.dart';
 import 'package:frontend_eco_2/widgets/common/app_toast.dart';
+import 'package:frontend_eco_2/widgets/common/user_avatar.dart';
 
 /// Versión de la app. Debe seguir a `version:` en pubspec.yaml — antes aquí
 /// había un "2.4.1" fijo que no correspondía a ninguna versión real.
@@ -455,17 +456,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             child: ListTile(
               contentPadding: const EdgeInsets.all(16),
-              leading: Container(
-                width: 50,
-                height: 50,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: const Color(0xFFE2E7E4),
-                  border: Border.all(color: AppColors.primary, width: 1.5),
-                ),
-                child: const Icon(Icons.person,
-                    size: 30, color: AppColors.primary),
-              ),
+              leading: UserAvatar(avatarId: user?.avatarUrl, size: 50),
               title: Text(
                 // Sin "Carlos Eco" de relleno: si aún no hay nombre elegido se
                 // muestra el correo, que sí es real.

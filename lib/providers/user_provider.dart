@@ -140,6 +140,7 @@ class UserProvider with ChangeNotifier {
 
   Future<bool> updateProfile({
     String? username,
+    String? avatarId,
     bool? notificationsEnabled,
     int? reminderStartHour,
     int? reminderEndHour,
@@ -150,6 +151,7 @@ class UserProvider with ChangeNotifier {
     try {
       _currentUser = await _userService.updateProfile(
         username: username,
+        avatarId: avatarId,
         notificationsEnabled: notificationsEnabled,
         reminderStartHour: reminderStartHour,
         reminderEndHour: reminderEndHour,

@@ -2193,4 +2193,37 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get manage => 'Gestionar';
+
+  @override
+  String get chooseAvatar => 'Elige tu avatar';
+
+  @override
+  String get avatarUpdated => 'Avatar actualizado';
+
+  @override
+  String get noAvatar => 'Sin avatar';
+
+  @override
+  String get avatarAgronomist => 'Agrónoma';
+
+  @override
+  String get avatarFarmer => 'Granjero';
+
+  @override
+  String get avatarGardener => 'Jardinera';
+
+  @override
+  String get avatarTechnologist => 'Tecnólogo';
+
+  @override
+  String get avatarBreeder => 'Criadora';
+
+  @override
+  String get avatarExplorer => 'Explorador';
+
+  @override
+  String get avatarScientist => 'Científico';
+
+  @override
+  String get avatarFlorist => 'Floricultora';
 }

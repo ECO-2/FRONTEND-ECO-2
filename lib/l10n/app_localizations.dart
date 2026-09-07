@@ -3860,6 +3860,72 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Gestionar'**
   String get manage;
+
+  /// No description provided for @chooseAvatar.
+  ///
+  /// In es, this message translates to:
+  /// **'Elige tu avatar'**
+  String get chooseAvatar;
+
+  /// No description provided for @avatarUpdated.
+  ///
+  /// In es, this message translates to:
+  /// **'Avatar actualizado'**
+  String get avatarUpdated;
+
+  /// No description provided for @noAvatar.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin avatar'**
+  String get noAvatar;
+
+  /// No description provided for @avatarAgronomist.
+  ///
+  /// In es, this message translates to:
+  /// **'Agrónoma'**
+  String get avatarAgronomist;
+
+  /// No description provided for @avatarFarmer.
+  ///
+  /// In es, this message translates to:
+  /// **'Granjero'**
+  String get avatarFarmer;
+
+  /// No description provided for @avatarGardener.
+  ///
+  /// In es, this message translates to:
+  /// **'Jardinera'**
+  String get avatarGardener;
+
+  /// No description provided for @avatarTechnologist.
+  ///
+  /// In es, this message translates to:
+  /// **'Tecnólogo'**
+  String get avatarTechnologist;
+
+  /// No description provided for @avatarBreeder.
+  ///
+  /// In es, this message translates to:
+  /// **'Criadora'**
+  String get avatarBreeder;
+
+  /// No description provided for @avatarExplorer.
+  ///
+  /// In es, this message translates to:
+  /// **'Explorador'**
+  String get avatarExplorer;
+
+  /// No description provided for @avatarScientist.
+  ///
+  /// In es, this message translates to:
+  /// **'Científico'**
+  String get avatarScientist;
+
+  /// No description provided for @avatarFlorist.
+  ///
+  /// In es, this message translates to:
+  /// **'Floricultora'**
+  String get avatarFlorist;
 }
 
 class _AppLocalizationsDelegate

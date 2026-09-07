@@ -6,6 +6,7 @@ import 'package:frontend_eco_2/theme/app_colors.dart';
 import 'package:frontend_eco_2/widgets/common/custom_text_field.dart';
 import 'package:frontend_eco_2/widgets/common/custom_app_bar.dart';
 import 'package:frontend_eco_2/widgets/common/app_toast.dart';
+import 'package:frontend_eco_2/widgets/common/user_avatar.dart';
 
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});
@@ -82,6 +83,30 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     Navigator.of(context).pop();
   }
 
+  /// Abre el selector de avatar y guarda el elegido.
+  ///
+  /// Antes ambos botones solo mostraban un toast de "próximamente"; ahora la
+  /// elección se persiste en el perfil (campo avatar_url, que ya existía).
+  Future<void> _pickAvatar() async {
+    final l = AppLocalizations.of(context)!;
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+
+    final chosen = await showAvatarPicker(
+      context,
+      current: userProvider.currentUser?.avatarUrl,
+      title: l.chooseAvatar,
+    );
+    if (chosen == null || !mounted) return;
+
+    final ok = await userProvider.updateProfile(avatarId: chosen);
+    if (!mounted) return;
+    showAppToast(
+      context,
+      ok ? l.avatarUpdated : (userProvider.errorText(context) ?? l.connectionError),
+      type: ok ? ToastType.success : ToastType.error,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -127,27 +152,18 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       children: [
                         Stack(
                           children: [
-                            Container(
-                              width: 120,
-                              height: 120,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: const Color(0xFFE2E7E4), // Light greyish green avatar background
-                                border: Border.all(color: AppColors.primary, width: 2),
-                              ),
-                              child: const Icon(
-                                Icons.person,
-                                size: 70,
-                                color: AppColors.primary,
-                              ),
+                            UserAvatar(
+                              avatarId: context
+                                  .watch<UserProvider>()
+                                  .currentUser
+                                  ?.avatarUrl,
+                              size: 120,
                             ),
                             Positioned(
                               bottom: 0,
                               right: 0,
                               child: InkWell(
-                                onTap: () {
-                                  showAppToast(context, AppLocalizations.of(context)!.changePhotoComingSoon);
-                                },
+                                onTap: _pickAvatar,
                                 child: Container(
                                   width: 36,
                                   height: 36,
@@ -168,11 +184,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         ),
                         const SizedBox(height: 12),
                         TextButton(
-                          onPressed: () {
-                            showAppToast(context, AppLocalizations.of(context)!.changePhotoComingSoon);
-                          },
+                          onPressed: _pickAvatar,
                           child: Text(
-                            AppLocalizations.of(context)!.changeProfilePhoto,
+                            AppLocalizations.of(context)!.chooseAvatar,
                             style: const TextStyle(
                               color: AppColors.primary,
                               fontSize: 14,

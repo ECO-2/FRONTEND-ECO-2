@@ -23,12 +23,15 @@ class UserService {
   /// PATCH /user/profile — actualiza nombre, notificaciones y horarios de recordatorio.
   Future<User> updateProfile({
     String? username,
+    String? avatarId,
     bool? notificationsEnabled,
     int? reminderStartHour,
     int? reminderEndHour,
   }) async {
     final body = <String, dynamic>{};
     if (username != null) body['username'] = username;
+    // Se manda el id del avatar, no una URL: ver avatar_catalog.dart.
+    if (avatarId != null) body['avatar_url'] = avatarId;
     if (notificationsEnabled != null) {
       body['notifications_enabled'] = notificationsEnabled;
     }

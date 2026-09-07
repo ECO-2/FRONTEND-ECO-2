@@ -1266,5 +1266,16 @@
   "plusOnlyFeature": "Disponible con O₂₊",
   "copyCode": "Copiar código",
   "plusUnlimitedSummary": "Macetas y escaneos ilimitados",
-  "manage": "Gestionar"
+  "manage": "Gestionar",
+  "chooseAvatar": "Elige tu avatar",
+  "avatarUpdated": "Avatar actualizado",
+  "noAvatar": "Sin avatar",
+  "avatarAgronomist": "Agrónoma",
+  "avatarFarmer": "Granjero",
+  "avatarGardener": "Jardinera",
+  "avatarTechnologist": "Tecnólogo",
+  "avatarBreeder": "Criadora",
+  "avatarExplorer": "Explorador",
+  "avatarScientist": "Científico",
+  "avatarFlorist": "Floricultora"
 }

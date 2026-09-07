@@ -9,6 +9,7 @@ import 'package:frontend_eco_2/utils/co2_estimate.dart';
 import 'package:frontend_eco_2/widgets/common/stat_card.dart';
 import 'package:frontend_eco_2/widgets/common/settings_option_tile.dart';
 import 'package:frontend_eco_2/widgets/common/plus_badge.dart';
+import 'package:frontend_eco_2/widgets/common/user_avatar.dart';
 
 class ProfileTab extends StatelessWidget {
   /// Abre la pestaña Jardín en el catálogo de especies.
@@ -79,20 +80,7 @@ class ProfileTab extends StatelessWidget {
           Center(
             child: Column(
               children: [
-                Container(
-                  width: 110,
-                  height: 110,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: const Color(0xFFE2E7E4), // Light greyish green avatar background
-                    border: Border.all(color: AppColors.primary, width: 2),
-                  ),
-                  child: const Icon(
-                    Icons.person,
-                    size: 60,
-                    color: AppColors.primary,
-                  ),
-                ),
+                UserAvatar(avatarId: user?.avatarUrl, size: 110),
                 const SizedBox(height: 16),
                 Text(
                   user?.username ?? 'Usuario',
