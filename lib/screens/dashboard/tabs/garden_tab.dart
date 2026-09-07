@@ -12,6 +12,8 @@ import 'package:frontend_eco_2/utils/plant_visuals.dart';
 import 'package:frontend_eco_2/utils/catalog_labels.dart';
 import 'package:frontend_eco_2/utils/cloudinary_transform.dart';
 import 'package:frontend_eco_2/utils/watering_status.dart';
+import 'package:frontend_eco_2/utils/pot_labels.dart';
+import 'package:frontend_eco_2/widgets/garden/rental_pot_banner.dart';
 import 'package:frontend_eco_2/widgets/garden/last_watered_sheet.dart';
 import 'package:frontend_eco_2/widgets/garden/needs_water_badge.dart';
 import 'package:frontend_eco_2/widgets/garden/add_plant_modal.dart';
@@ -1269,6 +1271,18 @@ class _GardenTabState extends State<GardenTab> {
         if (plantsNeedingWater.isNotEmpty)
           _buildAttentionBanner(context, plantsNeedingWater.length),
 
+        // El alquiler corre desde que se paga, asi que se mantiene a la vista
+        // mientras dure: si no, el usuario solo se entera cuando le falta
+        // sitio, que es cuando ya no puede hacer nada.
+        RentalPotBanner(
+          onUseSlot: () => showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            backgroundColor: Colors.transparent,
+            builder: (_) => const AddPlantModal(),
+          ),
+        ),
+
         // ── Plants list/grid ──
         Expanded(
           child: filteredPlants.isEmpty
@@ -1644,7 +1658,8 @@ class _GardenTabState extends State<GardenTab> {
                     ),
                     SizedBox(height: 2),
                     Text(
-                      AppLocalizations.of(context)!.potsFreeHint(plantCount),
+                      potsCaption(context,
+                          context.watch<PlanProvider>().status, plantCount),
                       style: const TextStyle(
                         fontFamily: 'DM Sans',
                         fontSize: 11,

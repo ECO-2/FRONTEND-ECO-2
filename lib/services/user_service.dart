@@ -64,6 +64,33 @@ class UserService {
     return PlanStatus.fromJson(data);
   }
 
+  /// GET /user/avatars — ids de los avatares que el usuario puede usar
+  /// (gratuitos + comprados).
+  Future<List<String>> getOwnedAvatars() async {
+    final data = await _client.get('/user/avatars') as Map<String, dynamic>;
+    return (data['owned'] as List<dynamic>? ?? const [])
+        .map((e) => e as String)
+        .toList();
+  }
+
+  /// POST /user/avatars/purchase — compra un avatar con semillas.
+  /// Devuelve el saldo de semillas restante.
+  Future<int> purchaseAvatar(String avatarId) async {
+    final data = await _client.post('/user/avatars/purchase',
+        body: {'avatar_id': avatarId}) as Map<String, dynamic>;
+    return data['seeds'] as int? ?? 0;
+  }
+
+  /// POST /user/store/redeem — canjea un artículo con semillas.
+  ///
+  /// El backend descuenta Y entrega en la misma transacción. Devuelve el saldo
+  /// de semillas restante.
+  Future<int> redeemStoreItem(String itemId) async {
+    final data = await _client.post('/user/store/redeem',
+        body: {'item_id': itemId}) as Map<String, dynamic>;
+    return data['seeds'] as int? ?? 0;
+  }
+
   /// PATCH /user/password — cambia la contraseña verificando la actual.
   Future<void> changePassword({
     required String currentPassword,

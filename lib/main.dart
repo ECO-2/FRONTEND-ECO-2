@@ -98,6 +98,9 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (_) => PlanProvider(userService: userService),
         ),
+        ChangeNotifierProvider(
+          create: (_) => AvatarsProvider(userService: userService),
+        ),
       ],
       // ECO2 no ofrece modo oscuro: la app siempre usa el tema claro,
       // sin importar el ajuste de tema del sistema del teléfono.
@@ -202,6 +205,7 @@ class _AppLoaderState extends State<_AppLoader> {
         plantsProvider.init(),
         missionsProvider.init(),
         planProvider.refresh(),
+        context.read<AvatarsProvider>().refresh(),
       ]);
       missionsProvider.syncUserPlantsCount(plantsProvider.userPlants.length);
 

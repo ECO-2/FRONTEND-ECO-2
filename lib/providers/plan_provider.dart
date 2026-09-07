@@ -64,6 +64,33 @@ class PlanProvider with ChangeNotifier {
     }
   }
 
+  /// Canjea un artículo de la tienda. Devuelve las semillas restantes, o null
+  /// si falló. Refresca el plan, porque el canje puede activar O2+ o añadir
+  /// macetas.
+  Future<int?> redeem(String itemId) async {
+    _isLoading = true;
+    _errorCode = null;
+    _errorMessage = null;
+    notifyListeners();
+    try {
+      final seeds = await _userService.redeemStoreItem(itemId);
+      _status = await _userService.getPlan();
+      _isLoading = false;
+      notifyListeners();
+      return seeds;
+    } on ApiException catch (e) {
+      _errorMessage = e.message;
+      _isLoading = false;
+      notifyListeners();
+      return null;
+    } catch (_) {
+      _errorCode = AppError.connection;
+      _isLoading = false;
+      notifyListeners();
+      return null;
+    }
+  }
+
   Future<bool> cancelPlus() async {
     _isLoading = true;
     notifyListeners();

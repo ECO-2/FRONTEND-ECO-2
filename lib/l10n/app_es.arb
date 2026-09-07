@@ -426,14 +426,6 @@
   "couldNotAddPlant": "No se pudo agregar la planta.",
   "addNewPlant": "Añadir nueva planta",
   "yourPlantName": "Nombre de tu planta",
-  "potsFreeHint": "[{count} macetas de 10 gratis]",
-  "@potsFreeHint": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "gramsPerDayShort": "{grams} g/día",
   "@gramsPerDayShort": {
     "placeholders": {
@@ -1125,14 +1117,6 @@
   "clear": "Limpiar",
   "applyFilters": "Aplicar filtros",
   "unlockO2Features": "Desbloquea funciones O₂₊",
-  "freePotsOf": "[{count} macetas de 10\ngratis]",
-  "@freePotsOf": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "done": "Listo",
   "customizeYourEco2": "Personaliza tu experiencia ECO2",
   "skipForNow": "Omitir por ahora",
@@ -1219,7 +1203,7 @@
   "tabActive": "Activa",
   "tabCompleted": "Completadas",
   "tabLocked": "Bloqueadas",
-  "plantLimitReached": "Has llegado a tus 10 macetas. Con O₂₊ son ilimitadas.",
+  "plantLimitReached": "Has llegado a tu tope de macetas. Con O₂₊ son ilimitadas.",
   "scanLimitReached": "Ya usaste tus 5 escaneos de hoy. Con O₂₊ son ilimitados.",
   "plusMember": "Miembro O₂₊",
   "plusActiveUntil": "Activo hasta el {date}",
@@ -1230,6 +1214,42 @@
       }
     }
   },
+  "potsUsedOfLimit": "{used} de {limit} macetas",
+  "@potsUsedOfLimit": { "placeholders": { "used": { "type": "int" }, "limit": { "type": "int" } } },
+  "potsUnlimited": "Macetas ilimitadas",
+  "legacyPotsKept": "{count, plural, =1{Conservas 1 maceta de tu O₂₊ anterior} other{Conservas {count} macetas de tu O₂₊ anterior}}",
+  "@legacyPotsKept": { "placeholders": { "count": { "type": "int" } } },
+  "legacyPotsExplainer": "Al terminar O₂₊ no se borra ninguna planta: conservas las que cuidabas y el tope solo afecta a las nuevas.",
+  "rentalPotsActive": "{count, plural, =1{1 maceta alquilada} other{{count} macetas alquiladas}}",
+  "@rentalPotsActive": { "placeholders": { "count": { "type": "int" } } },
+  "rentalPotsExpiresIn": "{days, plural, =0{Vence hoy} =1{Vence mañana} other{Vence en {days} días}}",
+  "@rentalPotsExpiresIn": { "placeholders": { "days": { "type": "int" } } },
+  "rentalPotsFreeSlot": "{count, plural, =1{Te queda 1 hueco libre en tu jardín} other{Te quedan {count} huecos libres en tu jardín}}",
+  "@rentalPotsFreeSlot": { "placeholders": { "count": { "type": "int" } } },
+  "rentalPotsAllUsed": "Todas tus macetas están ocupadas",
+  "avatarAlreadyOwned": "Ya tienes este avatar.",
+  "avatarNotOwned": "Necesitas comprar este avatar primero.",
+  "avatarPurchased": "¡{name} desbloqueado!",
+  "@avatarPurchased": { "placeholders": { "name": { "type": "String" } } },
+  "buyForSeeds": "Comprar por {cost} semillas",
+  "@buyForSeeds": { "placeholders": { "cost": { "type": "int" } } },
+  "earlierLabel": "Anteriores",
+  "noNotificationsBody": "Aquí verás los riegos pendientes, los logros que desbloquees y las plantas que añadas.",
+  "noNotificationsTitle": "Todo en orden",
+  "notEnoughSeeds": "No tienes semillas suficientes.",
+  "owned": "Ya lo tienes",
+  "storeAvatarSubtitle": "Desbloqueo permanente",
+  "storeCriadoraTitle": "Avatar Criadora",
+  "storeExploradorTitle": "Avatar Explorador",
+  "storeJardineraTitle": "Avatar Jardinera",
+  "storeNoctilanaTitle": "Avatar Noctilana",
+  "thisWeekLabel": "Esta semana",
+  "unreadCount": "{count, plural, =1{1 sin leer} other{{count} sin leer}}",
+  "@unreadCount": { "placeholders": { "count": { "type": "int" } } },
+  "rentalPotsExpiresInHours": "{hours, plural, =1{Vence en 1 hora} other{Vence en {hours} horas}}",
+  "@rentalPotsExpiresInHours": { "placeholders": { "hours": { "type": "int" } } },
+  "rentalPotsExpiresInMinutes": "{minutes, plural, =1{Vence en 1 minuto} other{Vence en {minutes} minutos}}",
+  "@rentalPotsExpiresInMinutes": { "placeholders": { "minutes": { "type": "int" } } },
   "freePlanLabel": "Plan gratuito",
   "potsUsage": "{used} de {limit} macetas",
   "@potsUsage": {

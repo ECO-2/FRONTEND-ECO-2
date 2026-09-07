@@ -6,6 +6,8 @@ import 'package:frontend_eco_2/models/models.dart';
 import 'package:frontend_eco_2/providers/providers.dart';
 import 'package:frontend_eco_2/routing/app_routes.dart';
 import 'package:frontend_eco_2/widgets/common/app_toast.dart';
+import 'package:frontend_eco_2/theme/app_colors.dart';
+import 'package:frontend_eco_2/utils/achievement_labels.dart';
 
 const _kDark = Color(0xFF10454F);
 const _kBg = Color(0xFFF8FAF9);
@@ -50,13 +52,16 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       return DateTime.now().difference(p.lastWateredAt!).inDays >= species.waterFrequencyDays;
     }).map((p) => (plantId: p.id, plantNickname: p.nickname)).toList();
 
+    final l = AppLocalizations.of(context)!;
     final recentAchievements = missionsProvider.unlockedAchievements.map((ua) {
       final achievement = missionsProvider.achievements
           .where((a) => a.id == ua.achievementId);
+      // El nombre pasa por el traductor de logros: el que viene del backend
+      // esta en espanol. Antes tambien se pegaba " semillas" a mano, que en
+      // ingles quedaba mezclado.
       final title = achievement.isEmpty
-          ? 'Nuevo logro'
-          : '${achievement.first.name} (+${achievement.first.xpReward} XP'
-              '${achievement.first.seedReward > 0 ? ' · +${achievement.first.seedReward} semillas' : ''})';
+          ? l.achievementUnlockedTitle
+          : achievementName(context, achievement.first);
       return (achievementId: ua.achievementId, title: title, unlockedAt: ua.unlockedAt);
     }).toList();
 
@@ -77,101 +82,67 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   Widget build(BuildContext context) {
     final notifProvider = Provider.of<NotificationsProvider>(context);
 
-    final todayNotifications = notifProvider.notifications
-        .where((n) => DateTime.now().difference(n.sentAt).inHours <= 12)
+    // Antes solo habia dos grupos, partidos por 12 horas, y el segundo se
+    // titulaba "esta semana" aunque contuviera cosas de hace meses.
+    final now = DateTime.now();
+    final startOfToday = DateTime(now.year, now.month, now.day);
+    final startOfWeek = startOfToday.subtract(const Duration(days: 7));
+
+    final ordered = [...notifProvider.notifications]
+      ..sort((a, b) => b.sentAt.compareTo(a.sentAt));
+
+    final todayNotifications =
+        ordered.where((n) => !n.sentAt.isBefore(startOfToday)).toList();
+    final weekNotifications = ordered
+        .where((n) =>
+            n.sentAt.isBefore(startOfToday) && !n.sentAt.isBefore(startOfWeek))
         .toList();
-    final weekNotifications = notifProvider.notifications
-        .where((n) => DateTime.now().difference(n.sentAt).inHours > 12)
-        .toList();
+    final earlierNotifications =
+        ordered.where((n) => n.sentAt.isBefore(startOfWeek)).toList();
 
     return Scaffold(
       backgroundColor: _kBg,
       body: Column(
         children: [
           // ── Dark teal header ──────────────────────────────────
-          _NotifHeader(unreadCount: notifProvider.unreadCount),
-          // ── List ─────────────────────────────────────────────
+          _NotifHeader(
+            unreadCount: notifProvider.unreadCount,
+            onMarkAllRead: () {
+              notifProvider.markAllAsRead();
+              showAppToast(
+                context,
+                AppLocalizations.of(context)!.allNotificationsRead,
+                duration: const Duration(seconds: 1, milliseconds: 400),
+              );
+            },
+          ),
+          // ── Lista ────────────────────────────────────────────
           Expanded(
             child: notifProvider.notifications.isEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(
-                          Icons.notifications_none,
-                          size: 64,
-                          color: Colors.grey,
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          AppLocalizations.of(context)!.noNotificationsYet,
-                          style: const TextStyle(
-                            color: Colors.grey,
-                            fontFamily: 'DM Sans',
-                          ),
-                        ),
-                      ],
-                    ),
-                  )
+                ? _buildEmptyState(context)
                 : ListView(
-                    padding: const EdgeInsets.only(bottom: 32),
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
                     children: [
-                      // Mark all read
-                      if (notifProvider.unreadCount > 0)
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: Padding(
-                            padding: const EdgeInsets.only(right: 16, top: 6),
-                            child: TextButton(
-                              onPressed: () {
-                                notifProvider.markAllAsRead();
-                                showAppToast(
-                                  context,
-                                  AppLocalizations.of(context)!.allNotificationsRead,
-                                  duration: const Duration(seconds: 1, milliseconds: 400),
-                                );
-                              },
-                              child: Text(
-                                AppLocalizations.of(context)!.markAllRead,
-                                style: const TextStyle(
-                                  color: _kDark,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 13,
-                                  fontFamily: 'DM Sans',
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-
-                      // HOY
                       if (todayNotifications.isNotEmpty) ...[
                         _sectionLabel(AppLocalizations.of(context)!.todayLabel),
-                        ...todayNotifications.map(
-                          (n) => _buildNotifItem(context, n),
-                        ),
-                        const SizedBox(height: 8),
+                        ...todayNotifications.map((n) => _buildNotifItem(context, n)),
                       ],
-
-                      // ESTA SEMANA
                       if (weekNotifications.isNotEmpty) ...[
-                        _sectionLabel('ESTA SEMANA'),
-                        ...weekNotifications.map(
-                          (n) => _buildNotifItem(context, n),
-                        ),
+                        _sectionLabel(AppLocalizations.of(context)!.thisWeekLabel),
+                        ...weekNotifications.map((n) => _buildNotifItem(context, n)),
                       ],
-
-                      // Footer
-                      Padding(
-                        padding: EdgeInsets.symmetric(vertical: 20),
-                        child: Center(
-                          child: Text(
-                            AppLocalizations.of(context)!.thatsAllForNow,
-                            style: const TextStyle(
-                              color: _kTextMuted,
-                              fontSize: 13,
-                              fontFamily: 'DM Sans',
-                            ),
+                      if (earlierNotifications.isNotEmpty) ...[
+                        _sectionLabel(AppLocalizations.of(context)!.earlierLabel),
+                        ...earlierNotifications.map((n) => _buildNotifItem(context, n)),
+                      ],
+                      const SizedBox(height: 12),
+                      Center(
+                        child: Text(
+                          AppLocalizations.of(context)!.thatsAllForNow,
+                          style: const TextStyle(
+                            color: _kTextMuted,
+                            fontSize: 13,
+                            fontFamily: 'DM Sans',
                           ),
                         ),
                       ),
@@ -183,29 +154,71 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     );
   }
 
-  Widget _sectionLabel(String label) {
-    return Container(
-      color: Colors.grey[200],
-      child: Column(
-        children: [
-          const Divider(height: 1, color: Color(0xFFE2E8E4)),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                label,
-                style: const TextStyle(
-                  fontFamily: 'DM Sans',
-                  fontWeight: FontWeight.w700,
-                  fontSize: 12,
-                  color: _kTextMuted,
-                  letterSpacing: 1.2,
-                ),
+  /// Estado vacio: antes era un icono gris y una linea de texto tambien gris,
+  /// que se leia como un error. Ahora explica que aparecera aqui.
+  Widget _buildEmptyState(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 40),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 96,
+              height: 96,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.accent.withValues(alpha: 0.18),
+              ),
+              alignment: Alignment.center,
+              child: const Icon(
+                Icons.notifications_none_rounded,
+                size: 44,
+                color: _kDark,
               ),
             ),
-          ),
-        ],
+            const SizedBox(height: 20),
+            Text(
+              l.noNotificationsTitle,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontFamily: 'DM Sans',
+                fontWeight: FontWeight.w700,
+                fontSize: 18,
+                color: _kTextDark,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              l.noNotificationsBody,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontFamily: 'DM Sans',
+                fontSize: 13,
+                height: 1.5,
+                color: _kTextMuted,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Encabezado de grupo. Antes era una banda gris con un divisor encima, que
+  /// es lo que daba el aire de lista antigua.
+  Widget _sectionLabel(String label) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(4, 12, 4, 8),
+      child: Text(
+        label,
+        style: const TextStyle(
+          fontFamily: 'DM Sans',
+          fontWeight: FontWeight.w700,
+          fontSize: 13,
+          color: _kTextMuted,
+        ),
       ),
     );
   }
@@ -257,83 +270,134 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         bodyText = parts.length > 1 ? parts[1] : '';
     }
 
-    return InkWell(
-      onTap: () {
-        Provider.of<NotificationsProvider>(context, listen: false).markAsRead(notification.id);
-        _handleNotificationTap(context, notification);
-      },
-      child: Container(
-        color: isUnread ? _kDark.withValues(alpha: 0.04) : Colors.transparent,
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Icon circle
-            Container(
-              width: 42,
-              height: 42,
-              decoration: BoxDecoration(color: iconBg, shape: BoxShape.circle),
-              alignment: Alignment.center,
-              child: Icon(icon, color: iconColor, size: 20),
-            ),
-            const SizedBox(width: 14),
-            // Text content
-            Expanded(
-              child: Column(
+    // Tarjeta redondeada en vez de una fila plana. Las no leidas llevan una
+    // barra de acento a la izquierda: se distingue de un vistazo sin recurrir a
+    // un fondo tintado que ensuciaba la lista.
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Dismissible(
+        key: ValueKey('notif-${notification.id}'),
+        direction: isUnread
+            ? DismissDirection.endToStart
+            : DismissDirection.none,
+        // Deslizar marca como leida, no borra: la lista se reconstruye del
+        // estado real de la app al abrirla, asi que una notificacion borrada
+        // reaparecería y el gesto se sentiría roto.
+        onDismissed: (_) {
+          Provider.of<NotificationsProvider>(context, listen: false)
+              .markAsRead(notification.id);
+          showAppToast(
+            context,
+            AppLocalizations.of(context)!.markAllRead,
+            duration: const Duration(seconds: 1),
+          );
+        },
+        background: Container(
+          alignment: Alignment.centerRight,
+          padding: const EdgeInsets.only(right: 20),
+          decoration: BoxDecoration(
+            color: _kDark.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: const Icon(Icons.mark_email_read_rounded,
+              color: _kDark, size: 22),
+        ),
+        child: Material(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(16),
+            onTap: () {
+              Provider.of<NotificationsProvider>(context, listen: false)
+                  .markAsRead(notification.id);
+              _handleNotificationTap(context, notification);
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: isUnread
+                      ? AppColors.accent.withValues(alpha: 0.9)
+                      : const Color(0xFFE2E7E4),
+                  width: isUnread ? 1.4 : 1,
+                ),
+              ),
+              padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
+              child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          titleText,
-                          style: TextStyle(
-                            fontFamily: 'DM Sans',
-                            fontWeight: isUnread
-                                ? FontWeight.w700
-                                : FontWeight.w500,
-                            fontSize: 13,
-                            color: _kTextDark,
-                          ),
-                        ),
-                      ),
-                      if (isUnread)
-                        Container(
-                          width: 8,
-                          height: 8,
-                          margin: const EdgeInsets.only(left: 8, top: 4),
-                          decoration: const BoxDecoration(
-                            color: _kDark,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                    ],
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration:
+                        BoxDecoration(color: iconBg, shape: BoxShape.circle),
+                    alignment: Alignment.center,
+                    child: Icon(icon, color: iconColor, size: 21),
                   ),
-                  if (bodyText.isNotEmpty) ...[
-                    const SizedBox(height: 3),
-                    Text(
-                      bodyText,
-                      style: const TextStyle(
-                        fontFamily: 'DM Sans',
-                        fontWeight: FontWeight.w400,
-                        fontSize: 12,
-                        color: _kTextMuted,
-                      ),
-                    ),
-                  ],
-                  const SizedBox(height: 4),
-                  Text(
-                    _formatTimeAgo(context, notification.sentAt),
-                    style: const TextStyle(
-                      fontFamily: 'DM Sans',
-                      fontSize: 11,
-                      color: _kTextMuted,
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                titleText,
+                                style: TextStyle(
+                                  fontFamily: 'DM Sans',
+                                  fontWeight: isUnread
+                                      ? FontWeight.w700
+                                      : FontWeight.w600,
+                                  fontSize: 14,
+                                  color: _kTextDark,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              _formatTimeAgo(context, notification.sentAt),
+                              style: const TextStyle(
+                                fontFamily: 'DM Sans',
+                                fontSize: 11,
+                                color: _kTextMuted,
+                              ),
+                            ),
+                            if (isUnread) ...[
+                              const SizedBox(width: 8),
+                              Container(
+                                width: 8,
+                                height: 8,
+                                margin: const EdgeInsets.only(top: 4),
+                                decoration: const BoxDecoration(
+                                  color: AppColors.accent,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                        if (bodyText.isNotEmpty) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            bodyText,
+                            style: const TextStyle(
+                              fontFamily: 'DM Sans',
+                              fontWeight: FontWeight.w400,
+                              fontSize: 12.5,
+                              height: 1.4,
+                              color: _kTextMuted,
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
                   ),
                 ],
               ),
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -370,8 +434,12 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 // ── Notifications header with settings icon ──────────────────────────────
 class _NotifHeader extends StatelessWidget {
   final int unreadCount;
+  final VoidCallback onMarkAllRead;
 
-  const _NotifHeader({required this.unreadCount});
+  const _NotifHeader({
+    required this.unreadCount,
+    required this.onMarkAllRead,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -414,7 +482,37 @@ class _NotifHeader extends StatelessWidget {
               ),
             ),
           ),
-          // Settings icon
+          // El contador pasa a ser un boton: antes era una bolita con el
+          // numero y la accion de marcar todas vivia suelta sobre la lista.
+          if (unreadCount > 0)
+            GestureDetector(
+              onTap: onMarkAllRead,
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                decoration: BoxDecoration(
+                  color: AppColors.accent,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.done_all_rounded,
+                        size: 14, color: _kTextDark),
+                    const SizedBox(width: 6),
+                    Text(
+                      AppLocalizations.of(context)!.unreadCount(unreadCount),
+                      style: const TextStyle(
+                        color: _kTextDark,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'DM Sans',
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           IconButton(
             icon: const Icon(
               Icons.settings_outlined,
@@ -423,26 +521,6 @@ class _NotifHeader extends StatelessWidget {
             ),
             onPressed: () => Navigator.pushNamed(context, AppRoutes.settings),
           ),
-          // Unread badge
-          if (unreadCount > 0)
-            Container(
-              width: 24,
-              height: 24,
-              decoration: const BoxDecoration(
-                shape: BoxShape.circle,
-                color: Color(0xFFBDE038),
-              ),
-              alignment: Alignment.center,
-              child: Text(
-                '$unreadCount',
-                style: const TextStyle(
-                  color: _kTextDark,
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: 'DM Sans',
-                ),
-              ),
-            ),
         ],
       ),
     );

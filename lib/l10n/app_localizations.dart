@@ -1484,12 +1484,6 @@ abstract class AppLocalizations {
   /// **'Nombre de tu planta'**
   String get yourPlantName;
 
-  /// No description provided for @potsFreeHint.
-  ///
-  /// In es, this message translates to:
-  /// **'[{count} macetas de 10 gratis]'**
-  String potsFreeHint(int count);
-
   /// No description provided for @gramsPerDayShort.
   ///
   /// In es, this message translates to:
@@ -3507,12 +3501,6 @@ abstract class AppLocalizations {
   /// **'Desbloquea funciones O₂₊'**
   String get unlockO2Features;
 
-  /// No description provided for @freePotsOf.
-  ///
-  /// In es, this message translates to:
-  /// **'[{count} macetas de 10\ngratis]'**
-  String freePotsOf(int count);
-
   /// No description provided for @done.
   ///
   /// In es, this message translates to:
@@ -3738,7 +3726,7 @@ abstract class AppLocalizations {
   /// No description provided for @plantLimitReached.
   ///
   /// In es, this message translates to:
-  /// **'Has llegado a tus 10 macetas. Con O₂₊ son ilimitadas.'**
+  /// **'Has llegado a tu tope de macetas. Con O₂₊ son ilimitadas.'**
   String get plantLimitReached;
 
   /// No description provided for @scanLimitReached.
@@ -3758,6 +3746,162 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Activo hasta el {date}'**
   String plusActiveUntil(String date);
+
+  /// No description provided for @potsUsedOfLimit.
+  ///
+  /// In es, this message translates to:
+  /// **'{used} de {limit} macetas'**
+  String potsUsedOfLimit(int used, int limit);
+
+  /// No description provided for @potsUnlimited.
+  ///
+  /// In es, this message translates to:
+  /// **'Macetas ilimitadas'**
+  String get potsUnlimited;
+
+  /// No description provided for @legacyPotsKept.
+  ///
+  /// In es, this message translates to:
+  /// **'{count, plural, =1{Conservas 1 maceta de tu O₂₊ anterior} other{Conservas {count} macetas de tu O₂₊ anterior}}'**
+  String legacyPotsKept(int count);
+
+  /// No description provided for @legacyPotsExplainer.
+  ///
+  /// In es, this message translates to:
+  /// **'Al terminar O₂₊ no se borra ninguna planta: conservas las que cuidabas y el tope solo afecta a las nuevas.'**
+  String get legacyPotsExplainer;
+
+  /// No description provided for @rentalPotsActive.
+  ///
+  /// In es, this message translates to:
+  /// **'{count, plural, =1{1 maceta alquilada} other{{count} macetas alquiladas}}'**
+  String rentalPotsActive(int count);
+
+  /// No description provided for @rentalPotsExpiresIn.
+  ///
+  /// In es, this message translates to:
+  /// **'{days, plural, =0{Vence hoy} =1{Vence mañana} other{Vence en {days} días}}'**
+  String rentalPotsExpiresIn(int days);
+
+  /// No description provided for @rentalPotsFreeSlot.
+  ///
+  /// In es, this message translates to:
+  /// **'{count, plural, =1{Te queda 1 hueco libre en tu jardín} other{Te quedan {count} huecos libres en tu jardín}}'**
+  String rentalPotsFreeSlot(int count);
+
+  /// No description provided for @rentalPotsAllUsed.
+  ///
+  /// In es, this message translates to:
+  /// **'Todas tus macetas están ocupadas'**
+  String get rentalPotsAllUsed;
+
+  /// No description provided for @avatarAlreadyOwned.
+  ///
+  /// In es, this message translates to:
+  /// **'Ya tienes este avatar.'**
+  String get avatarAlreadyOwned;
+
+  /// No description provided for @avatarNotOwned.
+  ///
+  /// In es, this message translates to:
+  /// **'Necesitas comprar este avatar primero.'**
+  String get avatarNotOwned;
+
+  /// No description provided for @avatarPurchased.
+  ///
+  /// In es, this message translates to:
+  /// **'¡{name} desbloqueado!'**
+  String avatarPurchased(String name);
+
+  /// No description provided for @buyForSeeds.
+  ///
+  /// In es, this message translates to:
+  /// **'Comprar por {cost} semillas'**
+  String buyForSeeds(int cost);
+
+  /// No description provided for @earlierLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Anteriores'**
+  String get earlierLabel;
+
+  /// No description provided for @noNotificationsBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Aquí verás los riegos pendientes, los logros que desbloquees y las plantas que añadas.'**
+  String get noNotificationsBody;
+
+  /// No description provided for @noNotificationsTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Todo en orden'**
+  String get noNotificationsTitle;
+
+  /// No description provided for @notEnoughSeeds.
+  ///
+  /// In es, this message translates to:
+  /// **'No tienes semillas suficientes.'**
+  String get notEnoughSeeds;
+
+  /// No description provided for @owned.
+  ///
+  /// In es, this message translates to:
+  /// **'Ya lo tienes'**
+  String get owned;
+
+  /// No description provided for @storeAvatarSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Desbloqueo permanente'**
+  String get storeAvatarSubtitle;
+
+  /// No description provided for @storeCriadoraTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Avatar Criadora'**
+  String get storeCriadoraTitle;
+
+  /// No description provided for @storeExploradorTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Avatar Explorador'**
+  String get storeExploradorTitle;
+
+  /// No description provided for @storeJardineraTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Avatar Jardinera'**
+  String get storeJardineraTitle;
+
+  /// No description provided for @storeNoctilanaTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Avatar Noctilana'**
+  String get storeNoctilanaTitle;
+
+  /// No description provided for @thisWeekLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Esta semana'**
+  String get thisWeekLabel;
+
+  /// No description provided for @unreadCount.
+  ///
+  /// In es, this message translates to:
+  /// **'{count, plural, =1{1 sin leer} other{{count} sin leer}}'**
+  String unreadCount(int count);
+
+  /// No description provided for @rentalPotsExpiresInHours.
+  ///
+  /// In es, this message translates to:
+  /// **'{hours, plural, =1{Vence en 1 hora} other{Vence en {hours} horas}}'**
+  String rentalPotsExpiresInHours(int hours);
+
+  /// No description provided for @rentalPotsExpiresInMinutes.
+  ///
+  /// In es, this message translates to:
+  /// **'{minutes, plural, =1{Vence en 1 minuto} other{Vence en {minutes} minutos}}'**
+  String rentalPotsExpiresInMinutes(int minutes);
 
   /// No description provided for @freePlanLabel.
   ///

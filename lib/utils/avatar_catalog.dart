@@ -12,21 +12,44 @@ import 'package:frontend_eco_2/l10n/app_localizations.dart';
 class AvatarOption {
   final String id;
 
-  const AvatarOption(this.id);
+  /// Coste en semillas. 0 = incluido con la cuenta.
+  ///
+  /// El precio se repite aquí solo para pintarlo; quien decide si una compra es
+  /// válida es el backend (src/domain/avatars/catalog.ts). Si la app fuera la
+  /// única que lo sabe, bastaría con editar la petición para llevárselo gratis.
+  final int cost;
+
+  const AvatarOption(this.id, {this.cost = 0});
+
+  bool get isFree => cost == 0;
 
   String get asset => 'assets/avatars/$id.png';
 }
 
 const List<AvatarOption> kAvatars = [
+  // Incluidos desde el registro.
   AvatarOption('agronoma'),
   AvatarOption('granjero'),
-  AvatarOption('jardinera'),
   AvatarOption('tecnologo'),
-  AvatarOption('criadora'),
-  AvatarOption('explorador'),
   AvatarOption('cientifico'),
-  AvatarOption('noctilana'),
+
+  // De pago en la tienda de semillas.
+  AvatarOption('jardinera', cost: 250),
+  AvatarOption('explorador', cost: 300),
+  AvatarOption('criadora', cost: 350),
+  AvatarOption('noctilana', cost: 400),
 ];
+
+/// Los que se venden en la tienda.
+List<AvatarOption> get kPurchasableAvatars =>
+    kAvatars.where((a) => !a.isFree).toList();
+
+AvatarOption? avatarOptionFor(String id) {
+  for (final a in kAvatars) {
+    if (a.id == id) return a;
+  }
+  return null;
+}
 
 /// Ruta del asset para un id guardado, o null si no se reconoce.
 ///

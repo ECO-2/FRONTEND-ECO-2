@@ -15,10 +15,14 @@ String storeItemTitle(BuildContext context, String id) {
       return l.storeO2Plus2wTitle;
     case 'maceta_rental_2w':
       return l.storePotRentalTitle;
-    case 'avatar_explorador':
-      return l.storeAvatarExplorerTitle;
-    case 'avatar_guardian':
-      return l.storeAvatarGuardianTitle;
+    case 'jardinera':
+      return l.storeJardineraTitle;
+    case 'explorador':
+      return l.storeExploradorTitle;
+    case 'criadora':
+      return l.storeCriadoraTitle;
+    case 'noctilana':
+      return l.storeNoctilanaTitle;
     case 'maceta_pack3':
       return l.storePotPack3Title;
     case 'o2_plus_4w':
@@ -35,9 +39,11 @@ String storeItemSubtitle(BuildContext context, String id) {
       return l.storeO2Plus2wSubtitle;
     case 'maceta_rental_2w':
       return l.storePotRentalSubtitle;
-    case 'avatar_explorador':
-    case 'avatar_guardian':
-      return l.storePermanentUnlock;
+    case 'jardinera':
+    case 'explorador':
+    case 'criadora':
+    case 'noctilana':
+      return l.storeAvatarSubtitle;
     case 'maceta_pack3':
       return l.storePotPack3Subtitle;
     case 'o2_plus_4w':

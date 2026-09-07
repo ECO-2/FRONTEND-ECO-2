@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:frontend_eco_2/theme/app_colors.dart';
 import 'package:frontend_eco_2/utils/avatar_catalog.dart';
+import 'package:provider/provider.dart';
+import 'package:frontend_eco_2/providers/providers.dart';
+import 'package:frontend_eco_2/l10n/app_localizations.dart';
 
 /// Avatar del usuario, recortado en círculo.
 ///
@@ -12,45 +15,46 @@ class UserAvatar extends StatelessWidget {
   final String? avatarId;
   final double size;
 
-  /// Aro de color alrededor. Se omite en tamaños pequeños, donde estorba.
-  final bool ring;
-
   const UserAvatar({
     super.key,
     required this.avatarId,
     this.size = 56,
-    this.ring = true,
   });
 
   @override
   Widget build(BuildContext context) {
     final asset = avatarAssetFor(avatarId);
 
-    return Container(
+    // Sin aro ni fondo cuando hay avatar: la ilustracion ya trae su propio
+    // circulo, asi que un borde encima se veia como un contenedor de mas.
+    if (asset == null) {
+      return Container(
+        width: size,
+        height: size,
+        decoration: const BoxDecoration(
+          shape: BoxShape.circle,
+          color: Color(0xFFE2E7E4),
+        ),
+        alignment: Alignment.center,
+        child: Icon(Icons.person, size: size * 0.6, color: AppColors.primary),
+      );
+    }
+
+    return SizedBox(
       width: size,
       height: size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: const Color(0xFFE2E7E4),
-        border: ring
-            ? Border.all(color: AppColors.primary, width: size * 0.03 + 1)
-            : null,
+      child: Image.asset(
+        asset,
+        fit: BoxFit.contain,
+        // El PNG es de 348 px; a tamaños grandes conviene que el filtrado
+        // suavice en vez de dejar el borde escalonado.
+        filterQuality: FilterQuality.medium,
+        errorBuilder: (_, _, _) => Icon(
+          Icons.person,
+          size: size * 0.6,
+          color: AppColors.primary,
+        ),
       ),
-      clipBehavior: Clip.antiAlias,
-      child: asset == null
-          ? Icon(Icons.person, size: size * 0.6, color: AppColors.primary)
-          : Image.asset(
-              asset,
-              fit: BoxFit.cover,
-              // El PNG es de 348 px; a tamaños grandes conviene que el filtrado
-              // suavice en vez de dejar el borde escalonado.
-              filterQuality: FilterQuality.medium,
-              errorBuilder: (_, _, _) => Icon(
-                Icons.person,
-                size: size * 0.6,
-                color: AppColors.primary,
-              ),
-            ),
     );
   }
 }
@@ -95,16 +99,36 @@ Future<String?> showAvatarPicker(
               childAspectRatio: 0.82,
               children: [
                 for (final option in kAvatars)
-                  GestureDetector(
-                    onTap: () => Navigator.pop(sheetContext, option.id),
-                    child: Column(
+                  Builder(builder: (context) {
+                    final unlocked = option.isFree ||
+                        context.watch<AvatarsProvider>().isOwned(option.id);
+                    return GestureDetector(
+                    // Los no comprados no se pueden elegir. El backend lo
+                    // rechazaria igualmente, pero dejar tocarlos y ver un error
+                    // despues es peor que enseñar el candado.
+                    onTap: unlocked
+                        ? () => Navigator.pop(sheetContext, option.id)
+                        : null,
+                    child: Opacity(
+                      opacity: unlocked ? 1 : 0.45,
+                      child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Stack(
                           alignment: Alignment.bottomRight,
                           children: [
                             UserAvatar(avatarId: option.id, size: 64),
-                            if (option.id == current)
+                            if (!unlocked)
+                              Container(
+                                decoration: const BoxDecoration(
+                                  color: Color(0xFF807F7F),
+                                  shape: BoxShape.circle,
+                                ),
+                                padding: const EdgeInsets.all(3),
+                                child: const Icon(Icons.lock_rounded,
+                                    size: 12, color: Colors.white),
+                              )
+                            else if (option.id == current)
                               Container(
                                 decoration: const BoxDecoration(
                                   color: AppColors.primary,
@@ -118,7 +142,10 @@ Future<String?> showAvatarPicker(
                         ),
                         const SizedBox(height: 6),
                         Text(
-                          avatarName(context, option.id),
+                          unlocked
+                              ? avatarName(context, option.id)
+                              : AppLocalizations.of(context)!
+                                  .buyForSeeds(option.cost),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           textAlign: TextAlign.center,
@@ -130,7 +157,9 @@ Future<String?> showAvatarPicker(
                         ),
                       ],
                     ),
-                  ),
+                    ),
+                  );
+                  }),
               ],
             ),
           ],

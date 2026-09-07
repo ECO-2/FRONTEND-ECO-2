@@ -804,11 +804,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get yourPlantName => 'Your plant\'s name';
 
   @override
-  String potsFreeHint(int count) {
-    return '[$count of 10 free pots]';
-  }
-
-  @override
   String gramsPerDayShort(String grams) {
     return '$grams g/day';
   }
@@ -1971,11 +1966,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get unlockO2Features => 'Unlock O₂₊ features';
 
   @override
-  String freePotsOf(int count) {
-    return '[$count of 10 pots\nfree]';
-  }
-
-  @override
   String get done => 'Done';
 
   @override
@@ -2115,7 +2105,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get plantLimitReached =>
-      'You\'ve reached your 10 pots. With O₂₊ they\'re unlimited.';
+      'You\'ve reached your pot limit. With O₂₊ they\'re unlimited.';
 
   @override
   String get scanLimitReached =>
@@ -2127,6 +2117,149 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String plusActiveUntil(String date) {
     return 'Active until $date';
+  }
+
+  @override
+  String potsUsedOfLimit(int used, int limit) {
+    return '$used of $limit pots';
+  }
+
+  @override
+  String get potsUnlimited => 'Unlimited pots';
+
+  @override
+  String legacyPotsKept(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'You keep $count pots from your previous O₂₊',
+      one: 'You keep 1 pot from your previous O₂₊',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get legacyPotsExplainer =>
+      'When O₂₊ ends no plant is deleted: you keep the ones you were caring for, and the limit only applies to new ones.';
+
+  @override
+  String rentalPotsActive(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count rented pots',
+      one: '1 rented pot',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String rentalPotsExpiresIn(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: 'Expires in $days days',
+      one: 'Expires tomorrow',
+      zero: 'Expires today',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String rentalPotsFreeSlot(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'You have $count free slots in your garden',
+      one: 'You have 1 free slot in your garden',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get rentalPotsAllUsed => 'All your pots are in use';
+
+  @override
+  String get avatarAlreadyOwned => 'You already own this avatar.';
+
+  @override
+  String get avatarNotOwned => 'You need to buy this avatar first.';
+
+  @override
+  String avatarPurchased(String name) {
+    return '$name unlocked!';
+  }
+
+  @override
+  String buyForSeeds(int cost) {
+    return 'Buy for $cost seeds';
+  }
+
+  @override
+  String get earlierLabel => 'Earlier';
+
+  @override
+  String get noNotificationsBody =>
+      'Watering reminders, achievements you unlock and plants you add will show up here.';
+
+  @override
+  String get noNotificationsTitle => 'All caught up';
+
+  @override
+  String get notEnoughSeeds => 'You don\'t have enough seeds.';
+
+  @override
+  String get owned => 'Owned';
+
+  @override
+  String get storeAvatarSubtitle => 'Permanent unlock';
+
+  @override
+  String get storeCriadoraTitle => 'Poultry keeper avatar';
+
+  @override
+  String get storeExploradorTitle => 'Explorer avatar';
+
+  @override
+  String get storeJardineraTitle => 'Gardener avatar';
+
+  @override
+  String get storeNoctilanaTitle => 'Noctilana avatar';
+
+  @override
+  String get thisWeekLabel => 'This week';
+
+  @override
+  String unreadCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count unread',
+      one: '1 unread',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String rentalPotsExpiresInHours(int hours) {
+    String _temp0 = intl.Intl.pluralLogic(
+      hours,
+      locale: localeName,
+      other: 'Expires in $hours hours',
+      one: 'Expires in 1 hour',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String rentalPotsExpiresInMinutes(int minutes) {
+    String _temp0 = intl.Intl.pluralLogic(
+      minutes,
+      locale: localeName,
+      other: 'Expires in $minutes minutes',
+      one: 'Expires in 1 minute',
+    );
+    return '$_temp0';
   }
 
   @override

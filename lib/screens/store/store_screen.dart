@@ -10,6 +10,8 @@ import 'package:frontend_eco_2/widgets/common/custom_bottom_nav_bar.dart';
 import 'package:frontend_eco_2/widgets/common/custom_status_bar.dart';
 import 'package:frontend_eco_2/widgets/common/app_toast.dart';
 import 'package:frontend_eco_2/routing/tab_navigation.dart';
+import 'package:frontend_eco_2/utils/avatar_catalog.dart';
+import 'package:frontend_eco_2/widgets/common/user_avatar.dart';
 
 // Claves estables, no etiquetas: comparar contra el texto visible rompia el
 // filtro en cuanto la app cambiaba de idioma.
@@ -24,6 +26,12 @@ class _StoreListing {
   final bool bestseller;
   final String? badge;
 
+  /// Avatar que entrega la compra, si el articulo es un avatar.
+  ///
+  /// Los articulos que no lo tienen (macetas, O2+) todavia no entregan nada:
+  /// spendSeeds solo descuenta el saldo.
+  final String? avatarId;
+
   const _StoreListing({
     required this.id,
     required this.cost,
@@ -32,6 +40,7 @@ class _StoreListing {
     this.featured = false,
     this.bestseller = false,
     this.badge,
+    this.avatarId,
   });
 }
 
@@ -52,17 +61,35 @@ const List<_StoreListing> _kListings = [
     bestseller: true,
     badge: 'new',
   ),
+  // Avatares reales del catalogo. El precio se define en
+  // utils/avatar_catalog.dart y lo valida el backend al comprar.
   _StoreListing(
-    id: 'avatar_explorador',
+    id: 'jardinera',
     cost: 250,
     category: 'avatars',
-    icon: Icons.face_retouching_natural_rounded,
+    icon: Icons.local_florist_rounded,
+    avatarId: 'jardinera',
   ),
   _StoreListing(
-    id: 'avatar_guardian',
-    cost: 600,
+    id: 'explorador',
+    cost: 300,
     category: 'avatars',
-    icon: Icons.forest_rounded,
+    icon: Icons.explore_rounded,
+    avatarId: 'explorador',
+  ),
+  _StoreListing(
+    id: 'criadora',
+    cost: 350,
+    category: 'avatars',
+    icon: Icons.egg_rounded,
+    avatarId: 'criadora',
+  ),
+  _StoreListing(
+    id: 'noctilana',
+    cost: 400,
+    category: 'avatars',
+    icon: Icons.yard_rounded,
+    avatarId: 'noctilana',
   ),
   _StoreListing(
     id: 'maceta_pack3',
@@ -134,6 +161,22 @@ class _StoreScreenState extends State<StoreScreen> {
           : item.category == _selectedFilter;
       return matchesSearch && matchesFilter;
     }).toList();
+
+    // Lo ya comprado baja al final: arriba queda lo que todavia se puede
+    // conseguir. Sin esto, los avatares comprados seguian ocupando las
+    // primeras posiciones aunque ya no hubiera nada que hacer con ellos.
+    final avatars = context.watch<AvatarsProvider>();
+    bool isOwned(_StoreListing i) =>
+        i.avatarId != null && avatars.isOwned(i.avatarId!);
+
+    // sort de Dart no es estable, asi que se ordena por (comprado, posicion
+    // original) para conservar el orden del catalogo dentro de cada grupo.
+    final order = {for (var i = 0; i < _kListings.length; i++) _kListings[i].id: i};
+    filtered.sort((a, b) {
+      final byOwned = (isOwned(a) ? 1 : 0).compareTo(isOwned(b) ? 1 : 0);
+      if (byOwned != 0) return byOwned;
+      return (order[a.id] ?? 0).compareTo(order[b.id] ?? 0);
+    });
 
     return Column(
       children: [
@@ -465,14 +508,48 @@ class _StoreScreenState extends State<StoreScreen> {
             ),
             onPressed: () async {
               Navigator.of(ctx).pop();
-              final success = await missionsProvider.spendSeeds(item.cost);
+
+              // Todos los articulos pasan por un endpoint que descuenta Y
+              // entrega en la misma transaccion. Antes los que no eran avatares
+              // llamaban a spendSeeds, que solo descontaba: quien compraba O2+
+              // o macetas perdia las semillas y no recibia nada.
+              final avatarId = item.avatarId;
+              final String? error;
+              final int? seeds;
+
+              if (avatarId != null) {
+                final avatars = context.read<AvatarsProvider>();
+                seeds = await avatars.purchase(avatarId);
+                if (!context.mounted) return;
+                error = seeds == null ? avatars.errorText(context) : null;
+              } else {
+                final plan = context.read<PlanProvider>();
+                seeds = await plan.redeem(item.id);
+                if (!context.mounted) return;
+                error = seeds == null ? plan.errorText(context) : null;
+              }
+
+              if (seeds == null) {
+                showAppToast(
+                  context,
+                  avatarPurchaseMessage(context, error) ??
+                      error ??
+                      AppLocalizations.of(context)!.purchaseFailed,
+                  type: ToastType.error,
+                );
+                return;
+              }
+
+              // El saldo de semillas vive en MissionsProvider, que hay que
+              // refrescar para que la cabecera no siga mostrando el anterior.
+              await missionsProvider.init();
               if (!context.mounted) return;
               showAppToast(
                 context,
-                success
-                    ? '${AppLocalizations.of(context)!.purchaseSuccess(storeItemTitle(context, item.id))} 🎉'
-                    : AppLocalizations.of(context)!.purchaseFailed,
-                type: success ? ToastType.success : ToastType.error,
+                avatarId != null
+                    ? AppLocalizations.of(context)!.avatarPurchased(avatarName(context, avatarId))
+                    : '${AppLocalizations.of(context)!.purchaseSuccess(storeItemTitle(context, item.id))} 🎉',
+                type: ToastType.success,
               );
             },
             child: Text(
@@ -499,7 +576,12 @@ class _StoreItemCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final canAfford = userSeeds >= item.cost;
+    // Un avatar ya comprado deja de ofrecerse. El backend rechaza el duplicado
+    // con 409 y no vuelve a cobrar, pero seguir mostrando "Comprar" hacia creer
+    // que la compra no habia funcionado.
+    final alreadyOwned = item.avatarId != null &&
+        context.watch<AvatarsProvider>().isOwned(item.avatarId!);
+    final canAfford = !alreadyOwned && userSeeds >= item.cost;
     final titleColor = item.featured ? Colors.white : AppColors.primaryDark;
     final subtitleColor = item.featured ? AppColors.accent : AppColors.primary;
 
@@ -541,7 +623,12 @@ class _StoreItemCard extends StatelessWidget {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  StoreItemIcon(icon: item.icon, featured: item.featured),
+                  // Si el articulo es un avatar se enseña la ilustracion
+                  // real, que dice mucho mas que un icono generico.
+                  if (item.avatarId != null)
+                    UserAvatar(avatarId: item.avatarId, size: 56)
+                  else
+                    StoreItemIcon(icon: item.icon, featured: item.featured),
                   const SizedBox(width: 14),
                   Expanded(
                     child: Column(
@@ -578,24 +665,38 @@ class _StoreItemCard extends StatelessWidget {
                   height: 44,
                   padding: const EdgeInsets.symmetric(horizontal: 4),
                   decoration: BoxDecoration(
-                    color: canAfford ? AppColors.accent : const Color(0xFFECECEC),
+                    color: alreadyOwned
+                        ? const Color(0xFFE6F0E2)
+                        : (canAfford ? AppColors.accent : const Color(0xFFECECEC)),
                     borderRadius: BorderRadius.circular(22),
                   ),
                   child: Row(
                     children: [
                       CircleAvatar(
                         radius: 16,
-                        backgroundColor: canAfford ? AppColors.primaryDark : const Color(0xFFB7B7B7),
-                        child: const Icon(Icons.spa_rounded, size: 16, color: Colors.white),
+                        backgroundColor: alreadyOwned
+                            ? AppColors.primary
+                            : (canAfford ? AppColors.primaryDark : const Color(0xFFB7B7B7)),
+                        child: Icon(
+                          alreadyOwned ? Icons.check_rounded : Icons.spa_rounded,
+                          size: 16,
+                          color: Colors.white,
+                        ),
                       ),
                       Expanded(
                         child: Center(
                           child: Text(
-                            AppLocalizations.of(context)!.seedsCost(item.cost),
+                            alreadyOwned
+                                ? AppLocalizations.of(context)!.owned
+                                : AppLocalizations.of(context)!.seedsCost(item.cost),
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 13,
-                              color: canAfford ? AppColors.primaryDark : const Color(0xFF8A8A8A),
+                              color: alreadyOwned
+                                  ? AppColors.primary
+                                  : (canAfford
+                                      ? AppColors.primaryDark
+                                      : const Color(0xFF8A8A8A)),
                               fontFamily: 'Inter',
                             ),
                             maxLines: 1,

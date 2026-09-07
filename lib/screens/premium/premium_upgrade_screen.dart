@@ -262,6 +262,32 @@ class _PremiumUpgradeScreenState extends State<PremiumUpgradeScreen> {
                                     fontFamily: 'Inter',
                                   ),
                                 ),
+                                // Quien vuelve al plan gratuito necesita ver
+                                // que no ha perdido nada; si no, el tope se
+                                // lee como un castigo por dejar de pagar.
+                                if (status.legacyPots > 0) ...[
+                                  const SizedBox(height: 10),
+                                  Text(
+                                    AppLocalizations.of(context)!
+                                        .legacyPotsKept(status.legacyPots),
+                                    style: const TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.primaryDark,
+                                      fontFamily: 'Inter',
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    AppLocalizations.of(context)!
+                                        .legacyPotsExplainer,
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      color: AppColors.textSecondary,
+                                      fontFamily: 'Inter',
+                                    ),
+                                  ),
+                                ],
                               ],
                             ),
                           );

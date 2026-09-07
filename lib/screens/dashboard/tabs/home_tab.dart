@@ -3,6 +3,7 @@ import 'package:frontend_eco_2/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:frontend_eco_2/models/models.dart';
 import 'package:frontend_eco_2/providers/providers.dart';
+import 'package:frontend_eco_2/utils/pot_labels.dart';
 import 'package:frontend_eco_2/routing/app_routes.dart';
 import 'package:frontend_eco_2/theme/app_colors.dart';
 import 'package:frontend_eco_2/widgets/common/plant_card.dart';
@@ -221,7 +222,12 @@ class HomeTab extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           GestureDetector(
-            onTap: () => Navigator.pushNamed(context, AppRoutes.addPlant),
+            onTap: () => showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              backgroundColor: Colors.transparent,
+              builder: (_) => const AddPlantModal(),
+            ),
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
               decoration: BoxDecoration(
@@ -653,7 +659,7 @@ class HomeTab extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    '[$plantCount macetas de 10\ngratis]',
+                    potsCaption(context, context.watch<PlanProvider>().status, plantCount),
                     textAlign: TextAlign.center,
                     style: const TextStyle(
                       fontFamily: 'DM Sans',

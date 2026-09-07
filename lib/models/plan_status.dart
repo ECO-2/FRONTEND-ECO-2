@@ -11,6 +11,13 @@ class PlanStatus {
   final int plantsUsed;
   final int? plantsLimit;
 
+  /// Macetas conservadas de un O2+ ya caducado (aterrizaje suave).
+  final int legacyPots;
+
+  /// Macetas de alquiler vigentes y cuando vencen.
+  final int rentalPots;
+  final DateTime? rentalExpiresAt;
+
   final int scansUsedToday;
   final int? scansLimit;
 
@@ -20,6 +27,9 @@ class PlanStatus {
     required this.isPlusActive,
     required this.plantsUsed,
     this.plantsLimit,
+    this.legacyPots = 0,
+    this.rentalPots = 0,
+    this.rentalExpiresAt,
     required this.scansUsedToday,
     this.scansLimit,
   });
@@ -42,6 +52,11 @@ class PlanStatus {
       isPlusActive: json['is_plus_active'] as bool? ?? false,
       plantsUsed: json['plants_used'] as int? ?? 0,
       plantsLimit: json['plants_limit'] as int?,
+      legacyPots: json['legacy_pots'] as int? ?? 0,
+      rentalPots: json['rental_pots'] as int? ?? 0,
+      rentalExpiresAt: json['rental_expires_at'] != null
+          ? DateTime.tryParse(json['rental_expires_at'] as String)
+          : null,
       scansUsedToday: json['scans_used_today'] as int? ?? 0,
       scansLimit: json['scans_limit'] as int?,
     );
@@ -64,5 +79,29 @@ class PlanStatus {
   }
 
   bool get hasReachedPlantLimit => plantSlotsLeft == 0;
+
+  /// Lo que le queda al alquiler, o null si no hay ninguno vigente.
+  Duration? get rentalTimeLeft {
+    final until = rentalExpiresAt;
+    if (rentalPots <= 0 || until == null) return null;
+    final left = until.difference(DateTime.now());
+    return left.isNegative ? Duration.zero : left;
+  }
+
+  /// Dias que le quedan al alquiler, o null si no hay ninguno vigente.
+  ///
+  /// Se redondea hacia arriba: mientras quede algo de hoy, el usuario todavia
+  /// tiene "1 dia", no cero.
+  int? get rentalDaysLeft {
+    final left = rentalTimeLeft;
+    if (left == null) return null;
+    return (left.inMinutes / (60 * 24)).ceil();
+  }
+
+  /// El alquiler esta a punto de vencer y conviene avisar con mas enfasis.
+  bool get rentalEndsSoon {
+    final days = rentalDaysLeft;
+    return days != null && days <= 3;
+  }
   bool get hasReachedScanLimit => scansLeftToday == 0;
 }
